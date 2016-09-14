@@ -386,6 +386,7 @@ gbuf_add_str_xml(struct gbuf *gbuf, const char *str)
             if (c < 0x20 || c == 0x7f) {
                 esc_buf[3] = hexdigits[c >> 4];
                 esc_buf[4] = hexdigits[c & 0xf];
+                esc_ptr = esc_buf;
                 esc_len = sizeof(esc_buf);
             } else {
                 p++;
