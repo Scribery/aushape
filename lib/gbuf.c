@@ -26,11 +26,11 @@
  *
  * @param _expr The expression to evaluate.
  */
-#define AUSHAPE_GBUF_GUARD(_expr) \
-    do {                            \
-        if (!(_expr)) {             \
-            return false;           \
-        }                           \
+#define GUARD(_expr) \
+    do {                    \
+        if (!(_expr)) {     \
+            return false;   \
+        }                   \
     } while (0)
 
 bool
@@ -76,7 +76,7 @@ aushape_gbuf_accomodate(struct aushape_gbuf *gbuf, size_t len)
             new_size *= 2;
         }
         new_ptr = realloc(gbuf->ptr, new_size);
-        AUSHAPE_GBUF_GUARD(new_ptr != NULL);
+        GUARD(new_ptr != NULL);
         gbuf->ptr = new_ptr;
         gbuf->size = new_size;
     }
@@ -90,7 +90,7 @@ aushape_gbuf_add_char(struct aushape_gbuf *gbuf, char c)
     size_t new_len;
     assert(aushape_gbuf_is_valid(gbuf));
     new_len = gbuf->len + 1;
-    AUSHAPE_GBUF_GUARD(aushape_gbuf_accomodate(gbuf, new_len));
+    GUARD(aushape_gbuf_accomodate(gbuf, new_len));
     gbuf->ptr[gbuf->len] = c;
     gbuf->len = new_len;
     return true;
@@ -109,7 +109,7 @@ aushape_gbuf_add_buf(struct aushape_gbuf *gbuf, const void *ptr, size_t len)
     }
 
     new_len = gbuf->len + len;
-    AUSHAPE_GBUF_GUARD(aushape_gbuf_accomodate(gbuf, new_len));
+    GUARD(aushape_gbuf_accomodate(gbuf, new_len));
 
     memcpy(gbuf->ptr + gbuf->len, ptr, len);
     gbuf->len = new_len;
@@ -133,7 +133,7 @@ aushape_gbuf_add_buf_lowercase(struct aushape_gbuf *gbuf, const void *ptr, size_
     }
 
     new_len = gbuf->len + len;
-    AUSHAPE_GBUF_GUARD(aushape_gbuf_accomodate(gbuf, new_len));
+    GUARD(aushape_gbuf_accomodate(gbuf, new_len));
 
     for (src = (const char *)ptr, dst = gbuf->ptr + gbuf->len;
          len > 0;
@@ -178,15 +178,15 @@ aushape_gbuf_add_vfmt(struct aushape_gbuf *gbuf, const char *fmt, va_list ap)
     va_copy(ap_copy, ap);
     rc = vsnprintf(NULL, 0, fmt, ap_copy);
     va_end(ap_copy);
-    AUSHAPE_GBUF_GUARD(rc >= 0);
+    GUARD(rc >= 0);
 
     len = (size_t)rc;
     new_len = gbuf->len + len;
     /* NOTE: leaving space for terminating zero */
-    AUSHAPE_GBUF_GUARD(aushape_gbuf_accomodate(gbuf, new_len + 1));
+    GUARD(aushape_gbuf_accomodate(gbuf, new_len + 1));
     /* NOTE: leaving space for terminating zero */
     rc = vsnprintf(gbuf->ptr + gbuf->len, len + 1, fmt, ap);
-    AUSHAPE_GBUF_GUARD(rc >= 0);
+    GUARD(rc >= 0);
     gbuf->len = new_len;
     return true;
 }
@@ -242,12 +242,12 @@ aushape_gbuf_add_str_xml(struct aushape_gbuf *gbuf, const char *str)
                 continue;
             }
         }
-        AUSHAPE_GBUF_GUARD(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
-        AUSHAPE_GBUF_GUARD(aushape_gbuf_add_buf(gbuf, esc_ptr, esc_len));
+        GUARD(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
+        GUARD(aushape_gbuf_add_buf(gbuf, esc_ptr, esc_len));
         p++;
         last_p = p;
     }
-    AUSHAPE_GBUF_GUARD(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
+    GUARD(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
     return true;
 }
 
@@ -300,12 +300,12 @@ aushape_gbuf_add_str_json(struct aushape_gbuf *gbuf, const char *str)
             }
             break;
         }
-        AUSHAPE_GBUF_GUARD(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
-        AUSHAPE_GBUF_GUARD(aushape_gbuf_add_buf(gbuf, esc_ptr, esc_len));
+        GUARD(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
+        GUARD(aushape_gbuf_add_buf(gbuf, esc_ptr, esc_len));
         p++;
         last_p = p;
     }
-    AUSHAPE_GBUF_GUARD(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
+    GUARD(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
     return true;
 }
 
