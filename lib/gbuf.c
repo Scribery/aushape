@@ -71,7 +71,9 @@ aushape_gbuf_accomodate(struct aushape_gbuf *gbuf, size_t len)
 
     if (len > gbuf->size) {
         char *new_ptr;
-        size_t new_size = gbuf->size == 0 ? AUSHAPE_GBUF_SIZE_MIN : gbuf->size * 2;
+        size_t new_size = (gbuf->size == 0
+                                ? AUSHAPE_GBUF_SIZE_MIN :
+                                gbuf->size * 2);
         while (new_size < len) {
             new_size *= 2;
         }
@@ -118,7 +120,8 @@ aushape_gbuf_add_buf(struct aushape_gbuf *gbuf, const void *ptr, size_t len)
 }
 
 bool
-aushape_gbuf_add_buf_lowercase(struct aushape_gbuf *gbuf, const void *ptr, size_t len)
+aushape_gbuf_add_buf_lowercase(struct aushape_gbuf *gbuf,
+                               const void *ptr, size_t len)
 {
     size_t new_len;
     const char *src;

@@ -70,7 +70,8 @@ extern const char *aushape_conv_rc_to_desc(enum aushape_conv_rc rc);
  * @return True if the function executed succesfully, false if it failed and
  *         conversion should be terminated.
  */
-typedef bool (*aushape_conv_output_fn)(const char *ptr, size_t len, void *data);
+typedef bool (*aushape_conv_output_fn)(const char *ptr, size_t len,
+                                       void *data);
 
 /** Converter state */
 struct aushape_conv;
