@@ -22,7 +22,8 @@ lib_LTLIBRARIES = \
 	libaushape.la
 
 libaushape_la_SOURCES = \
-	aushape.c
+	gbuf.c          \
+	conv.c
 
 libaushape_la_LIBADD = \
 	$(AUPARSE_LIBS)

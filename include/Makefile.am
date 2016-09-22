@@ -18,3 +18,4 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 SUBDIRS = aushape
+include_HEADERS = aushape.h

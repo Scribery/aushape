@@ -18,3 +18,11 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 aushapedir = $(includedir)/aushape
+
+aushape_HEADERS = \
+	conv.h      \
+	format.h
+
+noinst_HEADERS = \
+	gbuf.h      \
+	misc.h
