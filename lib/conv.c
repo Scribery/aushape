@@ -23,6 +23,31 @@
 #include <stdio.h>
 #include <string.h>
 
+/**
+ * Evaluate an expression and return false if it is false.
+ *
+ * @param _expr The expression to evaluate.
+ */
+#define GBUF_GUARD_BOOL(_expr) \
+    do {                            \
+        if (!(_expr)) {             \
+            return false;           \
+        }                           \
+    } while (0)
+
+/**
+ * Evaluate an expression and return AUSHAPE_CONV_RC_AUPARSE_FAILED if it is
+ * false.
+ *
+ * @param _expr The expression to evaluate.
+ */
+#define GBUF_GUARD_RC(_expr) \
+    do {                                            \
+        if (!(_expr)) {                             \
+            return AUSHAPE_CONV_RC_AUPARSE_FAILED;  \
+        }                                           \
+    } while (0)
+
 struct aushape_conv_rc_info {
     const char *name;
     const char *desc;
@@ -90,31 +115,6 @@ aushape_conv_is_valid(const struct aushape_conv *conv)
            conv->au != NULL &&
            conv->output_fn != NULL;
 }
-
-/**
- * Evaluate an expression and return false if it is false.
- *
- * @param _expr The expression to evaluate.
- */
-#define GBUF_GUARD_BOOL(_expr) \
-    do {                            \
-        if (!(_expr)) {             \
-            return false;           \
-        }                           \
-    } while (0)
-
-/**
- * Evaluate an expression and return AUSHAPE_CONV_RC_AUPARSE_FAILED if it is
- * false.
- *
- * @param _expr The expression to evaluate.
- */
-#define GBUF_GUARD_RC(_expr) \
-    do {                                            \
-        if (!(_expr)) {                             \
-            return AUSHAPE_CONV_RC_AUPARSE_FAILED;  \
-        }                                           \
-    } while (0)
 
 /**
  * Add a formatted fragment for an auparse field to a growing buffer.
@@ -373,8 +373,6 @@ aushape_conv_gbuf_add_event(struct aushape_gbuf *gbuf,
 
     return AUSHAPE_CONV_RC_OK;
 }
-
-#undef GBUF_GUARD
 
 void
 aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
