@@ -28,7 +28,7 @@
  *
  * @param _expr The expression to evaluate.
  */
-#define GBUF_GUARD_BOOL(_expr) \
+#define GUARD_BOOL(_expr) \
     do {                            \
         if (!(_expr)) {             \
             return false;           \
@@ -41,7 +41,7 @@
  *
  * @param _expr The expression to evaluate.
  */
-#define GBUF_GUARD_RC(_expr) \
+#define GUARD_RC(_expr) \
     do {                                            \
         if (!(_expr)) {                             \
             return AUSHAPE_CONV_RC_AUPARSE_FAILED;  \
@@ -160,32 +160,30 @@ aushape_conv_gbuf_add_field(struct aushape_gbuf *gbuf,
 
     switch (format) {
     case AUSHAPE_FORMAT_XML:
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf, "        <"));
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf, name));
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf, " i=\""));
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str_xml(gbuf, value_i));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "        <"));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, name));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, " i=\""));
+        GUARD_BOOL(aushape_gbuf_add_str_xml(gbuf, value_i));
         if (value_r != NULL) {
-            GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\" r=\""));
-            GBUF_GUARD_BOOL(aushape_gbuf_add_str_xml(gbuf, value_r));
+            GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\" r=\""));
+            GUARD_BOOL(aushape_gbuf_add_str_xml(gbuf, value_r));
         }
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"/>\n"));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"/>\n"));
         break;
     case AUSHAPE_FORMAT_JSON:
         if (first) {
-            GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf,
-                                                 "\n                \""));
+            GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\n                \""));
         } else {
-            GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf,
-                                                 ",\n                \""));
+            GUARD_BOOL(aushape_gbuf_add_str(gbuf, ",\n                \""));
         }
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf, name));
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\": [ \""));
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str_json(gbuf, value_i));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, name));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\": [ \""));
+        GUARD_BOOL(aushape_gbuf_add_str_json(gbuf, value_i));
         if (value_r != NULL) {
-            GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\", \""));
-            GBUF_GUARD_BOOL(aushape_gbuf_add_str_json(gbuf, value_r));
+            GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\", \""));
+            GUARD_BOOL(aushape_gbuf_add_str_json(gbuf, value_r));
         }
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\" ]"));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\" ]"));
         break;
     default:
         assert(false);
@@ -224,27 +222,25 @@ aushape_conv_gbuf_add_record(struct aushape_gbuf *gbuf,
     type_name = auparse_get_type_name(au);
 
     if (format == AUSHAPE_FORMAT_XML) {
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf, "    <"));
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, type_name));
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf, " raw=\""));
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str_xml(
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "    <"));
+        GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, type_name));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, " raw=\""));
+        GUARD_BOOL(aushape_gbuf_add_str_xml(
                                         gbuf, auparse_get_record_text(au)));
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\">\n"));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\">\n"));
     } else {
         if (first) {
-            GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\n        \""));
+            GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\n        \""));
         } else {
-            GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf, ",\n        \""));
+            GUARD_BOOL(aushape_gbuf_add_str(gbuf, ",\n        \""));
         }
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, type_name));
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf,
-                                             "\": {\n"
-                                             "            \"raw\" : \""));
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str_json(
+        GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, type_name));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\": {\n"
+                                              "            \"raw\" : \""));
+        GUARD_BOOL(aushape_gbuf_add_str_json(
                                         gbuf, auparse_get_record_text(au)));
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf,
-                                             "\",\n"
-                                             "            \"fields\" : {"));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\",\n"
+                                              "            \"fields\" : {"));
     }
 
     auparse_first_field(au);
@@ -252,22 +248,22 @@ aushape_conv_gbuf_add_record(struct aushape_gbuf *gbuf,
     do {
         field_name = auparse_get_field_name(au);
         if (strcmp(field_name, "type") != 0) {
-            GBUF_GUARD_BOOL(aushape_conv_gbuf_add_field(gbuf, format,
+            GUARD_BOOL(aushape_conv_gbuf_add_field(gbuf, format,
                                       first_field, field_name, au));
             first_field = false;
         }
     } while (auparse_next_field(au) > 0);
 
     if (format == AUSHAPE_FORMAT_XML) {
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf, "    </"));
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, type_name));
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf, ">\n"));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "    </"));
+        GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, type_name));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, ">\n"));
     } else {
         if (!first_field) {
-            GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\n            "));
+            GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\n            "));
         }
-        GBUF_GUARD_BOOL(aushape_gbuf_add_str(gbuf, "}\n"
-                                                   "        }"));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "}\n"
+                                              "        }"));
     }
 
     return true;
@@ -319,30 +315,29 @@ aushape_conv_gbuf_add_event(struct aushape_gbuf *gbuf,
 
     /* Output event header */
     if (format == AUSHAPE_FORMAT_XML) {
-        GBUF_GUARD_RC(aushape_gbuf_add_fmt(
+        GUARD_RC(aushape_gbuf_add_fmt(
                                 gbuf, "<event serial=\"%lu\" time=\"%s\"",
                                 e->serial, timestamp_buf));
         if (e->host != NULL) {
-            GBUF_GUARD_RC(aushape_gbuf_add_str(gbuf, " host=\""));
-            GBUF_GUARD_RC(aushape_gbuf_add_str_xml(gbuf, e->host));
-            GBUF_GUARD_RC(aushape_gbuf_add_str(gbuf, "\""));
+            GUARD_RC(aushape_gbuf_add_str(gbuf, " host=\""));
+            GUARD_RC(aushape_gbuf_add_str_xml(gbuf, e->host));
+            GUARD_RC(aushape_gbuf_add_str(gbuf, "\""));
         }
-        GBUF_GUARD_RC(aushape_gbuf_add_str(gbuf, ">\n"));
+        GUARD_RC(aushape_gbuf_add_str(gbuf, ">\n"));
     } else {
         if (!first) {
-            GBUF_GUARD_RC(aushape_gbuf_add_str(gbuf, ",\n"));
+            GUARD_RC(aushape_gbuf_add_str(gbuf, ",\n"));
         }
-        GBUF_GUARD_RC(aushape_gbuf_add_fmt(gbuf,
-                                           "{\n"
-                                           "    \"serial\" : %lu,\n"
-                                           "    \"time\" : \"%s\",\n",
-                                           e->serial, timestamp_buf));
+        GUARD_RC(aushape_gbuf_add_fmt(gbuf, "{\n"
+                                            "    \"serial\" : %lu,\n"
+                                            "    \"time\" : \"%s\",\n",
+                                            e->serial, timestamp_buf));
         if (e->host != NULL) {
-            GBUF_GUARD_RC(aushape_gbuf_add_str(gbuf, "    \"host\" : \""));
-            GBUF_GUARD_RC(aushape_gbuf_add_str_json(gbuf, e->host));
-            GBUF_GUARD_RC(aushape_gbuf_add_str(gbuf, "\",\n"));
+            GUARD_RC(aushape_gbuf_add_str(gbuf, "    \"host\" : \""));
+            GUARD_RC(aushape_gbuf_add_str_json(gbuf, e->host));
+            GUARD_RC(aushape_gbuf_add_str(gbuf, "\",\n"));
         }
-        GBUF_GUARD_RC(aushape_gbuf_add_str(gbuf, "    \"records\" : {"));
+        GUARD_RC(aushape_gbuf_add_str(gbuf, "    \"records\" : {"));
     }
 
     /* Output records */
@@ -351,23 +346,21 @@ aushape_conv_gbuf_add_event(struct aushape_gbuf *gbuf,
     }
     first_record = true;
     do {
-        GBUF_GUARD_RC(aushape_conv_gbuf_add_record(gbuf, format,
-                                                   first_record, au));
+        GUARD_RC(aushape_conv_gbuf_add_record(gbuf, format,
+                                              first_record, au));
         first_record = false;
     } while(auparse_next_record(au) > 0);
 
     /* Terminate event */
     if (format == AUSHAPE_FORMAT_XML) {
-        GBUF_GUARD_RC(aushape_gbuf_add_str(gbuf, "</event>\n"));
+        GUARD_RC(aushape_gbuf_add_str(gbuf, "</event>\n"));
     } else {
         if (first_record) {
-            GBUF_GUARD_RC(aushape_gbuf_add_str(gbuf,
-                                               "}\n"
-                                               "}"));
+            GUARD_RC(aushape_gbuf_add_str(gbuf, "}\n"
+                                                "}"));
         } else {
-            GBUF_GUARD_RC(aushape_gbuf_add_str(gbuf,
-                                               "\n    }\n"
-                                               "}"));
+            GUARD_RC(aushape_gbuf_add_str(gbuf, "\n    }\n"
+                                                "}"));
         }
     }
 
