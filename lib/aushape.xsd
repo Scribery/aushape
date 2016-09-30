@@ -1,0 +1,457 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            elementFormDefault="qualified">
+    <!-- Generic field type -->
+    <xsd:complexType name="field">
+        <xsd:attribute name="i" type="xsd:string" use="required"/>
+        <xsd:attribute name="r" type="xsd:string"/>
+    </xsd:complexType>
+
+    <!-- Special fields -->
+    <xsd:element name="args">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element type="field" name="a"
+                             minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- All fields -->
+    <xsd:group name="fields">
+        <xsd:choice>
+            <xsd:element type="field" name="acct"/>
+            <xsd:element type="field" name="acl"/>
+            <xsd:element type="field" name="action"/>
+            <xsd:element type="field" name="added"/>
+            <xsd:element type="field" name="addr"/>
+            <xsd:element type="field" name="apparmor"/>
+            <xsd:element type="field" name="arch"/>
+            <xsd:element type="field" name="argc"/>
+            <xsd:element type="field" name="audit_backlog_limit"/>
+            <xsd:element type="field" name="audit_backlog_wait_time"/>
+            <xsd:element type="field" name="audit_enabled"/>
+            <xsd:element type="field" name="audit_failure"/>
+            <xsd:element type="field" name="auid"/>
+            <xsd:element type="field" name="banners"/>
+            <xsd:element type="field" name="bool"/>
+            <xsd:element type="field" name="bus"/>
+            <xsd:element type="field" name="capability"/>
+            <xsd:element type="field" name="cap_fe"/>
+            <xsd:element type="field" name="cap_fi"/>
+            <xsd:element type="field" name="cap_fp"/>
+            <xsd:element type="field" name="cap_fver"/>
+            <xsd:element type="field" name="cap_pe"/>
+            <xsd:element type="field" name="cap_pi"/>
+            <xsd:element type="field" name="cap_pp"/>
+            <xsd:element type="field" name="category"/>
+            <xsd:element type="field" name="cgroup"/>
+            <xsd:element type="field" name="changed"/>
+            <xsd:element type="field" name="cipher"/>
+            <xsd:element type="field" name="class"/>
+            <xsd:element type="field" name="cmd"/>
+            <xsd:element type="field" name="code"/>
+            <xsd:element type="field" name="comm"/>
+            <xsd:element type="field" name="compat"/>
+            <xsd:element type="field" name="cwd"/>
+            <xsd:element type="field" name="daddr"/>
+            <xsd:element type="field" name="data"/>
+            <xsd:element type="field" name="default-context"/>
+            <xsd:element type="field" name="dev"/>
+            <xsd:element type="field" name="device"/>
+            <xsd:element type="field" name="dir"/>
+            <xsd:element type="field" name="direction"/>
+            <xsd:element type="field" name="dmac"/>
+            <xsd:element type="field" name="dport"/>
+            <xsd:element type="field" name="egid"/>
+            <xsd:element type="field" name="enforcing"/>
+            <xsd:element type="field" name="entries"/>
+            <xsd:element type="field" name="euid"/>
+            <xsd:element type="field" name="exe"/>
+            <xsd:element type="field" name="exit"/>
+            <xsd:element type="field" name="fam"/>
+            <xsd:element type="field" name="family"/>
+            <xsd:element type="field" name="fd"/>
+            <xsd:element type="field" name="fe"/>
+            <xsd:element type="field" name="feature"/>
+            <xsd:element type="field" name="fi"/>
+            <xsd:element type="field" name="file"/>
+            <xsd:element type="field" name="flags"/>
+            <xsd:element type="field" name="format"/>
+            <xsd:element type="field" name="fp"/>
+            <xsd:element type="field" name="fsgid"/>
+            <xsd:element type="field" name="fsuid"/>
+            <xsd:element type="field" name="fver"/>
+            <xsd:element type="field" name="gid"/>
+            <xsd:element type="field" name="grantors"/>
+            <xsd:element type="field" name="grp"/>
+            <xsd:element type="field" name="hook"/>
+            <xsd:element type="field" name="hostname"/>
+            <xsd:element type="field" name="icmp_type"/>
+            <xsd:element type="field" name="id"/>
+            <xsd:element type="field" name="igid"/>
+            <xsd:element type="field" name="img-ctx"/>
+            <xsd:element type="field" name="inif"/>
+            <xsd:element type="field" name="ino"/>
+            <xsd:element type="field" name="inode"/>
+            <xsd:element type="field" name="inode_gid"/>
+            <xsd:element type="field" name="inode_uid"/>
+            <xsd:element type="field" name="invalid_context"/>
+            <xsd:element type="field" name="ioctlcmd"/>
+            <xsd:element type="field" name="ip"/>
+            <xsd:element type="field" name="ipid"/>
+            <xsd:element type="field" name="ipx-net"/>
+            <xsd:element type="field" name="item"/>
+            <xsd:element type="field" name="items"/>
+            <xsd:element type="field" name="iuid"/>
+            <xsd:element type="field" name="kernel"/>
+            <xsd:element type="field" name="key"/>
+            <xsd:element type="field" name="kind"/>
+            <xsd:element type="field" name="ksize"/>
+            <xsd:element type="field" name="laddr"/>
+            <xsd:element type="field" name="len"/>
+            <xsd:element type="field" name="list"/>
+            <xsd:element type="field" name="lport"/>
+            <xsd:element type="field" name="mac"/>
+            <xsd:element type="field" name="macproto"/>
+            <xsd:element type="field" name="maj"/>
+            <xsd:element type="field" name="major"/>
+            <xsd:element type="field" name="minor"/>
+            <xsd:element type="field" name="mode"/>
+            <xsd:element type="field" name="model"/>
+            <xsd:element type="field" name="msg"/>
+            <xsd:element type="field" name="name"/>
+            <xsd:element type="field" name="nametype"/>
+            <xsd:element type="field" name="nargs"/>
+            <xsd:element type="field" name="net"/>
+            <xsd:element type="field" name="new"/>
+            <xsd:element type="field" name="new-chardev"/>
+            <xsd:element type="field" name="new-disk"/>
+            <xsd:element type="field" name="new-enabled"/>
+            <xsd:element type="field" name="new-fs"/>
+            <xsd:element type="field" name="new_gid"/>
+            <xsd:element type="field" name="new-level"/>
+            <xsd:element type="field" name="new_lock"/>
+            <xsd:element type="field" name="new-log_passwd"/>
+            <xsd:element type="field" name="new-mem"/>
+            <xsd:element type="field" name="new-net"/>
+            <xsd:element type="field" name="new_pe"/>
+            <xsd:element type="field" name="new_pi"/>
+            <xsd:element type="field" name="new_pp"/>
+            <xsd:element type="field" name="new-range"/>
+            <xsd:element type="field" name="new-rng"/>
+            <xsd:element type="field" name="new-role"/>
+            <xsd:element type="field" name="new-seuser"/>
+            <xsd:element type="field" name="new-vcpu"/>
+            <xsd:element type="field" name="nlnk-fam"/>
+            <xsd:element type="field" name="nlnk-grp"/>
+            <xsd:element type="field" name="nlnk-pid"/>
+            <xsd:element type="field" name="oauid"/>
+            <xsd:element type="field" name="obj"/>
+            <xsd:element type="field" name="obj_gid"/>
+            <xsd:element type="field" name="obj_uid"/>
+            <xsd:element type="field" name="ocomm"/>
+            <xsd:element type="field" name="oflag"/>
+            <xsd:element type="field" name="ogid"/>
+            <xsd:element type="field" name="old"/>
+            <xsd:element type="field" name="old-auid"/>
+            <xsd:element type="field" name="old-chardev"/>
+            <xsd:element type="field" name="old-disk"/>
+            <xsd:element type="field" name="old-enabled"/>
+            <xsd:element type="field" name="old_enforcing"/>
+            <xsd:element type="field" name="old-fs"/>
+            <xsd:element type="field" name="old-level"/>
+            <xsd:element type="field" name="old_lock"/>
+            <xsd:element type="field" name="old-log_passwd"/>
+            <xsd:element type="field" name="old-mem"/>
+            <xsd:element type="field" name="old-net"/>
+            <xsd:element type="field" name="old_pe"/>
+            <xsd:element type="field" name="old_pi"/>
+            <xsd:element type="field" name="old_pp"/>
+            <xsd:element type="field" name="old_prom"/>
+            <xsd:element type="field" name="old-range"/>
+            <xsd:element type="field" name="old-rng"/>
+            <xsd:element type="field" name="old-role"/>
+            <xsd:element type="field" name="old-ses"/>
+            <xsd:element type="field" name="old-seuser"/>
+            <xsd:element type="field" name="old_val"/>
+            <xsd:element type="field" name="old-vcpu"/>
+            <xsd:element type="field" name="op"/>
+            <xsd:element type="field" name="opid"/>
+            <xsd:element type="field" name="oses"/>
+            <xsd:element type="field" name="ouid"/>
+            <xsd:element type="field" name="outif"/>
+            <xsd:element type="field" name="parent"/>
+            <xsd:element type="field" name="path"/>
+            <xsd:element type="field" name="per"/>
+            <xsd:element type="field" name="perm"/>
+            <xsd:element type="field" name="permissive"/>
+            <xsd:element type="field" name="perm_mask"/>
+            <xsd:element type="field" name="pfs"/>
+            <xsd:element type="field" name="pid"/>
+            <xsd:element type="field" name="ppid"/>
+            <xsd:element type="field" name="printer"/>
+            <xsd:element type="field" name="proctitle"/>
+            <xsd:element type="field" name="prom"/>
+            <xsd:element type="field" name="proto"/>
+            <xsd:element type="field" name="qbytes"/>
+            <xsd:element type="field" name="range"/>
+            <xsd:element type="field" name="rdev"/>
+            <xsd:element type="field" name="reason"/>
+            <xsd:element type="field" name="removed"/>
+            <xsd:element type="field" name="res"/>
+            <xsd:element type="field" name="resrc"/>
+            <xsd:element type="field" name="result"/>
+            <xsd:element type="field" name="role"/>
+            <xsd:element type="field" name="rport"/>
+            <xsd:element type="field" name="saddr"/>
+            <xsd:element type="field" name="sauid"/>
+            <xsd:element type="field" name="scontext"/>
+            <xsd:element type="field" name="selected-context"/>
+            <xsd:element type="field" name="seperm"/>
+            <xsd:element type="field" name="seperms"/>
+            <xsd:element type="field" name="seqno"/>
+            <xsd:element type="field" name="seresult"/>
+            <xsd:element type="field" name="ses"/>
+            <xsd:element type="field" name="seuser"/>
+            <xsd:element type="field" name="sgid"/>
+            <xsd:element type="field" name="sig"/>
+            <xsd:element type="field" name="sigev_signo"/>
+            <xsd:element type="field" name="smac"/>
+            <xsd:element type="field" name="spid"/>
+            <xsd:element type="field" name="sport"/>
+            <xsd:element type="field" name="state"/>
+            <xsd:element type="field" name="subj"/>
+            <xsd:element type="field" name="success"/>
+            <xsd:element type="field" name="suid"/>
+            <xsd:element type="field" name="syscall"/>
+            <xsd:element type="field" name="table"/>
+            <xsd:element type="field" name="tclass"/>
+            <xsd:element type="field" name="tcontext"/>
+            <xsd:element type="field" name="terminal"/>
+            <xsd:element type="field" name="tty"/>
+            <xsd:element type="field" name="type"/>
+            <xsd:element type="field" name="uid"/>
+            <xsd:element type="field" name="unit"/>
+            <xsd:element type="field" name="uri"/>
+            <xsd:element type="field" name="user"/>
+            <xsd:element type="field" name="uuid"/>
+            <xsd:element type="field" name="val"/>
+            <xsd:element type="field" name="ver"/>
+            <xsd:element type="field" name="virt"/>
+            <xsd:element type="field" name="vm"/>
+            <xsd:element type="field" name="vm-ctx"/>
+            <xsd:element type="field" name="vm-pid"/>
+            <xsd:element type="field" name="watch"/>
+            <xsd:element ref="args"/>
+        </xsd:choice>
+    </xsd:group>
+
+    <!-- Record type -->
+    <xsd:complexType name="record">
+        <xsd:sequence>
+            <xsd:group ref="fields" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="raw" type="xsd:string"/>
+    </xsd:complexType>
+
+    <!-- Specific records -->
+    <xsd:group name="records">
+        <xsd:choice>
+            <xsd:element type="record" name="user"/>
+            <xsd:element type="record" name="login"/>
+            <xsd:element type="record" name="user_auth"/>
+            <xsd:element type="record" name="user_acct"/>
+            <xsd:element type="record" name="user_mgmt"/>
+            <xsd:element type="record" name="cred_acq"/>
+            <xsd:element type="record" name="cred_disp"/>
+            <xsd:element type="record" name="user_start"/>
+            <xsd:element type="record" name="user_end"/>
+            <xsd:element type="record" name="user_avc"/>
+            <xsd:element type="record" name="user_chauthtok"/>
+            <xsd:element type="record" name="user_err"/>
+            <xsd:element type="record" name="cred_refr"/>
+            <xsd:element type="record" name="usys_config"/>
+            <xsd:element type="record" name="user_login"/>
+            <xsd:element type="record" name="user_logout"/>
+            <xsd:element type="record" name="add_user"/>
+            <xsd:element type="record" name="del_user"/>
+            <xsd:element type="record" name="add_group"/>
+            <xsd:element type="record" name="del_group"/>
+            <xsd:element type="record" name="dac_check"/>
+            <xsd:element type="record" name="chgrp_id"/>
+            <xsd:element type="record" name="test"/>
+            <xsd:element type="record" name="trusted_app"/>
+            <xsd:element type="record" name="user_selinux_err"/>
+            <xsd:element type="record" name="user_cmd"/>
+            <xsd:element type="record" name="user_tty"/>
+            <xsd:element type="record" name="chuser_id"/>
+            <xsd:element type="record" name="grp_auth"/>
+            <xsd:element type="record" name="mac_check"/>
+            <xsd:element type="record" name="acct_lock"/>
+            <xsd:element type="record" name="acct_unlock"/>
+            <xsd:element type="record" name="system_boot"/>
+            <xsd:element type="record" name="system_shutdown"/>
+            <xsd:element type="record" name="system_runlevel"/>
+            <xsd:element type="record" name="service_start"/>
+            <xsd:element type="record" name="service_stop"/>
+            <xsd:element type="record" name="grp_mgmt"/>
+            <xsd:element type="record" name="grp_chauthtok"/>
+            <xsd:element type="record" name="daemon_start"/>
+            <xsd:element type="record" name="daemon_end"/>
+            <xsd:element type="record" name="daemon_abort"/>
+            <xsd:element type="record" name="daemon_config"/>
+            <xsd:element type="record" name="daemon_rotate"/>
+            <xsd:element type="record" name="daemon_resume"/>
+            <xsd:element type="record" name="daemon_accept"/>
+            <xsd:element type="record" name="daemon_close"/>
+            <xsd:element type="record" name="daemon_err"/>
+            <xsd:element type="record" name="syscall"/>
+            <xsd:element type="record" name="path"/>
+            <xsd:element type="record" name="ipc"/>
+            <xsd:element type="record" name="socketcall"/>
+            <xsd:element type="record" name="config_change"/>
+            <xsd:element type="record" name="sockaddr"/>
+            <xsd:element type="record" name="cwd"/>
+            <xsd:element type="record" name="execve"/>
+            <xsd:element type="record" name="ipc_set_perm"/>
+            <xsd:element type="record" name="mq_open"/>
+            <xsd:element type="record" name="mq_sendrecv"/>
+            <xsd:element type="record" name="mq_notify"/>
+            <xsd:element type="record" name="mq_getsetattr"/>
+            <xsd:element type="record" name="kernel_other"/>
+            <xsd:element type="record" name="fd_pair"/>
+            <xsd:element type="record" name="obj_pid"/>
+            <xsd:element type="record" name="tty"/>
+            <xsd:element type="record" name="eoe"/>
+            <xsd:element type="record" name="bprm_fcaps"/>
+            <xsd:element type="record" name="capset"/>
+            <xsd:element type="record" name="mmap"/>
+            <xsd:element type="record" name="netfilter_pkt"/>
+            <xsd:element type="record" name="netfilter_cfg"/>
+            <xsd:element type="record" name="seccomp"/>
+            <xsd:element type="record" name="proctitle"/>
+            <xsd:element type="record" name="feature_change"/>
+            <xsd:element type="record" name="avc"/>
+            <xsd:element type="record" name="selinux_err"/>
+            <xsd:element type="record" name="avc_path"/>
+            <xsd:element type="record" name="mac_policy_load"/>
+            <xsd:element type="record" name="mac_status"/>
+            <xsd:element type="record" name="mac_config_change"/>
+            <xsd:element type="record" name="mac_unlbl_allow"/>
+            <xsd:element type="record" name="mac_cipsov4_add"/>
+            <xsd:element type="record" name="mac_cipsov4_del"/>
+            <xsd:element type="record" name="mac_map_add"/>
+            <xsd:element type="record" name="mac_map_del"/>
+            <xsd:element type="record" name="mac_ipsec_addsa"/>
+            <xsd:element type="record" name="mac_ipsec_delsa"/>
+            <xsd:element type="record" name="mac_ipsec_addspd"/>
+            <xsd:element type="record" name="mac_ipsec_delspd"/>
+            <xsd:element type="record" name="mac_ipsec_event"/>
+            <xsd:element type="record" name="mac_unlbl_stcadd"/>
+            <xsd:element type="record" name="mac_unlbl_stcdel"/>
+            <xsd:element type="record" name="anom_promiscuous"/>
+            <xsd:element type="record" name="anom_abend"/>
+            <xsd:element type="record" name="anom_link"/>
+            <xsd:element type="record" name="integrity_data"/>
+            <xsd:element type="record" name="integrity_metadata"/>
+            <xsd:element type="record" name="integrity_status"/>
+            <xsd:element type="record" name="integrity_hash"/>
+            <xsd:element type="record" name="integrity_pcr"/>
+            <xsd:element type="record" name="integrity_rule"/>
+            <xsd:element type="record" name="apparmor"/>
+            <xsd:element type="record" name="apparmor_audit"/>
+            <xsd:element type="record" name="apparmor_allowed"/>
+            <xsd:element type="record" name="apparmor_denied"/>
+            <xsd:element type="record" name="apparmor_hint"/>
+            <xsd:element type="record" name="apparmor_status"/>
+            <xsd:element type="record" name="apparmor_error"/>
+            <xsd:element type="record" name="kernel"/>
+            <xsd:element type="record" name="anom_login_failures"/>
+            <xsd:element type="record" name="anom_login_time"/>
+            <xsd:element type="record" name="anom_login_sessions"/>
+            <xsd:element type="record" name="anom_login_acct"/>
+            <xsd:element type="record" name="anom_login_location"/>
+            <xsd:element type="record" name="anom_max_dac"/>
+            <xsd:element type="record" name="anom_max_mac"/>
+            <xsd:element type="record" name="anom_amtu_fail"/>
+            <xsd:element type="record" name="anom_rbac_fail"/>
+            <xsd:element type="record" name="anom_rbac_integrity_fail"/>
+            <xsd:element type="record" name="anom_crypto_fail"/>
+            <xsd:element type="record" name="anom_access_fs"/>
+            <xsd:element type="record" name="anom_exec"/>
+            <xsd:element type="record" name="anom_mk_exec"/>
+            <xsd:element type="record" name="anom_add_acct"/>
+            <xsd:element type="record" name="anom_del_acct"/>
+            <xsd:element type="record" name="anom_mod_acct"/>
+            <xsd:element type="record" name="anom_root_trans"/>
+            <xsd:element type="record" name="resp_anomaly"/>
+            <xsd:element type="record" name="resp_alert"/>
+            <xsd:element type="record" name="resp_kill_proc"/>
+            <xsd:element type="record" name="resp_term_access"/>
+            <xsd:element type="record" name="resp_acct_remote"/>
+            <xsd:element type="record" name="resp_acct_lock_timed"/>
+            <xsd:element type="record" name="resp_acct_unlock_timed"/>
+            <xsd:element type="record" name="resp_acct_lock"/>
+            <xsd:element type="record" name="resp_term_lock"/>
+            <xsd:element type="record" name="resp_sebool"/>
+            <xsd:element type="record" name="resp_exec"/>
+            <xsd:element type="record" name="resp_single"/>
+            <xsd:element type="record" name="resp_halt"/>
+            <xsd:element type="record" name="user_role_change"/>
+            <xsd:element type="record" name="role_assign"/>
+            <xsd:element type="record" name="role_remove"/>
+            <xsd:element type="record" name="label_override"/>
+            <xsd:element type="record" name="label_level_change"/>
+            <xsd:element type="record" name="user_labeled_export"/>
+            <xsd:element type="record" name="user_unlabeled_export"/>
+            <xsd:element type="record" name="dev_alloc"/>
+            <xsd:element type="record" name="dev_dealloc"/>
+            <xsd:element type="record" name="fs_relabel"/>
+            <xsd:element type="record" name="user_mac_policy_load"/>
+            <xsd:element type="record" name="role_modify"/>
+            <xsd:element type="record" name="user_mac_config_change"/>
+            <xsd:element type="record" name="crypto_test_user"/>
+            <xsd:element type="record" name="crypto_param_change_user"/>
+            <xsd:element type="record" name="crypto_login"/>
+            <xsd:element type="record" name="crypto_logout"/>
+            <xsd:element type="record" name="crypto_key_user"/>
+            <xsd:element type="record" name="crypto_failure_user"/>
+            <xsd:element type="record" name="crypto_replay_user"/>
+            <xsd:element type="record" name="crypto_session"/>
+            <xsd:element type="record" name="crypto_ike_sa"/>
+            <xsd:element type="record" name="crypto_ipsec_sa"/>
+            <xsd:element type="record" name="virt_control"/>
+            <xsd:element type="record" name="virt_resource"/>
+            <xsd:element type="record" name="virt_machine_id"/>
+        </xsd:choice>
+    </xsd:group>
+
+    <!-- Event -->
+    <xsd:simpleType name="serial">
+        <xsd:restriction base="xsd:nonNegativeInteger">
+            <xsd:minInclusive value="1" />
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:element name="event">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:group ref="records"
+                           minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+            <xsd:attribute name="serial" type="serial" use="required"/>
+            <xsd:attribute name="time" type="xsd:dateTime" use="required"/>
+            <xsd:attribute name="host"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- Log -->
+    <xsd:element name="log">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="event"
+                             minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>
