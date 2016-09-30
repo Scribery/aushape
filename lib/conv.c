@@ -36,16 +36,15 @@
     } while (0)
 
 /**
- * Evaluate an expression and return AUSHAPE_CONV_RC_AUPARSE_FAILED if it is
- * false.
+ * Evaluate an expression and return AUSHAPE_CONV_RC_NOMEM if it is false.
  *
  * @param _expr The expression to evaluate.
  */
 #define GUARD_RC(_expr) \
-    do {                                            \
-        if (!(_expr)) {                             \
-            return AUSHAPE_CONV_RC_AUPARSE_FAILED;  \
-        }                                           \
+    do {                                    \
+        if (!(_expr)) {                     \
+            return AUSHAPE_CONV_RC_NOMEM;   \
+        }                                   \
     } while (0)
 
 struct aushape_conv_rc_info {
