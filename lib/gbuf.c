@@ -212,7 +212,7 @@ aushape_gbuf_add_str_xml(struct aushape_gbuf *gbuf, const char *str)
 {
     const char *last_p;
     const char *p;
-    char c;
+    unsigned char c;
     static const char hexdigits[] = "0123456789abcdef";
     char esc_buf[6] = {'&', '#', 'x', 0, 0, ';'};
     const char *esc_ptr;
@@ -259,7 +259,7 @@ aushape_gbuf_add_str_json(struct aushape_gbuf *gbuf, const char *str)
 {
     const char *last_p;
     const char *p;
-    char c;
+    unsigned char c;
     static const char hexdigits[] = "0123456789abcdef";
     char esc_char_buf[2] = {'\\'};
     char esc_code_buf[6] = {'\\', 'u', '0', '0'};
