@@ -37,6 +37,8 @@ enum aushape_conv_rc {
     AUSHAPE_CONV_RC_OUTPUT_FAILED,
     /** An underlying auparse call failed */
     AUSHAPE_CONV_RC_AUPARSE_FAILED,
+    /** Invalid execve record sequence encountered */
+    AUSHAPE_CONV_RC_INVALID_EXECVE,
     /** Number of return codes (not a valid return code) */
     AUSHAPE_CONV_RC_NUM
 };
