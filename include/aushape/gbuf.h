@@ -157,6 +157,19 @@ extern bool aushape_gbuf_add_fmt(struct aushape_gbuf *gbuf,
                                  const char *fmt, ...);
 
 /**
+ * Add the contents of an abstract buffer to a growing buffer, escaped as a
+ * double-quoted XML attribute value.
+ *
+ * @param gbuf      The growing buffer to add the escaped buffer contents to.
+ * @param ptr       The pointer to the buffer to escape and add.
+ * @param len       The length of the buffer to escape and add.
+ *
+ * @return True if added successfully, false if memory allocation failed.
+ */
+extern bool aushape_gbuf_add_buf_xml(struct aushape_gbuf *gbuf,
+                                     const void *ptr, size_t len);
+
+/**
  * Add a string to a growing buffer, escaped as a double-quoted XML attribute
  * value.
  *
@@ -167,6 +180,19 @@ extern bool aushape_gbuf_add_fmt(struct aushape_gbuf *gbuf,
  */
 extern bool aushape_gbuf_add_str_xml(struct aushape_gbuf *gbuf,
                                      const char *str);
+
+/**
+ * Add the contents of an abstract buffer to a growing buffer, escaped as a
+ * JSON string value.
+ *
+ * @param gbuf      The growing buffer to add the escaped buffer contents to.
+ * @param ptr       The pointer to the buffer to escape and add.
+ * @param len       The length of the buffer to escape and add.
+ *
+ * @return True if added successfully, false if memory allocation failed.
+ */
+extern bool aushape_gbuf_add_buf_json(struct aushape_gbuf *gbuf,
+                                      const void *ptr, size_t len);
 
 /**
  * Add a string to a growing buffer, escaped as a JSON string value.

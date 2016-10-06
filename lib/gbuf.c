@@ -208,7 +208,8 @@ aushape_gbuf_add_fmt(struct aushape_gbuf *gbuf, const char *fmt, ...)
 }
 
 bool
-aushape_gbuf_add_str_xml(struct aushape_gbuf *gbuf, const char *str)
+aushape_gbuf_add_buf_xml(struct aushape_gbuf *gbuf,
+                         const void *ptr, size_t len)
 {
     const char *last_p;
     const char *p;
@@ -219,11 +220,12 @@ aushape_gbuf_add_str_xml(struct aushape_gbuf *gbuf, const char *str)
     size_t esc_len;
 
     assert(aushape_gbuf_is_valid(gbuf));
-    assert(str != NULL);
+    assert(ptr != NULL || len == 0);
 
-    p = str;
+    p = (const char *)ptr;
     last_p = p;
-    while ((c = *p) != '\0') {
+    for (; len > 0; len--) {
+        c = *p;
         switch (c) {
 #define ESC_CASE(_c, _e) \
         case _c:                    \
@@ -255,7 +257,16 @@ aushape_gbuf_add_str_xml(struct aushape_gbuf *gbuf, const char *str)
 }
 
 bool
-aushape_gbuf_add_str_json(struct aushape_gbuf *gbuf, const char *str)
+aushape_gbuf_add_str_xml(struct aushape_gbuf *gbuf, const char *str)
+{
+    assert(aushape_gbuf_is_valid(gbuf));
+    assert(str != NULL);
+    return aushape_gbuf_add_buf_xml(gbuf, str, strlen(str));
+}
+
+bool
+aushape_gbuf_add_buf_json(struct aushape_gbuf *gbuf,
+                          const void *ptr, size_t len)
 {
     const char *last_p;
     const char *p;
@@ -267,11 +278,12 @@ aushape_gbuf_add_str_json(struct aushape_gbuf *gbuf, const char *str)
     size_t esc_len;
 
     assert(aushape_gbuf_is_valid(gbuf));
-    assert(str != NULL);
+    assert(ptr != NULL || len == 0);
 
-    p = str;
+    p = (const char *)ptr;
     last_p = p;
-    while ((c = *p) != '\0') {
+    for (; len > 0; len--) {
+        c = *p;
         switch (c) {
         case '"':
         case '\\':
@@ -310,5 +322,13 @@ aushape_gbuf_add_str_json(struct aushape_gbuf *gbuf, const char *str)
     }
     GUARD(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
     return true;
+}
+
+bool
+aushape_gbuf_add_str_json(struct aushape_gbuf *gbuf, const char *str)
+{
+    assert(aushape_gbuf_is_valid(gbuf));
+    assert(str != NULL);
+    return aushape_gbuf_add_buf_json(gbuf, str, strlen(str));
 }
 
