@@ -373,9 +373,11 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
     struct aushape_conv *conv = (struct aushape_conv *)data;
 
     assert(aushape_conv_is_valid(conv));
-    assert(conv->rc == AUSHAPE_CONV_RC_OK);
 
     if (type != AUPARSE_CB_EVENT_READY) {
+        return;
+    }
+    if (conv->rc != AUSHAPE_CONV_RC_OK) {
         return;
     }
 
