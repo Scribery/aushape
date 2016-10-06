@@ -34,7 +34,7 @@
     } while (0)
 
 bool
-aushape_gbuf_is_valid(struct aushape_gbuf *gbuf)
+aushape_gbuf_is_valid(const struct aushape_gbuf *gbuf)
 {
     return gbuf != NULL &&
            (gbuf->ptr == NULL || gbuf->size > 0) &&

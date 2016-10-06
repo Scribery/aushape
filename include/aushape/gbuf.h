@@ -40,7 +40,7 @@ struct aushape_gbuf {
  *
  * @return True if the growing buffer is valid, false otherwise.
  */
-extern bool aushape_gbuf_is_valid(struct aushape_gbuf *gbuf);
+extern bool aushape_gbuf_is_valid(const struct aushape_gbuf *gbuf);
 
 /**
  * Initialize a growing buffer.
