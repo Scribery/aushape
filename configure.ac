@@ -55,6 +55,8 @@ PKG_CHECK_MODULES([AUPARSE], [auparse])
 AC_CONFIG_FILES([Makefile
                  include/Makefile
                  include/aushape/Makefile
+                 include/aushape/conv/Makefile
                  lib/Makefile
+                 lib/conv/Makefile
                  src/Makefile])
 AC_OUTPUT

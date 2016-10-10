@@ -22,7 +22,7 @@
 #define _AUSHAPE_CONV_H
 
 #include <aushape/format.h>
-#include <aushape/conv_rc.h>
+#include <aushape/conv/rc.h>
 #include <stdlib.h>
 #include <stdbool.h>
 

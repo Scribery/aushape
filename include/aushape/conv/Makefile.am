@@ -17,14 +17,11 @@
 # along with aushape; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-SUBDIRS = conv
+aushape_convdir = $(includedir)/aushape/conv
 
-aushapedir = $(includedir)/aushape
-
-aushape_HEADERS = \
-	conv.h      \
-	format.h
+aushape_conv_HEADERS = \
+	rc.h
 
 noinst_HEADERS = \
-	gbuf.h          \
-	misc.h
+	buf.h       \
+	execve.h

@@ -18,15 +18,13 @@
 AM_CPPFLAGS = \
 	$(AUPARSE_CFLAGS)
 
-SUBDIRS = conv
+noinst_LTLIBRARIES = \
+	libaushape_conv.la
 
-lib_LTLIBRARIES = \
-	libaushape.la
+libaushape_conv_la_SOURCES = \
+	buf.c                   \
+	execve.c                \
+	rc.c
 
-libaushape_la_SOURCES = \
-	gbuf.c          \
-	conv.c
-
-libaushape_la_LIBADD = \
-	conv/libaushape_conv.la
+libaushape_conv_la_LIBADD = \
 	$(AUPARSE_LIBS)

@@ -23,7 +23,7 @@
 
 #include <aushape/format.h>
 #include <aushape/gbuf.h>
-#include <aushape/conv_rc.h>
+#include <aushape/conv/rc.h>
 #include <auparse.h>
 
 /** Execve record aggregation buffer */

@@ -21,8 +21,8 @@
 #ifndef _AUSHAPE_CONV_BUF_H
 #define _AUSHAPE_CONV_BUF_H
 
-#include <aushape/conv_execve.h>
-#include <aushape/conv_rc.h>
+#include <aushape/conv/execve.h>
+#include <aushape/conv/rc.h>
 #include <auparse.h>
 
 /** Converter's output buffer */
