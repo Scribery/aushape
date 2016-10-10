@@ -34,7 +34,7 @@ struct aushape_conv_buf {
 };
 
 /**
- * Check if an output buffer is valid.
+ * Check if a converter output buffer is valid.
  *
  * @param buf   The buffer to check.
  *
@@ -43,28 +43,28 @@ struct aushape_conv_buf {
 extern bool aushape_conv_buf_is_valid(const struct aushape_conv_buf *buf);
 
 /**
- * Initialize an output buffer
+ * Initialize a converter output buffer
  *
  * @param buf   The buffer to initialize.
  */
 extern void aushape_conv_buf_init(struct aushape_conv_buf *buf);
 
 /**
- * Cleanup an output buffer (free allocated data).
+ * Cleanup a converter output buffer (free allocated data).
  *
  * @param buf   The buffer to cleanup.
  */
 extern void aushape_conv_buf_cleanup(struct aushape_conv_buf *buf);
 
 /**
- * Empty an output buffer - prepare for processing of another event.
+ * Empty a converter output buffer - prepare for processing of another event.
  *
  * @param buf   The buffer to empty.
  */
 extern void aushape_conv_buf_empty(struct aushape_conv_buf *buf);
 
 /**
- * Add a formatted fragment for an auparse event to a converter buffer.
+ * Add a formatted fragment for an auparse event to a converter output buffer.
  *
  * @param buf       The converter buffer to add the fragment to.
  * @param format    The output format to use.
