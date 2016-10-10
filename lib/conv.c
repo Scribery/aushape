@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 
+/** Converter */
 struct aushape_conv {
     /** Auparse state */
     auparse_state_t            *au;
