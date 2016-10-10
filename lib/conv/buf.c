@@ -59,7 +59,7 @@
  *
  * @return True if added succesfully, false if memory allocation failed.
  */
-bool
+static bool
 aushape_conv_buf_add_field(struct aushape_gbuf *gbuf,
                            enum aushape_format format,
                            bool first,
@@ -136,7 +136,7 @@ aushape_conv_buf_add_field(struct aushape_gbuf *gbuf,
  *
  * @return True if added succesfully, false if memory allocation failed.
  */
-bool
+static bool
 aushape_conv_buf_add_record(struct aushape_gbuf *gbuf,
                             enum aushape_format format,
                             bool first,
@@ -211,7 +211,7 @@ aushape_conv_buf_add_record(struct aushape_gbuf *gbuf,
  *
  * @return True if added succesfully, false if memory allocation failed.
  */
-bool
+static bool
 aushape_conv_buf_add_execve(struct aushape_gbuf *gbuf,
                             enum aushape_format format,
                             bool first,
