@@ -40,7 +40,7 @@ enum aushape_format {
  *
  * @return True if the format is valid, false otherwise.
  */
-bool
+static inline bool
 aushape_format_is_valid(enum aushape_format format)
 {
     return format > AUSHAPE_FORMAT_INVALID &&
