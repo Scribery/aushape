@@ -84,6 +84,8 @@ enum aushape_conv_rc aushape_conv_create(struct aushape_conv **pconv,
  *          AUSHAPE_CONV_RC_INVALID_ARGS    - invalid arguments received,
  *          AUSHAPE_CONV_RC_NOMEM           - memory allocation failed,
  *          AUSHAPE_CONV_RC_AUPARSE_FAILED  - an auparse call failed,
+ *          AUSHAPE_CONV_RC_INVALID_EXECVE  - invalid execve record sequence
+ *                                            encountered,
  *          AUSHAPE_CONV_RC_OUTPUT_FAILED   - output function failed.
  */
 enum aushape_conv_rc aushape_conv_input(struct aushape_conv *conv,
@@ -101,6 +103,8 @@ enum aushape_conv_rc aushape_conv_input(struct aushape_conv *conv,
  *          AUSHAPE_CONV_RC_INVALID_ARGS    - invalid arguments received,
  *          AUSHAPE_CONV_RC_NOMEM           - memory allocation failed,
  *          AUSHAPE_CONV_RC_AUPARSE_FAILED  - an auparse call failed,
+ *          AUSHAPE_CONV_RC_INVALID_EXECVE  - invalid execve record sequence
+ *                                            encountered,
  *          AUSHAPE_CONV_RC_OUTPUT_FAILED   - output function failed.
  */
 enum aushape_conv_rc aushape_conv_flush(struct aushape_conv *conv);
