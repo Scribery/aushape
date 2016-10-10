@@ -47,7 +47,7 @@ struct aushape_conv_execve {
 };
 
 /**
- * Check if a buffer is valid.
+ * Check if an execve record aggregation buffer is valid.
  *
  * @param execve    The buffer to check.
  *
@@ -57,28 +57,29 @@ extern bool aushape_conv_execve_is_valid(
                         const struct aushape_conv_execve *execve);
 
 /**
- * Initialize a buffer.
+ * Initialize an execve record aggregation buffer.
  *
  * @param execve    The buffer to initialize.
  */
 extern void aushape_conv_execve_init(struct aushape_conv_execve *execve);
 
 /**
- * Cleanup a buffer.
+ * Cleanup an execve record aggregation buffer.
  *
  * @param execve    The buffer to cleanup, must be valid.
  */
 extern void aushape_conv_execve_cleanup(struct aushape_conv_execve *execve);
 
 /**
- * Empty a buffer to prepare for processing of another execve record sequence.
+ * Empty an execve record aggregation buffer to prepare for processing of
+ * another execve record sequence.
  *
  * @param execve    The buffer to empty.
  */
 extern void aushape_conv_execve_empty(struct aushape_conv_execve *execve);
 
 /**
- * Aggregate an execve record data into an aggregation buffer.
+ * Aggregate an execve record data into a buffer.
  *
  * @param execve    The buffer to aggregate the record into.
  * @param format    The output format to use.
