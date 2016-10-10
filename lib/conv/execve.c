@@ -135,8 +135,7 @@ aushape_conv_execve_add(struct aushape_conv_execve *execve,
         } else if (end = 0,
                    sscanf(field_name, "a%zu%n", &arg_idx, &end) >= 1 &&
                    (size_t)end == strlen(field_name)) {
-            if (execve->arg_num == 0 ||
-                arg_idx != execve->arg_idx ||
+            if (arg_idx != execve->arg_idx ||
                 arg_idx >= execve->arg_num) {
                 return AUSHAPE_CONV_RC_INVALID_EXECVE;
             }
@@ -164,8 +163,8 @@ aushape_conv_execve_add(struct aushape_conv_execve *execve,
         } else if (end = 0,
                    sscanf(field_name, "a%zu_len%n", &arg_idx, &end) >= 1 &&
                    (size_t)end == strlen(field_name)) {
-            if (execve->arg_num == 0 ||
-                arg_idx != execve->arg_idx ||
+            if (arg_idx != execve->arg_idx ||
+                arg_idx >= execve->arg_num ||
                 execve->got_len) {
                 return AUSHAPE_CONV_RC_INVALID_EXECVE;
             }
@@ -182,8 +181,7 @@ aushape_conv_execve_add(struct aushape_conv_execve *execve,
                    sscanf(field_name, "a%zu[%zu]%n",
                           &arg_idx, &slice_idx, &end) >= 1 &&
                    (size_t)end == strlen(field_name)) {
-            if (execve->arg_num == 0 ||
-                arg_idx != execve->arg_idx ||
+            if (arg_idx != execve->arg_idx ||
                 arg_idx >= execve->arg_num ||
                 !execve->got_len ||
                 slice_idx != execve->slice_idx) {
