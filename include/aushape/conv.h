@@ -22,44 +22,9 @@
 #define _AUSHAPE_CONV_H
 
 #include <aushape/format.h>
+#include <aushape/conv_rc.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
-/** Return codes */
-enum aushape_conv_rc {
-    /** Execution succeeded */
-    AUSHAPE_CONV_RC_OK  = 0,
-    /** Invalid arguments supplied to a function */
-    AUSHAPE_CONV_RC_INVALID_ARGS,
-    /** Memory allocation failed */
-    AUSHAPE_CONV_RC_NOMEM,
-    /** Output function failed */
-    AUSHAPE_CONV_RC_OUTPUT_FAILED,
-    /** An underlying auparse call failed */
-    AUSHAPE_CONV_RC_AUPARSE_FAILED,
-    /** Invalid execve record sequence encountered */
-    AUSHAPE_CONV_RC_INVALID_EXECVE,
-    /** Number of return codes (not a valid return code) */
-    AUSHAPE_CONV_RC_NUM
-};
-
-/**
- * Retrieve the name of a return code.
- *
- * @param rc    The return code to retrieve the name for.
- *
- * @return A constant string with the name of the return code.
- */
-extern const char *aushape_conv_rc_to_name(enum aushape_conv_rc rc);
-
-/**
- * Retrieve the description of a return code.
- *
- * @param rc    The return code to describe.
- *
- * @return A constant string describing the return code.
- */
-extern const char *aushape_conv_rc_to_desc(enum aushape_conv_rc rc);
 
 /**
  * Output function prototype.

@@ -23,7 +23,10 @@ lib_LTLIBRARIES = \
 
 libaushape_la_SOURCES = \
 	gbuf.c          \
-	conv.c
+	conv.c          \
+	conv_buf.c      \
+	conv_execve.c   \
+	conv_rc.c
 
 libaushape_la_LIBADD = \
 	$(AUPARSE_LIBS)
