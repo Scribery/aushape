@@ -297,23 +297,6 @@ aushape_conv_buf_empty(struct aushape_conv_buf *buf)
     assert(aushape_conv_buf_is_valid(buf));
 }
 
-/**
- * Add a formatted fragment for an auparse event to a converter buffer.
- *
- * @param buf       The converter buffer to add the fragment to.
- * @param format    The output format to use.
- * @param first     True if this is the first event being output,
- *                  false otherwise.
- * @param au        The auparse state with the current event as the one to be
- *                  output.
- *
- * @return Return code:
- *          AUSHAPE_CONV_RC_OK              - added succesfully,
- *          AUSHAPE_CONV_RC_NOMEM           - memory allocation failed,
- *          AUSHAPE_CONV_RC_AUPARSE_FAILED  - an auparse call failed,
- *          AUSHAPE_CONV_RC_INVALID_EXECVE  - invalid execve record sequence
- *                                            encountered.
- */
 enum aushape_conv_rc
 aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
                            enum aushape_format format,
