@@ -1,5 +1,5 @@
 /*
- * @brief An aushape raw audit log converter return code
+ * An aushape raw audit log converter return code
  *
  * Copyright (C) 2016 Red Hat
  *
