@@ -19,9 +19,7 @@
 #include <aushape/conv.h>
 #include <aushape/conv/buf.h>
 #include <aushape/gbuf.h>
-#include <aushape/misc.h>
 #include <auparse.h>
-#include <stdio.h>
 #include <string.h>
 
 /** Converter */
