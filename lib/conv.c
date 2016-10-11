@@ -49,7 +49,14 @@ aushape_conv_is_valid(const struct aushape_conv *conv)
            aushape_conv_buf_is_valid(&conv->buf);
 }
 
-void
+/**
+ * Handle auparse event callback.
+ *
+ * @param au    The auparse state corresponding to the reported event.
+ * @param type  The event type.
+ * @param data  The opaque data passed to auparse_add_calback previously.
+ */
+static void
 aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
 {
     enum aushape_conv_rc rc;
