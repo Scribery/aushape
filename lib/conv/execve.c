@@ -126,6 +126,8 @@ aushape_conv_execve_add_argc(struct aushape_conv_execve *execve,
     assert(aushape_format_is_valid(format));
     assert(au != NULL);
 
+    (void)format;
+
     GUARD_BOOL(INVALID_EXECVE, execve->arg_num == 0);
     str = auparse_get_field_str(au);
     GUARD_BOOL(AUPARSE_FAILED, str != NULL);
@@ -230,6 +232,8 @@ aushape_conv_execve_add_arg_len(struct aushape_conv_execve *execve,
     assert(aushape_conv_execve_is_valid(execve));
     assert(aushape_format_is_valid(format));
     assert(au != NULL);
+
+    (void)format;
 
     GUARD_BOOL(INVALID_EXECVE,
                arg_idx == execve->arg_idx &&
