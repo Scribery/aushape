@@ -1,0 +1,88 @@
+=====================================================================
+
+BELOW IS A RUNNING STREAM OF NOTES WHICH DON'T HAVE TO MAKE ANY SENSE
+
+=====================================================================
+
+So, we map one input field to one or more output fields
+
+For each output field we need to:
+    Know the output field name.
+    Decide do we have a value or not ("?"/"(none)"/"(null)"/etc.).
+    Decide how to retrieve the value (str/interpret).
+    Decide whether the value is a decimal number, or a string.
+    Escape the value according to output format.
+    Know if we should add a separator or not.
+
+We need to output both raw and "interpreted" value for some fields
+
+For some fields we know what the "interpretation" output is easily, for some
+we need to copy the complicated logic in auparse to actually know. Like the
+file opening mode argument decoding.
+
+However, we can request field types from auparse, and perhaps those can help
+us know what the interpreted field means. Still, it is a *source* field type,
+not the interpretation.
+
+We can get a type for each field and infer the meaning of the interpreted
+value. However, we cannot do that statically, as some field names are reused
+and so their type can change dynamically, depending on record type or such.
+
+However, we can't infer the meaning of syscall arguments, since they don't
+have type returned properly. We might need to fallback to general
+"interpretation" of those.
+
+So, theoretically we can use the field type to avoid storing interpreted
+value, to save on overhead. That seems about manageable.
+
+Otherwise we won't be able to keep the schema synched with the logic in
+auparse.
+
+So, for each input field we need to:
+    Decide do we have a value or not ("?"/"(none)"/"(null)"/etc.).
+    Decide whether the value is a decimal number, or a string.
+    Escape the value according to output format.
+    Know if we should add a separator or not.
+
+How can we generate schema:
+
+    Get record types from auditd/lib/msg_typetab.h
+        List record elements named after record types,
+        say they contain any of the field elements for the start.
+    Get fields from audit-documentation/specs/fields/field-dictionary.csv
+        List field elements. Specify "i" attribute as mandatory. Specify
+        whether it is a string or a number based on the type from the CSV.
+        Either specify "r" attribute as optional for every field with type
+        according to the CSV, similar to the "i" attribute. Or try to figure
+        out which field doesn't have to have it based on... what?
+
+        Wait, perhaps that's separate. We can still attach type to either "r"
+        or "i" and mark all "i" attributes optional. Can't we?
+
+        We can add another column to the CSV file (aargh!) which specifies if
+        the value is actually interpreted, or if it is simply unescaped or
+        copied as is.
+
+arg_num
+arg_idx
+arg_len_total
+arg_len_read
+
+(partially) formatted arg list gbuf
+
+
+Do we need splitting the stream into documents with n events each?
+If we write to a log, then we'd rather write single event per message
+
+What if we separate the document output and the event output?
+Have the converter just output events, either single-line, or multi-line with
+the initial and successive indent specified.
+
+Have the converter user wrap that into documents as necessary. One of such
+users can be the aushape program. Or perhaps we can have another module which
+does a more complete job, once the approach used in aushape is figured out.
+
+To keep to that idea we need to stop assuming anything about the order of
+events being output and not to attempt to arrange separators and whitespace
+that go before, between, or after them. Have no newlines at the end at all.
+This will be one thing done well.
