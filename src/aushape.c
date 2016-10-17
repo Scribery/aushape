@@ -36,10 +36,22 @@ usage(FILE *stream)
             "\n");
 }
 
-bool conv_output_fn(const char *ptr, size_t len, void *data)
+struct conv_output_data {
+    /** True if output an event already */
+    bool got_event;
+};
+
+bool conv_output_fn(enum aushape_format format, const char *ptr, size_t len,
+                    void *abstract_data)
 {
-    (void)data;
+    struct conv_output_data *data = (struct conv_output_data *)abstract_data;
+
+    if (data->got_event && format == AUSHAPE_FORMAT_JSON) {
+        write(STDOUT_FILENO, ",", 1);
+    }
+    write(STDOUT_FILENO, "\n", 1);
     write(STDOUT_FILENO, ptr, len);
+    data->got_event = true;
     return true;
 }
 
@@ -48,6 +60,7 @@ main(int argc, char **argv)
 {
     int status = 1;
     enum aushape_format format;
+    struct conv_output_data conv_output_data = {.got_event = false};
     struct aushape_conv *conv = NULL;
     enum aushape_conv_rc conv_rc;
     char buf[4096];
@@ -70,7 +83,8 @@ main(int argc, char **argv)
         goto cleanup;
     }
 
-    conv_rc = aushape_conv_create(&conv, format, conv_output_fn, NULL);
+    conv_rc = aushape_conv_create(&conv, format,
+                                  conv_output_fn, &conv_output_data);
     if (conv_rc != AUSHAPE_CONV_RC_OK) {
         fprintf(stderr, "Failed creating converter: %s\n",
                 aushape_conv_rc_to_desc(conv_rc));
@@ -78,9 +92,9 @@ main(int argc, char **argv)
 
     if (format == AUSHAPE_FORMAT_XML) {
         str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-              "<log>\n";
+              "<log>";
     } else {
-        str = "[\n";
+        str = "[";
     }
     write(STDOUT_FILENO, str, strlen(str));
 
@@ -101,7 +115,7 @@ main(int argc, char **argv)
     }
 
     if (format == AUSHAPE_FORMAT_XML) {
-        str = "</log>\n";
+        str = "\n</log>\n";
     } else {
         str = "\n]\n";
     }

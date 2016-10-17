@@ -300,7 +300,6 @@ aushape_conv_buf_empty(struct aushape_conv_buf *buf)
 enum aushape_conv_rc
 aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
                            enum aushape_format format,
-                           bool first,
                            auparse_state_t *au)
 {
     enum aushape_conv_rc rc;
@@ -340,9 +339,6 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         }
         GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, ">\n"));
     } else {
-        if (!first) {
-            GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, ",\n"));
-        }
         GUARD_RC(aushape_gbuf_add_fmt(&buf->gbuf,
                                       "{\n"
                                       "    \"serial\" : %lu,\n"
@@ -392,7 +388,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
 
     /* Terminate event */
     if (format == AUSHAPE_FORMAT_XML) {
-        GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "</event>\n"));
+        GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "</event>"));
     } else {
         if (first_record) {
             GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "}\n"

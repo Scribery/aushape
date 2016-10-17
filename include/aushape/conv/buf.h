@@ -68,8 +68,6 @@ extern void aushape_conv_buf_empty(struct aushape_conv_buf *buf);
  *
  * @param buf       The converter buffer to add the fragment to.
  * @param format    The output format to use.
- * @param first     True if this is the first event being output,
- *                  false otherwise.
  * @param au        The auparse state with the current event as the one to be
  *                  output.
  *
@@ -83,7 +81,6 @@ extern void aushape_conv_buf_empty(struct aushape_conv_buf *buf);
 extern enum aushape_conv_rc aushape_conv_buf_add_event(
                                     struct aushape_conv_buf *buf,
                                     enum aushape_format format,
-                                    bool first,
                                     auparse_state_t *au);
 
 #endif /* _AUSHAPE_CONV_BUF_H */

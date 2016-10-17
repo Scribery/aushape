@@ -28,16 +28,18 @@
 
 /**
  * Output function prototype.
- * Called for each completely formatted event fragment.
+ * Called for each completely formatted event.
  *
- * @param ptr   Pointer to the formatted fragment.
- * @param len   Length of the formatted fragment in bytes.
- * @param data  The opaque data pointer, supplied upon converter creation.
+ * @param format    Event output format.
+ * @param ptr       Pointer to the formatted event.
+ * @param len       Length of the formatted event in bytes.
+ * @param data      The opaque data pointer, supplied upon converter creation.
  *
  * @return True if the function executed succesfully, false if it failed and
  *         conversion should be terminated.
  */
-typedef bool (*aushape_conv_output_fn)(const char *ptr, size_t len,
+typedef bool (*aushape_conv_output_fn)(enum aushape_format format,
+                                       const char *ptr, size_t len,
                                        void *data);
 
 /** Converter state */
@@ -59,7 +61,7 @@ bool aushape_conv_is_valid(const struct aushape_conv *conv);
  *                      Not modified in case of error. Cannot be NULL.
  * @param format        The output format to use.
  * @param output_fn     The function to call for each completely formatted
- *                      event fragment. Cannot be NULL.
+ *                      event. Cannot be NULL.
  * @param output_data   The data to pass to the output function.
  *
  * @return Return code:
