@@ -30,7 +30,7 @@
  * Output function prototype.
  * Called for each completely formatted event.
  *
- * @param format    Event output format.
+ * @param format    Output format.
  * @param ptr       Pointer to the formatted event.
  * @param len       Length of the formatted event in bytes.
  * @param data      The opaque data pointer, supplied upon converter creation.
@@ -38,7 +38,7 @@
  * @return True if the function executed succesfully, false if it failed and
  *         conversion should be terminated.
  */
-typedef bool (*aushape_conv_output_fn)(enum aushape_format format,
+typedef bool (*aushape_conv_output_fn)(const struct aushape_format *format,
                                        const char *ptr, size_t len,
                                        void *data);
 
@@ -70,7 +70,7 @@ bool aushape_conv_is_valid(const struct aushape_conv *conv);
  *          AUSHAPE_CONV_RC_NOMEM           - memory allocation failed.
  */
 enum aushape_conv_rc aushape_conv_create(struct aushape_conv **pconv,
-                                         enum aushape_format format,
+                                         const struct aushape_format *format,
                                          aushape_conv_output_fn output_fn,
                                          void *output_data);
 

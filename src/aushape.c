@@ -41,12 +41,13 @@ struct conv_output_data {
     bool got_event;
 };
 
-bool conv_output_fn(enum aushape_format format, const char *ptr, size_t len,
+bool conv_output_fn(const struct aushape_format *format,
+                    const char *ptr, size_t len,
                     void *abstract_data)
 {
     struct conv_output_data *data = (struct conv_output_data *)abstract_data;
 
-    if (data->got_event && format == AUSHAPE_FORMAT_JSON) {
+    if (data->got_event && format->lang == AUSHAPE_LANG_JSON) {
         write(STDOUT_FILENO, ",", 1);
     }
     write(STDOUT_FILENO, "\n", 1);
@@ -59,7 +60,7 @@ int
 main(int argc, char **argv)
 {
     int status = 1;
-    enum aushape_format format;
+    struct aushape_format format;
     struct conv_output_data conv_output_data = {.got_event = false};
     struct aushape_conv *conv = NULL;
     enum aushape_conv_rc conv_rc;
@@ -68,29 +69,29 @@ main(int argc, char **argv)
     ssize_t rc;
 
     if (argc != 2) {
-        fprintf(stderr, "Output format not specified\n");
+        fprintf(stderr, "Output language not specified\n");
         usage(stderr);
         goto cleanup;
     }
 
     if (strcasecmp(argv[1], "XML") == 0) {
-        format = AUSHAPE_FORMAT_XML;
+        format.lang = AUSHAPE_LANG_XML;
     } else if (strcasecmp(argv[1], "JSON") == 0) {
-        format = AUSHAPE_FORMAT_JSON;
+        format.lang = AUSHAPE_LANG_JSON;
     } else {
-        fprintf(stderr, "Invalid output format: %s\n", argv[1]);
+        fprintf(stderr, "Invalid output language: %s\n", argv[1]);
         usage(stderr);
         goto cleanup;
     }
 
-    conv_rc = aushape_conv_create(&conv, format,
+    conv_rc = aushape_conv_create(&conv, &format,
                                   conv_output_fn, &conv_output_data);
     if (conv_rc != AUSHAPE_CONV_RC_OK) {
         fprintf(stderr, "Failed creating converter: %s\n",
                 aushape_conv_rc_to_desc(conv_rc));
     }
 
-    if (format == AUSHAPE_FORMAT_XML) {
+    if (format.lang == AUSHAPE_LANG_XML) {
         str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
               "<log>";
     } else {
@@ -114,7 +115,7 @@ main(int argc, char **argv)
         goto cleanup;
     }
 
-    if (format == AUSHAPE_FORMAT_XML) {
+    if (format.lang == AUSHAPE_LANG_XML) {
         str = "\n</log>\n";
     } else {
         str = "\n]\n";

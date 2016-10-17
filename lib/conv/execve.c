@@ -114,7 +114,7 @@ aushape_conv_execve_empty(struct aushape_conv_execve *execve)
  */
 static enum aushape_conv_rc
 aushape_conv_execve_add_argc(struct aushape_conv_execve *execve,
-                             enum aushape_format format,
+                             const struct aushape_format *format,
                              auparse_state_t *au)
 {
     enum aushape_conv_rc rc;
@@ -158,7 +158,7 @@ cleanup:
  */
 static enum aushape_conv_rc
 aushape_conv_execve_add_arg(struct aushape_conv_execve *execve,
-                            enum aushape_format format,
+                            const struct aushape_format *format,
                             size_t arg_idx,
                             auparse_state_t *au)
 {
@@ -175,12 +175,12 @@ aushape_conv_execve_add_arg(struct aushape_conv_execve *execve,
 
     str = auparse_interpret_field(au);
     GUARD_BOOL(AUPARSE_FAILED, str != NULL);
-    if (format == AUSHAPE_FORMAT_XML) {
+    if (format->lang == AUSHAPE_LANG_XML) {
         GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args,
                                                "        <a i=\""));
         GUARD_BOOL(NOMEM, aushape_gbuf_add_str_xml(&execve->args, str));
         GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args, "\"/>\n"));
-    } else if (format == AUSHAPE_FORMAT_JSON) {
+    } else if (format->lang == AUSHAPE_LANG_JSON) {
         /* If it's the first argument in the record */
         if (execve->arg_idx == 0) {
             GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args,
@@ -218,7 +218,7 @@ cleanup:
  */
 static enum aushape_conv_rc
 aushape_conv_execve_add_arg_len(struct aushape_conv_execve *execve,
-                                enum aushape_format format,
+                                const struct aushape_format *format,
                                 size_t arg_idx,
                                 auparse_state_t *au)
 {
@@ -271,7 +271,7 @@ cleanup:
  */
 static enum aushape_conv_rc
 aushape_conv_execve_add_arg_slice(struct aushape_conv_execve *execve,
-                                  enum aushape_format format,
+                                  const struct aushape_format *format,
                                   size_t arg_idx, size_t slice_idx,
                                   auparse_state_t *au)
 {
@@ -297,10 +297,10 @@ aushape_conv_execve_add_arg_slice(struct aushape_conv_execve *execve,
     /* If we are starting a new argument */
     if (slice_idx == 0) {
         /* Begin argument markup */
-        if (format == AUSHAPE_FORMAT_XML) {
+        if (format->lang == AUSHAPE_LANG_XML) {
             GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args,
                                                    "        <a i=\""));
-        } else if (format == AUSHAPE_FORMAT_JSON) {
+        } else if (format->lang == AUSHAPE_LANG_JSON) {
             /* If it's the first argument in the record */
             if (execve->arg_idx == 0) {
                 GUARD_BOOL(NOMEM, aushape_gbuf_add_str(
@@ -314,18 +314,18 @@ aushape_conv_execve_add_arg_slice(struct aushape_conv_execve *execve,
     /* Add the slice */
     str = auparse_interpret_field(au);
     GUARD_BOOL(AUPARSE_FAILED, str != NULL);
-    if (format == AUSHAPE_FORMAT_XML) {
+    if (format->lang == AUSHAPE_LANG_XML) {
         GUARD_BOOL(NOMEM, aushape_gbuf_add_str_xml(&execve->args, str));
-    } else if (format == AUSHAPE_FORMAT_JSON) {
+    } else if (format->lang == AUSHAPE_LANG_JSON) {
         GUARD_BOOL(NOMEM, aushape_gbuf_add_str_json(&execve->args, str));
     }
     execve->len_read += len;
     /* If we have finished the argument */
     if (execve->len_read == execve->len_total) {
         /* End argument markup */
-        if (format == AUSHAPE_FORMAT_XML) {
+        if (format->lang == AUSHAPE_LANG_XML) {
             GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args, "\"/>\n"));
-        } else if (format == AUSHAPE_FORMAT_JSON) {
+        } else if (format->lang == AUSHAPE_LANG_JSON) {
             GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->args, '"'));
         }
         execve->got_len = 0;
@@ -345,7 +345,7 @@ cleanup:
 
 enum aushape_conv_rc
 aushape_conv_execve_add(struct aushape_conv_execve *execve,
-                        enum aushape_format format,
+                        const struct aushape_format *format,
                         auparse_state_t *au)
 {
     enum aushape_conv_rc rc;

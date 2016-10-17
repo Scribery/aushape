@@ -27,7 +27,7 @@ struct aushape_conv {
     /** Auparse state */
     auparse_state_t            *au;
     /** Output format */
-    enum aushape_format         format;
+    struct aushape_format       format;
     /** Output function pointer */
     aushape_conv_output_fn      output_fn;
     /** Output function data */
@@ -70,9 +70,9 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
     }
 
     aushape_conv_buf_empty(&conv->buf);
-    rc = aushape_conv_buf_add_event(&conv->buf, conv->format, au);
+    rc = aushape_conv_buf_add_event(&conv->buf, &conv->format, au);
     if (rc == AUSHAPE_CONV_RC_OK) {
-        if (!conv->output_fn(conv->format,
+        if (!conv->output_fn(&conv->format,
                              conv->buf.gbuf.ptr, conv->buf.gbuf.len,
                              conv->output_data)) {
             conv->rc = AUSHAPE_CONV_RC_OUTPUT_FAILED;
@@ -84,7 +84,7 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
 
 enum aushape_conv_rc
 aushape_conv_create(struct aushape_conv **pconv,
-                    enum aushape_format format,
+                    const struct aushape_format *format,
                     aushape_conv_output_fn output_fn,
                     void *output_data)
 {
@@ -113,7 +113,7 @@ aushape_conv_create(struct aushape_conv **pconv,
     auparse_add_callback(conv->au, aushape_conv_cb, conv, NULL);
 
     aushape_conv_buf_init(&conv->buf);
-    conv->format = format;
+    conv->format = *format;
     conv->output_fn = output_fn;
     conv->output_data = output_data;
 

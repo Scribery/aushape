@@ -61,7 +61,7 @@
  */
 static bool
 aushape_conv_buf_add_field(struct aushape_gbuf *gbuf,
-                           enum aushape_format format,
+                           const struct aushape_format *format,
                            bool first,
                            const char *name,
                            auparse_state_t *au)
@@ -88,8 +88,8 @@ aushape_conv_buf_add_field(struct aushape_gbuf *gbuf,
         break;
     }
 
-    switch (format) {
-    case AUSHAPE_FORMAT_XML:
+    switch (format->lang) {
+    case AUSHAPE_LANG_XML:
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "        <"));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, name));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, " i=\""));
@@ -100,7 +100,7 @@ aushape_conv_buf_add_field(struct aushape_gbuf *gbuf,
         }
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"/>\n"));
         break;
-    case AUSHAPE_FORMAT_JSON:
+    case AUSHAPE_LANG_JSON:
         if (first) {
             GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\n                \""));
         } else {
@@ -138,7 +138,7 @@ aushape_conv_buf_add_field(struct aushape_gbuf *gbuf,
  */
 static bool
 aushape_conv_buf_add_record(struct aushape_gbuf *gbuf,
-                            enum aushape_format format,
+                            const struct aushape_format *format,
                             bool first,
                             const char *name,
                             auparse_state_t *au)
@@ -150,7 +150,7 @@ aushape_conv_buf_add_record(struct aushape_gbuf *gbuf,
     assert(aushape_format_is_valid(format));
     assert(au != NULL);
 
-    if (format == AUSHAPE_FORMAT_XML) {
+    if (format->lang == AUSHAPE_LANG_XML) {
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "    <"));
         GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, name));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, " raw=\""));
@@ -185,7 +185,7 @@ aushape_conv_buf_add_record(struct aushape_gbuf *gbuf,
         }
     } while (auparse_next_field(au) > 0);
 
-    if (format == AUSHAPE_FORMAT_XML) {
+    if (format->lang == AUSHAPE_LANG_XML) {
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "    </"));
         GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, name));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, ">\n"));
@@ -213,7 +213,7 @@ aushape_conv_buf_add_record(struct aushape_gbuf *gbuf,
  */
 static bool
 aushape_conv_buf_add_execve(struct aushape_gbuf *gbuf,
-                            enum aushape_format format,
+                            const struct aushape_format *format,
                             bool first,
                             const struct aushape_conv_execve *execve)
 {
@@ -222,13 +222,13 @@ aushape_conv_buf_add_execve(struct aushape_gbuf *gbuf,
     assert(aushape_conv_execve_is_valid(execve));
     assert(aushape_conv_execve_is_complete(execve));
 
-    if (format == AUSHAPE_FORMAT_XML) {
+    if (format->lang == AUSHAPE_LANG_XML) {
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "    <execve raw=\""));
         GUARD_BOOL(aushape_gbuf_add_buf_xml(gbuf,
                                             execve->raw.ptr,
                                             execve->raw.len));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\">\n"));
-    } else if (format == AUSHAPE_FORMAT_JSON) {
+    } else if (format->lang == AUSHAPE_LANG_JSON) {
         if (first) {
             GUARD_BOOL(aushape_gbuf_add_str(gbuf,
                                             "\n        \"execve\": {\n"
@@ -248,9 +248,9 @@ aushape_conv_buf_add_execve(struct aushape_gbuf *gbuf,
     GUARD_BOOL(aushape_gbuf_add_buf(gbuf,
                                     execve->args.ptr, execve->args.len));
 
-    if (format == AUSHAPE_FORMAT_XML) {
+    if (format->lang == AUSHAPE_LANG_XML) {
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "    </execve>\n"));
-    } else if (format == AUSHAPE_FORMAT_JSON) {
+    } else if (format->lang == AUSHAPE_LANG_JSON) {
         if (execve->args.len > 0) {
             GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\n            "));
         }
@@ -299,7 +299,7 @@ aushape_conv_buf_empty(struct aushape_conv_buf *buf)
 
 enum aushape_conv_rc
 aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
-                           enum aushape_format format,
+                           const struct aushape_format *format,
                            auparse_state_t *au)
 {
     enum aushape_conv_rc rc;
@@ -328,7 +328,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
              time_buf, e->milli, zone_buf, zone_buf + 3);
 
     /* Output event header */
-    if (format == AUSHAPE_FORMAT_XML) {
+    if (format->lang == AUSHAPE_LANG_XML) {
         GUARD_RC(aushape_gbuf_add_fmt(
                             &buf->gbuf, "<event serial=\"%lu\" time=\"%s\"",
                             e->serial, timestamp_buf));
@@ -387,7 +387,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     } while(auparse_next_record(au) > 0);
 
     /* Terminate event */
-    if (format == AUSHAPE_FORMAT_XML) {
+    if (format->lang == AUSHAPE_LANG_XML) {
         GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "</event>"));
     } else {
         if (first_record) {

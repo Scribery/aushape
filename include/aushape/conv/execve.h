@@ -95,7 +95,7 @@ extern void aushape_conv_execve_empty(struct aushape_conv_execve *execve);
  */
 extern enum aushape_conv_rc aushape_conv_execve_add(
                                     struct aushape_conv_execve *execve,
-                                    enum aushape_format format,
+                                    const struct aushape_format *format,
                                     auparse_state_t *au);
 
 /**

@@ -1,5 +1,5 @@
 /**
- * @brief Aushape output format.
+ * @brief Aushape output language
  */
 /*
  * Copyright (C) 2016 Red Hat
@@ -19,31 +19,32 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _AUSHAPE_FORMAT_H
-#define _AUSHAPE_FORMAT_H
+#ifndef _AUSHAPE_LANG_H
+#define _AUSHAPE_LANG_H
 
-#include <aushape/lang.h>
 #include <stdbool.h>
-#include <stddef.h>
+#include <assert.h>
 
-/** Output format */
-struct aushape_format {
-    /** Output language */
-    enum aushape_lang   lang;
+/** Output language */
+enum aushape_lang {
+    AUSHAPE_LANG_INVALID, /** Invalid, uninitialized language */
+    AUSHAPE_LANG_XML,     /** XML */
+    AUSHAPE_LANG_JSON,    /** JSON */
+    AUSHAPE_LANG_NUM      /** Number of languages (not a valid language) */
 };
 
 /**
- * Check if an output format is valid.
+ * Check if a language is valid.
  *
- * @param format    The format to check.
+ * @param lang      The language to check.
  *
- * @return True if the format is valid, false otherwise.
+ * @return True if the language is valid, false otherwise.
  */
 static inline bool
-aushape_format_is_valid(const struct aushape_format *format)
+aushape_lang_is_valid(enum aushape_lang lang)
 {
-    return format != NULL &&
-           aushape_lang_is_valid(format->lang);
+    return lang > AUSHAPE_LANG_INVALID &&
+           lang < AUSHAPE_LANG_NUM;
 }
 
-#endif /* _AUSHAPE_FORMAT_H */
+#endif /* _AUSHAPE_LANG_H */

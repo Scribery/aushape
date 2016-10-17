@@ -80,7 +80,7 @@ extern void aushape_conv_buf_empty(struct aushape_conv_buf *buf);
  */
 extern enum aushape_conv_rc aushape_conv_buf_add_event(
                                     struct aushape_conv_buf *buf,
-                                    enum aushape_format format,
+                                    const struct aushape_format *format,
                                     auparse_state_t *au);
 
 #endif /* _AUSHAPE_CONV_BUF_H */
