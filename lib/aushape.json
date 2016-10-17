@@ -296,6 +296,10 @@
                     "type":         "string",
                     "format":       "date-time"
             },
+            "host": {
+                    "description":  "Event hostname",
+                    "type":         "string"
+            },
             "records": {
                 "type":     "object",
                 "properties": {
