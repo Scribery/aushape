@@ -23,16 +23,17 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdint.h>
 
 void
 usage(FILE *stream)
 {
     fprintf(stream,
-            "Usage: aushape FORMAT\n"
+            "Usage: aushape LANG\n"
             "Convert raw audit log to XML or JSON\n"
             "\n"
             "Arguments:\n"
-            "    FORMAT   Output format (\"XML\" or \"JSON\")\n"
+            "    LANG   Output language (\"XML\" or \"JSON\")\n"
             "\n");
 }
 
@@ -60,7 +61,9 @@ int
 main(int argc, char **argv)
 {
     int status = 1;
-    struct aushape_format format;
+    struct aushape_format format = {.fold_level = 4,
+                                    .init_indent = 4,
+                                    .nest_indent = 4};
     struct conv_output_data conv_output_data = {.got_event = false};
     struct aushape_conv *conv = NULL;
     enum aushape_conv_rc conv_rc;

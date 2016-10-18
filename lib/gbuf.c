@@ -99,6 +99,18 @@ aushape_gbuf_add_char(struct aushape_gbuf *gbuf, char c)
 }
 
 bool
+aushape_gbuf_add_span(struct aushape_gbuf *gbuf, int c, size_t l)
+{
+    size_t new_len;
+    assert(aushape_gbuf_is_valid(gbuf));
+    new_len = gbuf->len + l;
+    GUARD(aushape_gbuf_accomodate(gbuf, new_len));
+    memset(gbuf->ptr + gbuf->len, c, l);
+    gbuf->len = new_len;
+    return true;
+}
+
+bool
 aushape_gbuf_add_buf(struct aushape_gbuf *gbuf, const void *ptr, size_t len)
 {
     size_t new_len;
@@ -205,6 +217,40 @@ aushape_gbuf_add_fmt(struct aushape_gbuf *gbuf, const char *fmt, ...)
     va_end(ap);
 
     return result;
+}
+
+bool
+aushape_gbuf_space_opening(struct aushape_gbuf *gbuf,
+                           const struct aushape_format *format,
+                           size_t level)
+{
+    assert(aushape_gbuf_is_valid(gbuf));
+    assert(aushape_format_is_valid(format));
+    if (level > format->fold_level) {
+        return true;
+    } else {
+        return (level == 0 || aushape_gbuf_add_char(gbuf, '\n')) &&
+               aushape_gbuf_add_span(gbuf, ' ',
+                                     format->init_indent +
+                                     format->nest_indent * level);
+    }
+}
+
+bool
+aushape_gbuf_space_closing(struct aushape_gbuf *gbuf,
+                           const struct aushape_format *format,
+                           size_t level)
+{
+    assert(aushape_gbuf_is_valid(gbuf));
+    assert(aushape_format_is_valid(format));
+    if ((level + 1) > format->fold_level) {
+        return true;
+    } else {
+        return aushape_gbuf_add_char(gbuf, '\n') &&
+               aushape_gbuf_add_span(gbuf, ' ',
+                                     format->init_indent +
+                                     format->nest_indent * level);
+    }
 }
 
 bool

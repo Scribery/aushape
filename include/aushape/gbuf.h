@@ -19,6 +19,7 @@
 #ifndef _AUSHAPE_GBUF_H
 #define _AUSHAPE_GBUF_H
 
+#include <aushape/format.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -84,6 +85,18 @@ extern bool aushape_gbuf_accomodate(struct aushape_gbuf *gbuf, size_t len);
  * @return True if added successfully, false if memory allocation failed.
  */
 extern bool aushape_gbuf_add_char(struct aushape_gbuf *gbuf, char c);
+
+/**
+ * Add a span filled with a character to a growing buffer.
+ *
+ * @param gbuf  The growing buffer to add the span to.
+ * @param c     The character to fill the span with.
+ * @param l     The length of the span to fill.
+ *
+ * @return True if added successfully, false if memory allocation failed.
+ */
+extern bool aushape_gbuf_add_span(struct aushape_gbuf *gbuf,
+                                  int c, size_t l);
 
 /**
  * Add the contents of an abstract buffer to a growing buffer.
@@ -155,6 +168,42 @@ extern bool aushape_gbuf_add_vfmt(struct aushape_gbuf *gbuf,
  */
 extern bool aushape_gbuf_add_fmt(struct aushape_gbuf *gbuf,
                                  const char *fmt, ...);
+
+/**
+ * Add leading whitespace for an opening of a nested block to a growing
+ * buffer, according to an output format. If the specified nesting level is
+ * not zero and is not folded, then adds a newline, if it's just not folded,
+ * then adds indenting space, otherwise adds nothing.
+ *
+ * @param gbuf      The growing buffer to add the whitespace to.
+ * @param format    The format according to which the whitespace should be
+ *                  added.
+ * @param level     The block's nesting level.
+ *
+ * @return True if the whitespace was added succesfully, false if memory
+ *         allocation failed.
+ */
+extern bool aushape_gbuf_space_opening(struct aushape_gbuf *gbuf,
+                                       const struct aushape_format *format,
+                                       size_t level);
+
+/**
+ * Add leading whitespace for a closing of a nested block to a growing
+ * buffer, according to an output format. If the nesting level above the
+ * specified one is not folded, then adds a newline and indenting space,
+ * otherwise adds nothing.
+ *
+ * @param gbuf      The growing buffer to add the whitespace to.
+ * @param format    The format according to which the whitespace should be
+ *                  added.
+ * @param level     The block's nesting level.
+ *
+ * @return True if the whitespace was added succesfully, false if memory
+ *         allocation failed.
+ */
+extern bool aushape_gbuf_space_closing(struct aushape_gbuf *gbuf,
+                                       const struct aushape_format *format,
+                                       size_t level);
 
 /**
  * Add the contents of an abstract buffer to a growing buffer, escaped as a

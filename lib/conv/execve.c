@@ -178,19 +178,17 @@ aushape_conv_execve_add_arg(struct aushape_conv_execve *execve,
     str = auparse_interpret_field(au);
     GUARD_BOOL(AUPARSE_FAILED, str != NULL);
     if (format->lang == AUSHAPE_LANG_XML) {
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args,
-                                               "        <a i=\""));
+        GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(&execve->args, format, 2));
+        GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args, "<a i=\""));
         GUARD_BOOL(NOMEM, aushape_gbuf_add_str_xml(&execve->args, str));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args, "\"/>\n"));
+        GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args, "\"/>"));
     } else if (format->lang == AUSHAPE_LANG_JSON) {
-        /* If it's the first argument in the record */
-        if (execve->arg_idx == 0) {
-            GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args,
-                                                   "\n                \""));
-        } else {
-            GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args,
-                                                   ",\n                \""));
+        /* If it's not the first argument in the record */
+        if (execve->arg_idx > 0) {
+            GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->args, ','));
         }
+        GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(&execve->args, format, 4));
+        GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->args, '"'));
         GUARD_BOOL(NOMEM, aushape_gbuf_add_str_json(&execve->args, str));
         GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->args, '"'));
     }
@@ -302,17 +300,17 @@ aushape_conv_execve_add_arg_slice(struct aushape_conv_execve *execve,
     if (slice_idx == 0) {
         /* Begin argument markup */
         if (format->lang == AUSHAPE_LANG_XML) {
-            GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args,
-                                                   "        <a i=\""));
+            GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(&execve->args,
+                                                         format, 2));
+            GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args, "<a i=\""));
         } else if (format->lang == AUSHAPE_LANG_JSON) {
-            /* If it's the first argument in the record */
-            if (execve->arg_idx == 0) {
-                GUARD_BOOL(NOMEM, aushape_gbuf_add_str(
-                                    &execve->args, "\n                \""));
-            } else {
-                GUARD_BOOL(NOMEM, aushape_gbuf_add_str(
-                                    &execve->args, ",\n                \""));
+            /* If it's not the first argument in the record */
+            if (execve->arg_idx > 0) {
+                GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->args, ','));
             }
+            GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(&execve->args,
+                                                         format, 4));
+            GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->args, '"'));
         }
     }
     /* Add the slice */
@@ -328,7 +326,7 @@ aushape_conv_execve_add_arg_slice(struct aushape_conv_execve *execve,
     if (execve->len_read == execve->len_total) {
         /* End argument markup */
         if (format->lang == AUSHAPE_LANG_XML) {
-            GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args, "\"/>\n"));
+            GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args, "\"/>"));
         } else if (format->lang == AUSHAPE_LANG_JSON) {
             GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->args, '"'));
         }
