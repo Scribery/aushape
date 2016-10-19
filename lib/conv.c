@@ -70,7 +70,7 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
     }
 
     aushape_conv_buf_empty(&conv->buf);
-    rc = aushape_conv_buf_add_event(&conv->buf, &conv->format, au);
+    rc = aushape_conv_buf_add_event(&conv->buf, &conv->format, 0, au);
     if (rc == AUSHAPE_CONV_RC_OK) {
         if (!conv->output_fn(&conv->format,
                              conv->buf.gbuf.ptr, conv->buf.gbuf.len,

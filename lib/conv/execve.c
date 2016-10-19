@@ -142,6 +142,7 @@ cleanup:
  *
  * @param execve    The aggregation buffer to process the field for.
  * @param format    The output format to use.
+ * @param level     Syntactic nesting level the argument is output at.
  * @param arg_idx   The argument index from the field name.
  * @param au        The auparse context with the field to be processed as the
  *                  current field.
@@ -156,6 +157,7 @@ cleanup:
 static enum aushape_conv_rc
 aushape_conv_execve_add_arg(struct aushape_conv_execve *execve,
                             const struct aushape_format *format,
+                            size_t level,
                             size_t arg_idx,
                             auparse_state_t *au)
 {
@@ -173,7 +175,8 @@ aushape_conv_execve_add_arg(struct aushape_conv_execve *execve,
     str = auparse_interpret_field(au);
     GUARD_BOOL(AUPARSE_FAILED, str != NULL);
     if (format->lang == AUSHAPE_LANG_XML) {
-        GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(&execve->args, format, 2));
+        GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(&execve->args,
+                                                     format, level));
         GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args, "<a i=\""));
         GUARD_BOOL(NOMEM, aushape_gbuf_add_str_xml(&execve->args, str));
         GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args, "\"/>"));
@@ -182,7 +185,8 @@ aushape_conv_execve_add_arg(struct aushape_conv_execve *execve,
         if (execve->arg_idx > 0) {
             GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->args, ','));
         }
-        GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(&execve->args, format, 4));
+        GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(&execve->args,
+                                                     format, level));
         GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->args, '"'));
         GUARD_BOOL(NOMEM, aushape_gbuf_add_str_json(&execve->args, str));
         GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->args, '"'));
@@ -249,6 +253,7 @@ cleanup:
  *
  * @param execve    The aggregation buffer to process the field for.
  * @param format    The output format to use.
+ * @param level     Syntactic nesting level the argument is output at.
  * @param arg_idx   The argument index from the field name.
  * @param slice_idx The slice index from the field name.
  * @param au        The auparse context with the field to be processed as the
@@ -264,6 +269,7 @@ cleanup:
 static enum aushape_conv_rc
 aushape_conv_execve_add_arg_slice(struct aushape_conv_execve *execve,
                                   const struct aushape_format *format,
+                                  size_t level,
                                   size_t arg_idx, size_t slice_idx,
                                   auparse_state_t *au)
 {
@@ -291,7 +297,7 @@ aushape_conv_execve_add_arg_slice(struct aushape_conv_execve *execve,
         /* Begin argument markup */
         if (format->lang == AUSHAPE_LANG_XML) {
             GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(&execve->args,
-                                                         format, 2));
+                                                         format, level));
             GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args, "<a i=\""));
         } else if (format->lang == AUSHAPE_LANG_JSON) {
             /* If it's not the first argument in the record */
@@ -299,7 +305,7 @@ aushape_conv_execve_add_arg_slice(struct aushape_conv_execve *execve,
                 GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->args, ','));
             }
             GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(&execve->args,
-                                                         format, 4));
+                                                         format, level));
             GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->args, '"'));
         }
     }
@@ -338,6 +344,7 @@ cleanup:
 enum aushape_conv_rc
 aushape_conv_execve_add(struct aushape_conv_execve *execve,
                         const struct aushape_format *format,
+                        size_t level,
                         auparse_state_t *au)
 {
     enum aushape_conv_rc rc;
@@ -379,7 +386,8 @@ aushape_conv_execve_add(struct aushape_conv_execve *execve,
         } else if (end = 0,
                    sscanf(field_name, "a%zu%n", &arg_idx, &end) >= 1 &&
                    (size_t)end == strlen(field_name)) {
-            GUARD(aushape_conv_execve_add_arg(execve, format, arg_idx, au));
+            GUARD(aushape_conv_execve_add_arg(execve, format, level,
+                                              arg_idx, au));
         /* If it's the length of an argument */
         } else if (end = 0,
                    sscanf(field_name, "a%zu_len%n", &arg_idx, &end) >= 1 &&
@@ -390,7 +398,7 @@ aushape_conv_execve_add(struct aushape_conv_execve *execve,
                    sscanf(field_name, "a%zu[%zu]%n",
                           &arg_idx, &slice_idx, &end) >= 2 &&
                    (size_t)end == strlen(field_name)) {
-            GUARD(aushape_conv_execve_add_arg_slice(execve, format,
+            GUARD(aushape_conv_execve_add_arg_slice(execve, format, level,
                                                     arg_idx, slice_idx, au));
         /* If it's something else */
         } else {

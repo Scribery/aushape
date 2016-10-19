@@ -83,6 +83,7 @@ extern void aushape_conv_execve_empty(struct aushape_conv_execve *execve);
  *
  * @param execve    The buffer to aggregate the record into.
  * @param format    The output format to use.
+ * @param level     Syntactic nesting level the record is output at.
  * @param au        The auparse state with the current record as the execve
  *                  record to be aggregated.
  *
@@ -96,6 +97,7 @@ extern void aushape_conv_execve_empty(struct aushape_conv_execve *execve);
 extern enum aushape_conv_rc aushape_conv_execve_add(
                                     struct aushape_conv_execve *execve,
                                     const struct aushape_format *format,
+                                    size_t level,
                                     auparse_state_t *au);
 
 /**

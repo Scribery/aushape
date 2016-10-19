@@ -51,6 +51,7 @@
  *
  * @param gbuf      The growing buffer to add the fragment to.
  * @param format    The output format to use.
+ * @param level     Syntactic nesting level the field is output at.
  * @param first     True if this is the first field being output for a record,
  *                  false otherwise.
  * @param name      The field name.
@@ -62,10 +63,12 @@
 static bool
 aushape_conv_buf_add_field(struct aushape_gbuf *gbuf,
                            const struct aushape_format *format,
+                           size_t level,
                            bool first,
                            const char *name,
                            auparse_state_t *au)
 {
+    size_t l = level;
     const char *value_r;
     const char *value_i = auparse_interpret_field(au);
     int type = auparse_get_field_type(au);
@@ -90,7 +93,7 @@ aushape_conv_buf_add_field(struct aushape_gbuf *gbuf,
 
     switch (format->lang) {
     case AUSHAPE_LANG_XML:
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, 2));
+        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_char(gbuf, '<'));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, name));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, " i=\""));
@@ -105,22 +108,24 @@ aushape_conv_buf_add_field(struct aushape_gbuf *gbuf,
         if (!first) {
             GUARD_BOOL(aushape_gbuf_add_char(gbuf, ','));
         }
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, 4));
+        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, name));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\": ["));
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, 5));
+        l++;
+        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
         GUARD_BOOL(aushape_gbuf_add_str_json(gbuf, value_i));
         GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
         if (value_r != NULL) {
             GUARD_BOOL(aushape_gbuf_add_char(gbuf, ','));
-            GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, 5));
+            GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
             GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
             GUARD_BOOL(aushape_gbuf_add_str_json(gbuf, value_r));
             GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
         }
-        GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, 4));
+        l--;
+        GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_char(gbuf, ']'));
         break;
     default:
@@ -128,6 +133,7 @@ aushape_conv_buf_add_field(struct aushape_gbuf *gbuf,
         return false;
     }
 
+    assert(l == level);
     return true;
 }
 
@@ -136,6 +142,7 @@ aushape_conv_buf_add_field(struct aushape_gbuf *gbuf,
  *
  * @param gbuf      The growing buffer to add the fragment to.
  * @param format    The output format to use.
+ * @param level     Syntactic nesting level the record is output at.
  * @param first     True if this is the first record being output,
  *                  false otherwise.
  * @param name      The record (type) name.
@@ -147,10 +154,12 @@ aushape_conv_buf_add_field(struct aushape_gbuf *gbuf,
 static bool
 aushape_conv_buf_add_record(struct aushape_gbuf *gbuf,
                             const struct aushape_format *format,
+                            size_t level,
                             bool first,
                             const char *name,
                             auparse_state_t *au)
 {
+    size_t l = level;
     bool first_field;
     const char *field_name;
 
@@ -159,7 +168,7 @@ aushape_conv_buf_add_record(struct aushape_gbuf *gbuf,
     assert(au != NULL);
 
     if (format->lang == AUSHAPE_LANG_XML) {
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, 1));
+        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_char(gbuf, '<'));
         GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, name));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, " raw=\""));
@@ -171,46 +180,71 @@ aushape_conv_buf_add_record(struct aushape_gbuf *gbuf,
         if (!first) {
             GUARD_BOOL(aushape_gbuf_add_char(gbuf, ','));
         }
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, 2));
+        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
         GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, name));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\": {"));
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, 3));
+        l++;
+        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"raw\": \""));
         /* TODO: Return AUSHAPE_CONV_RC_AUPARSE_FAILED on failure */
         GUARD_BOOL(aushape_gbuf_add_str_json(
                                         gbuf, auparse_get_record_text(au)));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\","));
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, 3));
+        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"fields\": {"));
     }
 
+    l++;
     auparse_first_field(au);
     first_field = true;
     do {
         field_name = auparse_get_field_name(au);
         if (strcmp(field_name, "type") != 0) {
-            GUARD_BOOL(aushape_conv_buf_add_field(gbuf, format,
+            GUARD_BOOL(aushape_conv_buf_add_field(gbuf, format, l,
                                       first_field, field_name, au));
             first_field = false;
         }
     } while (auparse_next_field(au) > 0);
 
+    l--;
     if (format->lang == AUSHAPE_LANG_XML) {
-        GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, 1));
+        GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "</"));
         GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, name));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, ">"));
     } else {
         if (!first_field) {
-            GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, 3));
+            GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, l));
         }
         GUARD_BOOL(aushape_gbuf_add_char(gbuf, '}'));
-        GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, 2));
+        l--;
+        GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_char(gbuf, '}'));
     }
 
+    assert(l == level);
     return true;
+}
+
+/**
+ * Get the relative syntactic nesting level depth of the execve record
+ * arguments according to the format. See aushape_conv_buf_add_execve.
+ *
+ * @param format    The format the record is formatted with.
+ *
+ * @return The relative syntactic nesting level depth.
+ */
+static size_t
+aushape_conv_buf_get_execve_depth(const struct aushape_format *format)
+{
+    if (format->lang == AUSHAPE_LANG_XML) {
+        return 1;
+    } else if (format->lang == AUSHAPE_LANG_JSON) {
+        return 2;
+    } else {
+        return 0;
+    }
 }
 
 /**
@@ -218,6 +252,7 @@ aushape_conv_buf_add_record(struct aushape_gbuf *gbuf,
  *
  * @param gbuf      The growing buffer to add the fragment to.
  * @param format    The output format to use.
+ * @param level     Syntactic nesting level the record is output at.
  * @param first     True if this is the first record being output,
  *                  false otherwise.
  * @param execve    The aggregated execve record to add.
@@ -227,16 +262,18 @@ aushape_conv_buf_add_record(struct aushape_gbuf *gbuf,
 static bool
 aushape_conv_buf_add_execve(struct aushape_gbuf *gbuf,
                             const struct aushape_format *format,
+                            size_t level,
                             bool first,
                             const struct aushape_conv_execve *execve)
 {
+    size_t l = level;
     assert(aushape_gbuf_is_valid(gbuf));
     assert(aushape_format_is_valid(format));
     assert(aushape_conv_execve_is_valid(execve));
     assert(aushape_conv_execve_is_complete(execve));
 
     if (format->lang == AUSHAPE_LANG_XML) {
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, 1));
+        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "<execve raw=\""));
         GUARD_BOOL(aushape_gbuf_add_buf_xml(gbuf,
                                             execve->raw.ptr,
@@ -246,33 +283,38 @@ aushape_conv_buf_add_execve(struct aushape_gbuf *gbuf,
         if (!first) {
             GUARD_BOOL(aushape_gbuf_add_char(gbuf, ','));
         }
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, 2));
+        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"execve\": {"));
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, 3));
+        l++;
+        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"raw\": \""));
         GUARD_BOOL(aushape_gbuf_add_buf_json(gbuf,
                                              execve->raw.ptr,
                                              execve->raw.len));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\","));
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, 3));
+        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"args\": ["));
     }
+    l++;
 
     GUARD_BOOL(aushape_gbuf_add_buf(gbuf,
                                     execve->args.ptr, execve->args.len));
 
+    l--;
     if (format->lang == AUSHAPE_LANG_XML) {
-        GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, 1));
+        GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "</execve>"));
     } else if (format->lang == AUSHAPE_LANG_JSON) {
         if (execve->args.len > 0) {
-            GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, 3));
+            GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, l));
         }
         GUARD_BOOL(aushape_gbuf_add_char(gbuf, ']'));
-        GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, 2));
+        l--;
+        GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_char(gbuf, '}'));
     }
 
+    assert(l == level);
     return true;
 }
 
@@ -315,9 +357,11 @@ aushape_conv_buf_empty(struct aushape_conv_buf *buf)
 enum aushape_conv_rc
 aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
                            const struct aushape_format *format,
+                           size_t level,
                            auparse_state_t *au)
 {
     enum aushape_conv_rc rc;
+    size_t l = level;
     const au_event_t *e;
     struct tm *tm;
     char time_buf[32];
@@ -344,7 +388,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
 
     /* Output event header */
     if (format->lang == AUSHAPE_LANG_XML) {
-        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, 0));
+        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, l));
         GUARD_RC(aushape_gbuf_add_fmt(
                             &buf->gbuf, "<event serial=\"%lu\" time=\"%s\"",
                             e->serial, timestamp_buf));
@@ -355,25 +399,27 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         }
         GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, ">"));
     } else {
-        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, 0));
+        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, l));
         GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, '{'));
-        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, 1));
+        l++;
+        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, l));
         GUARD_RC(aushape_gbuf_add_fmt(&buf->gbuf,
                                       "\"serial\": %lu,", e->serial));
-        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, 1));
+        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, l));
         GUARD_RC(aushape_gbuf_add_fmt(&buf->gbuf,
                                       "\"time\": \"%s\",", timestamp_buf));
         if (e->host != NULL) {
-            GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, 1));
+            GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, l));
             GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "\"host\": \""));
             GUARD_RC(aushape_gbuf_add_str_json(&buf->gbuf, e->host));
             GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "\","));
         }
-        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, 1));
+        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, l));
         GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "\"records\": {"));
     }
 
     /* Output records */
+    l++;
     if (auparse_first_record(au) <= 0) {
         return AUSHAPE_CONV_RC_AUPARSE_FAILED;
     }
@@ -382,7 +428,10 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         record_name = auparse_get_type_name(au);
         /* If this is an "execve" record */
         if (strcmp(record_name, "EXECVE") == 0) {
-            rc = aushape_conv_execve_add(&buf->execve, format, au);
+            rc = aushape_conv_execve_add(
+                            &buf->execve, format,
+                            l + aushape_conv_buf_get_execve_depth(format),
+                            au);
             if (rc != AUSHAPE_CONV_RC_OK) {
                 assert(aushape_conv_buf_is_valid(buf));
                 return rc;
@@ -390,7 +439,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
             /* If the execve series was finished */
             if (aushape_conv_execve_is_complete(&buf->execve)) {
                 GUARD_RC(aushape_conv_buf_add_execve(&buf->gbuf, format,
-                                                     first_record,
+                                                     l, first_record,
                                                      &buf->execve));
                 first_record = false;
                 aushape_conv_execve_empty(&buf->execve);
@@ -400,7 +449,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
             if (!aushape_conv_execve_is_complete(&buf->execve)) {
                 return AUSHAPE_CONV_RC_INVALID_EXECVE;
             }
-            GUARD_RC(aushape_conv_buf_add_record(&buf->gbuf, format,
+            GUARD_RC(aushape_conv_buf_add_record(&buf->gbuf, format, l,
                                                  first_record, record_name,
                                                  au));
             first_record = false;
@@ -408,18 +457,21 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     } while(auparse_next_record(au) > 0);
 
     /* Terminate event */
+    l--;
     if (format->lang == AUSHAPE_LANG_XML) {
-        GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, format, 0));
+        GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, format, l));
         GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "</event>"));
     } else {
         if (!first_record) {
-            GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, format, 1));
+            GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, format, l));
         }
         GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, '}'));
-        GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, format, 0));
+        l--;
+        GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, format, l));
         GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, '}'));
     }
 
+    assert(l == level);
     assert(aushape_conv_buf_is_valid(buf));
     return AUSHAPE_CONV_RC_OK;
 }

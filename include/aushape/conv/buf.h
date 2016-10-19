@@ -68,6 +68,7 @@ extern void aushape_conv_buf_empty(struct aushape_conv_buf *buf);
  *
  * @param buf       The converter buffer to add the fragment to.
  * @param format    The output format to use.
+ * @param level     Syntactic nesting level the event is output at.
  * @param au        The auparse state with the current event as the one to be
  *                  output.
  *
@@ -81,6 +82,7 @@ extern void aushape_conv_buf_empty(struct aushape_conv_buf *buf);
 extern enum aushape_conv_rc aushape_conv_buf_add_event(
                                     struct aushape_conv_buf *buf,
                                     const struct aushape_format *format,
+                                    size_t level,
                                     auparse_state_t *au);
 
 #endif /* _AUSHAPE_CONV_BUF_H */
