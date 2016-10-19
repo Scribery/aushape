@@ -102,7 +102,6 @@ aushape_conv_execve_empty(struct aushape_conv_execve *execve)
  * Process "argc" field for the execve record being aggregated.
  *
  * @param execve    The aggregation buffer to process the field for.
- * @param format    The output format to use.
  * @param au        The auparse context with the field to be processed as the
  *                  current field.
  *
@@ -114,7 +113,6 @@ aushape_conv_execve_empty(struct aushape_conv_execve *execve)
  */
 static enum aushape_conv_rc
 aushape_conv_execve_add_argc(struct aushape_conv_execve *execve,
-                             const struct aushape_format *format,
                              auparse_state_t *au)
 {
     enum aushape_conv_rc rc;
@@ -123,10 +121,7 @@ aushape_conv_execve_add_argc(struct aushape_conv_execve *execve,
     int end;
 
     assert(aushape_conv_execve_is_valid(execve));
-    assert(aushape_format_is_valid(format));
     assert(au != NULL);
-
-    (void)format;
 
     GUARD_BOOL(INVALID_EXECVE, execve->arg_num == 0);
     str = auparse_get_field_str(au);
@@ -205,7 +200,6 @@ cleanup:
  * Process "a[0-9]+_len" field for the execve record being aggregated.
  *
  * @param execve    The aggregation buffer to process the field for.
- * @param format    The output format to use.
  * @param arg_idx   The argument index from the field name.
  * @param au        The auparse context with the field to be processed as the
  *                  current field.
@@ -218,7 +212,6 @@ cleanup:
  */
 static enum aushape_conv_rc
 aushape_conv_execve_add_arg_len(struct aushape_conv_execve *execve,
-                                const struct aushape_format *format,
                                 size_t arg_idx,
                                 auparse_state_t *au)
 {
@@ -228,10 +221,7 @@ aushape_conv_execve_add_arg_len(struct aushape_conv_execve *execve,
     int end;
 
     assert(aushape_conv_execve_is_valid(execve));
-    assert(aushape_format_is_valid(format));
     assert(au != NULL);
-
-    (void)format;
 
     GUARD_BOOL(INVALID_EXECVE,
                arg_idx == execve->arg_idx &&
@@ -384,7 +374,7 @@ aushape_conv_execve_add(struct aushape_conv_execve *execve,
             continue;
         /* If it's the number of arguments */
         } else if (strcmp(field_name, "argc") == 0) {
-            GUARD(aushape_conv_execve_add_argc(execve, format, au));
+            GUARD(aushape_conv_execve_add_argc(execve, au));
         /* If it's a whole argument */
         } else if (end = 0,
                    sscanf(field_name, "a%zu%n", &arg_idx, &end) >= 1 &&
@@ -394,8 +384,7 @@ aushape_conv_execve_add(struct aushape_conv_execve *execve,
         } else if (end = 0,
                    sscanf(field_name, "a%zu_len%n", &arg_idx, &end) >= 1 &&
                    (size_t)end == strlen(field_name)) {
-            GUARD(aushape_conv_execve_add_arg_len(execve, format,
-                                                  arg_idx, au));
+            GUARD(aushape_conv_execve_add_arg_len(execve, arg_idx, au));
         /* If it's an argument slice */
         } else if (end = 0,
                    sscanf(field_name, "a%zu[%zu]%n",
