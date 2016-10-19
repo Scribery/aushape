@@ -32,7 +32,7 @@ struct aushape_conv {
     aushape_conv_output_fn      output_fn;
     /** Output function data */
     void                       *output_data;
-    /** First input/output failure return code, or OK */
+    /** First conversion failure return code, or OK */
     enum aushape_conv_rc        rc;
     /** Output buffer */
     struct aushape_conv_buf     buf;
