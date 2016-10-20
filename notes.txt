@@ -86,3 +86,148 @@ To keep to that idea we need to stop assuming anything about the order of
 events being output and not to attempt to arrange separators and whitespace
 that go before, between, or after them. Have no newlines at the end at all.
 This will be one thing done well.
+
+----------------
+Command line sketches
+
+    aushape -l xml < input.log > output.xml
+    aushape -l xml input.log > output.xml
+    aushape -l xml -o stdout input.log > output.xml
+    aushape -l xml -o stdout < input.log > output.xml
+
+    aushape -l xml -o syslog --syslog-facility=authpriv --syslog-priority=info
+    aushape -l xml -o file --file-path=/var/log/aushape.log
+
+    aushape -l json --fold 4 --indent 4
+
+    aushape -l json --fold 0
+
+    aushape -l xml input.log >output.xml
+    aushape -l xml input.log output.xml
+    aushape -l json < input.log > output.json
+
+    aushape -o file -l xml input.log
+    aushape -o file -l xml input.log -
+    aushape -o
+    aushape -o file --file-path
+
+Audispd plugin configuration doesn't support passing arguments well, so we'll
+have to have a wrapper or a separate program installed, with all the necessary
+arguments specified.  For now we'll relax about audispd argument requirements.
+
+Actually, what if we simply make several executables, instead of one?
+
+The thing is, there are two separate tasks: convert a live stream, one event at
+a time, or convert a complete stream as a whole.
+
+How about this:
+
+aushape-stream
+aushape-convert
+
+Or, perhaps, we should simply go ahead with that document wrapping logic that
+we discarded before, only this time we actually write the whole document at a
+time. Or rather have that concept.
+
+We can say that the output can be discrete, or continuous.  If we're writing
+to a discrete output, we have to write whole documents always. If we're
+writing to a continuous output, we can write in any pieces.
+
+So if we say enclose all events into a document, and are writing to syslog,
+then we'll have to accumulate all the events in memory and invoke syslog(3)
+only when the input stream is closed. Well, duh, don't do that, unless you
+know what you're doing.
+
+But if we have the same configuration with a (continuous) file or stdout
+output, then we can write pieces as we want them, no matter the configuration.
+
+So, for this to work, we'll have to have an intermediate aggregator
+object/module, which would look at the type of the output and collect the
+data before writing, if the output is discrete. It would also deal with making
+documents of all, each n, or no events (make them bare).
+
+So, we can have these outputs:
+
+    file
+    syslog
+    journal
+
+We can make those be simply "writers". And we can make a special kind of
+writer, which expects being written complete events and accepts another writer
+to write documents to.
+
+So we can have:
+
+    aushape_fd_writer       - writing to an FD, continuous, expects whatever
+    aushape_syslog_writer   - writing to syslog, discrete, expects whatever
+    aushape_journal_writer  - writing to journal, discrete, expects whatever
+    and
+    aushape_doc_writer      - writing to a writer, discrete, expects events
+
+Let's try adding some more:
+
+    aushape_http_writer     - writing to fluentd, discrete, expects whatever
+
+Yet, perhaps we can stuff the document aggregation into the converter still.
+That may simplify things.
+
+There is a problem of writing the document prologue and epilogue for the case
+of "all events in one document". When do we write them?
+
+First of all, writing any events before or after the document doesn't make
+sense, so these operations cannot be on the same level as feeding input into
+the converter. I.e. there cannot be a function beside aushape_conv_input. If
+there was, then we would need to prohibit calling aushape_conv_input
+before/after it. If we have to call these special functions only after
+creation and before destruction, why not make them part of
+creation/destruction?
+
+The thing about making them a part of destruction is that we will either need
+to be able to fail destruction, or to ignore the problem and go ahead with
+freeing the converter. Even if we report a problem with finishing the document
+during destruction, and go ahead and destroy it, there would be no way to
+recover.
+
+If we make these separate functions, they would still feel strange, because
+they would only be necessary in that "all events in one doc" case.
+
+OTOH, if we really want to recover from that, then we need them. Yet, how
+would we recover, which cases would need that? Well, at least debugging would
+be nice.
+
+Having the document formatting in converter would also make the folding and
+indenting logic more solid and simple.
+
+BTW, even if we make document formatting in a separate "writer", we would
+still need to deal with handling finishing failure.
+
+We can allow passing a "force" flag argument to aushape_conv_destroy, but it
+would feel awkward. Perhaps separate functions are not that bad, after all.
+
+They can be made thus:
+
+    enum aushape_conv_rc aushape_conv_begin(struct aushape_conv *conv);
+    enum aushape_conv_rc aushape_conv_end(struct aushape_conv *conv);
+
+We will need to store converter state and refuse any calls out of this order:
+
+    aushape_conv_begin
+    aushape_conv_input|flush
+    ...
+    aushape_conv_end
+
+----
+
+If we're going to implement "writers", or perhaps something else beside the
+converter and simple additional modules, we might need to return to a global
+return code system, since it might be beneficial to know what exactly happened
+below the converter. E.g. why the writer failed, instead of just a single
+return code meaning "writer failed".
+
+----
+
+There is one good thing about implementing document wrapping in writers: we
+can add other policies, like limiting document size in bytes, instead of in
+events. With wrapping logic inside the converter we can't do that easily.
+OTOH, we can implement size limiting inside the converter too.
+

@@ -20,22 +20,40 @@
 #include <aushape/conv/buf.h>
 #include <aushape/gbuf.h>
 #include <auparse.h>
+#include <limits.h>
 #include <string.h>
 
 /** Converter */
 struct aushape_conv {
     /** Auparse state */
     auparse_state_t            *au;
+    /**
+     * Amount of events per document.
+     * Positive for events, negative for bytes
+     */
+    ssize_t                     events_per_doc;
     /** Output format */
     struct aushape_format       format;
     /** Output function pointer */
     aushape_conv_output_fn      output_fn;
+    /**
+     * True if the output function accepts continuous input, i.e. arbitrary
+     * pieces of the output, false if it expects complete documents/events.
+     */
+    bool                        output_cont;
     /** Output function data */
     void                       *output_data;
     /** First conversion failure return code, or OK */
     enum aushape_conv_rc        rc;
     /** Output buffer */
     struct aushape_conv_buf     buf;
+    /** True if outputting inside of a document, false otherwise */
+    bool                        in_doc;
+    /**
+     * Amount of events in current document.
+     * Events, if events_per_doc is positive, bytes if negative.
+     */
+    size_t                      events_in_doc;
 };
 
 bool
@@ -65,27 +83,95 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
     if (type != AUPARSE_CB_EVENT_READY) {
         return;
     }
-    if (conv->rc != AUSHAPE_CONV_RC_OK) {
-        return;
+
+    /*
+     * Output document prologue, if needed
+     */
+    if (conv->rc == AUSHAPE_CONV_RC_OK) {
+        if (conv->events_per_doc != 0 && conv->events_per_doc != SSIZE_MAX) {
+            if (!conv->in_doc) {
+                rc = aushape_conv_buf_add_prologue(&conv->buf, &conv->format, 0);
+                if (rc == AUSHAPE_CONV_RC_OK) {
+                    conv->in_doc = true;
+                    if (conv->output_cont) {
+                        if (conv->output_fn(&conv->format,
+                                            conv->buf.gbuf.ptr, conv->buf.gbuf.len,
+                                            conv->output_data)) {
+                            aushape_conv_buf_empty(&conv->buf);
+                        } else {
+                            conv->rc = AUSHAPE_CONV_RC_OUTPUT_FAILED;
+                        }
+                    }
+                } else {
+                    conv->rc = rc;
+                }
+            }
+        }
     }
 
-    aushape_conv_buf_empty(&conv->buf);
-    rc = aushape_conv_buf_add_event(&conv->buf, &conv->format, 0, au);
-    if (rc == AUSHAPE_CONV_RC_OK) {
-        if (!conv->output_fn(&conv->format,
-                             conv->buf.gbuf.ptr, conv->buf.gbuf.len,
-                             conv->output_data)) {
-            conv->rc = AUSHAPE_CONV_RC_OUTPUT_FAILED;
+    /*
+     * Output the event
+     */
+    if (conv->rc == AUSHAPE_CONV_RC_OK) {
+        rc = aushape_conv_buf_add_event(&conv->buf, &conv->format,
+                                        conv->in_doc ? 1 : 0,
+                                        conv->events_in_doc == 0, au);
+        if (rc == AUSHAPE_CONV_RC_OK) {
+            if (conv->events_per_doc > 0) {
+                conv->events_in_doc++;
+            } else if (conv->events_per_doc < 0) {
+                conv->events_in_doc += conv->buf.gbuf.len;
+            }
+            if (conv->output_cont || conv->events_per_doc == 0) {
+                if (conv->output_fn(&conv->format,
+                                     conv->buf.gbuf.ptr, conv->buf.gbuf.len,
+                                     conv->output_data)) {
+                    aushape_conv_buf_empty(&conv->buf);
+                } else {
+                    conv->rc = AUSHAPE_CONV_RC_OUTPUT_FAILED;
+                }
+            }
+        } else {
+            conv->rc = rc;
         }
-    } else {
-        conv->rc = rc;
+    }
+
+    /*
+     * Output document epilogue, if needed
+     */
+    if (conv->rc == AUSHAPE_CONV_RC_OK) {
+        if (conv->events_per_doc != 0 && conv->events_per_doc != SSIZE_MAX) {
+            assert(conv->in_doc);
+            /* If hit the limit */
+            if ((conv->events_per_doc > 0 &&
+                 conv->events_in_doc >= (size_t)conv->events_per_doc) ||
+                (conv->events_per_doc < 0 &&
+                 conv->events_in_doc >= (size_t)-conv->events_per_doc)) {
+                rc = aushape_conv_buf_add_epilogue(&conv->buf, &conv->format, 0);
+                if (rc == AUSHAPE_CONV_RC_OK) {
+                    if (conv->output_fn(&conv->format,
+                                        conv->buf.gbuf.ptr, conv->buf.gbuf.len,
+                                        conv->output_data)) {
+                        aushape_conv_buf_empty(&conv->buf);
+                        conv->events_in_doc = 0;
+                        conv->in_doc = false;
+                    } else {
+                        conv->rc = AUSHAPE_CONV_RC_OUTPUT_FAILED;
+                    }
+                } else {
+                    conv->rc = rc;
+                }
+            }
+        }
     }
 }
 
 enum aushape_conv_rc
 aushape_conv_create(struct aushape_conv **pconv,
+                    ssize_t events_per_doc,
                     const struct aushape_format *format,
                     aushape_conv_output_fn output_fn,
+                    bool output_cont,
                     void *output_data)
 {
     enum aushape_conv_rc rc;
@@ -113,8 +199,10 @@ aushape_conv_create(struct aushape_conv **pconv,
     auparse_add_callback(conv->au, aushape_conv_cb, conv, NULL);
 
     aushape_conv_buf_init(&conv->buf);
+    conv->events_per_doc = events_per_doc;
     conv->format = *format;
     conv->output_fn = output_fn;
+    conv->output_cont = output_cont;
     conv->output_data = output_data;
 
     *pconv = conv;
@@ -132,6 +220,80 @@ cleanup:
 }
 
 enum aushape_conv_rc
+aushape_conv_begin(struct aushape_conv *conv)
+{
+    if (!aushape_conv_is_valid(conv)) {
+        return AUSHAPE_CONV_RC_INVALID_ARGS;
+    }
+    if (conv->events_per_doc != SSIZE_MAX) {
+        return AUSHAPE_CONV_RC_OK;
+    }
+    if (conv->in_doc) {
+        return AUSHAPE_CONV_RC_INVALID_STATE;
+    }
+
+    if (conv->rc == AUSHAPE_CONV_RC_OK) {
+        enum aushape_conv_rc rc;
+        rc = aushape_conv_buf_add_prologue(&conv->buf, &conv->format, 0);
+        if (rc == AUSHAPE_CONV_RC_OK) {
+            conv->in_doc = true;
+            if (conv->output_cont) {
+                if (conv->output_fn(&conv->format,
+                                    conv->buf.gbuf.ptr, conv->buf.gbuf.len,
+                                    conv->output_data)) {
+                    aushape_conv_buf_empty(&conv->buf);
+                } else {
+                    conv->rc = AUSHAPE_CONV_RC_OUTPUT_FAILED;
+                }
+            }
+        } else {
+            conv->rc = rc;
+        }
+        assert(aushape_conv_is_valid(conv));
+    }
+
+    return conv->rc;
+}
+
+enum aushape_conv_rc
+aushape_conv_end(struct aushape_conv *conv)
+{
+    if (!aushape_conv_is_valid(conv)) {
+        return AUSHAPE_CONV_RC_INVALID_ARGS;
+    }
+    if (conv->events_per_doc == 0) {
+        return AUSHAPE_CONV_RC_OK;
+    } else if (!conv->in_doc) {
+        if (conv->events_per_doc == SSIZE_MAX) {
+            return AUSHAPE_CONV_RC_INVALID_STATE;
+        } else {
+            return AUSHAPE_CONV_RC_OK;
+        }
+    }
+
+    if (conv->rc == AUSHAPE_CONV_RC_OK) {
+        enum aushape_conv_rc rc;
+        rc = aushape_conv_buf_add_epilogue(&conv->buf, &conv->format, 0);
+        if (rc == AUSHAPE_CONV_RC_OK) {
+            if (conv->output_fn(&conv->format,
+                                conv->buf.gbuf.ptr, conv->buf.gbuf.len,
+                                conv->output_data)) {
+                aushape_conv_buf_empty(&conv->buf);
+                conv->events_in_doc = 0;
+                conv->in_doc = false;
+            } else {
+                conv->rc = AUSHAPE_CONV_RC_OUTPUT_FAILED;
+            }
+        } else {
+            conv->rc = rc;
+        }
+        assert(aushape_conv_is_valid(conv));
+    }
+
+    return conv->rc;
+}
+
+enum aushape_conv_rc
 aushape_conv_input(struct aushape_conv *conv,
                    const char *ptr,
                    size_t len)
@@ -139,6 +301,9 @@ aushape_conv_input(struct aushape_conv *conv,
     if (!aushape_conv_is_valid(conv) ||
         (ptr == NULL && len > 0)) {
         return AUSHAPE_CONV_RC_INVALID_ARGS;
+    }
+    if (conv->events_per_doc == SSIZE_MAX && !conv->in_doc) {
+        return AUSHAPE_CONV_RC_INVALID_STATE;
     }
 
     if (conv->rc == AUSHAPE_CONV_RC_OK) {
@@ -155,6 +320,9 @@ aushape_conv_flush(struct aushape_conv *conv)
 {
     if (!aushape_conv_is_valid(conv)) {
         return AUSHAPE_CONV_RC_INVALID_ARGS;
+    }
+    if (conv->events_per_doc == SSIZE_MAX && !conv->in_doc) {
+        return AUSHAPE_CONV_RC_INVALID_STATE;
     }
 
     if (conv->rc == AUSHAPE_CONV_RC_OK) {

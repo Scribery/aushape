@@ -23,16 +23,16 @@
 
 #include <aushape/format.h>
 #include <aushape/conv/rc.h>
+#include <unistd.h>
 #include <stddef.h>
 #include <stdbool.h>
 
 /**
- * Output function prototype.
- * Called for each completely formatted event.
+ * Output function prototype. Called for each output fragment.
  *
  * @param format    Output format.
- * @param ptr       Pointer to the formatted event.
- * @param len       Length of the formatted event in bytes.
+ * @param ptr       Pointer to the output fragment.
+ * @param len       Length of the output fragment in bytes.
  * @param data      The opaque data pointer, supplied upon converter creation.
  *
  * @return True if the function executed succesfully, false if it failed and
@@ -57,12 +57,24 @@ bool aushape_conv_is_valid(const struct aushape_conv *conv);
 /**
  * Create (allocate and initialize) a converter.
  *
- * @param pconv         Location for the created converter pointer.
- *                      Not modified in case of error. Cannot be NULL.
- * @param format        The output format to use.
- * @param output_fn     The function to call for each completely formatted
- *                      event. Cannot be NULL.
- * @param output_data   The data to pass to the output function.
+ * @param pconv             Location for the created converter pointer.
+ *                          Not modified in case of error. Cannot be NULL.
+ * @param events_per_doc    Amount of events to put into a single output
+ *                          document. Zero means "bare" output - no document
+ *                          wrapping, and no event separators. One means each
+ *                          event is wrapped in a document. SSIZE_MAX means
+ *                          all events are put into a single document, even if
+ *                          there were none. Negative numbers specify size of
+ *                          documents in bytes. Documents are finished when
+ *                          size of event text added to it crosses the negated
+ *                          number.
+ * @param format            The output format to use.
+ * @param output_fn         The function to call for each completely formatted
+ *                          fragment. Cannot be NULL.
+ * @param output_cont       True if the output function accepts continuous
+ *                          input, i.e. arbitrary pieces of the output,
+ *                          false if it expects complete documents/events.
+ * @param output_data       The data to pass to the output function.
  *
  * @return Return code:
  *          AUSHAPE_CONV_RC_OK              - created succesfully,
@@ -70,12 +82,34 @@ bool aushape_conv_is_valid(const struct aushape_conv *conv);
  *          AUSHAPE_CONV_RC_NOMEM           - memory allocation failed.
  */
 enum aushape_conv_rc aushape_conv_create(struct aushape_conv **pconv,
+                                         ssize_t events_per_doc,
                                          const struct aushape_format *format,
                                          aushape_conv_output_fn output_fn,
+                                         bool output_cont,
                                          void *output_data);
 
 /**
+ * Begin converter document output. Must be called once before
+ * aushape_conv_input, aushape_conv_flush, and aushape_conv_end. Has effect
+ * only if converter was created with events_per_doc == SSIZE_MAX.
+ *
+ * @param pconv         Converter to start the document output with.
+ *
+ * @return Return code:
+ *          AUSHAPE_CONV_RC_OK              - document started succesfully,
+ *          AUSHAPE_CONV_RC_INVALID_ARGS    - invalid arguments received,
+ *          AUSHAPE_CONV_RC_INVALID_STATE   - called after document was
+ *                                            started with aushape_conv_begin,
+ *                                            but not finished with
+ *                                            aushape_conv_end,
+ *          AUSHAPE_CONV_RC_NOMEM           - memory allocation failed,
+ *          AUSHAPE_CONV_RC_OUTPUT_FAILED   - output function failed.
+ */
+enum aushape_conv_rc aushape_conv_begin(struct aushape_conv *conv);
+
+/**
  * Provide a piece of raw audit log input to a converter.
+ * Can only be called after aushape_conv_begin and before aushape_conv_end.
  *
  * @param conv  The converter to provide input to.
  * @param ptr   The pointer to the log piece. Can be NULL, if len is 0.
@@ -84,6 +118,11 @@ enum aushape_conv_rc aushape_conv_create(struct aushape_conv **pconv,
  * @return Return code:
  *          AUSHAPE_CONV_RC_OK              - piece inputted successfully,
  *          AUSHAPE_CONV_RC_INVALID_ARGS    - invalid arguments received,
+ *          AUSHAPE_CONV_RC_INVALID_STATE   - called before starting document
+ *                                            output with aushape_conv_begin,
+ *                                            or after ending it with
+ *                                            aushape_conv_end with
+ *                                            events_per_doc == SSIZE_MAX,
  *          AUSHAPE_CONV_RC_NOMEM           - memory allocation failed,
  *          AUSHAPE_CONV_RC_AUPARSE_FAILED  - an auparse call failed,
  *          AUSHAPE_CONV_RC_INVALID_EXECVE  - invalid execve record sequence
@@ -96,13 +135,19 @@ enum aushape_conv_rc aushape_conv_input(struct aushape_conv *conv,
 
 /**
  * Process any raw log input buffered in a converter. To be called at the end
- * of a log to make sure everything was processed.
+ * of a log to make sure everything was processed. Can only be called after
+ * aushape_conv_begin and before aushape_conv_end.
  *
  * @param conv  The converter to flush.
  *
  * @return Return code:
  *          AUSHAPE_CONV_RC_OK              - flushed successfully,
  *          AUSHAPE_CONV_RC_INVALID_ARGS    - invalid arguments received,
+ *          AUSHAPE_CONV_RC_INVALID_STATE   - called before starting document
+ *                                            output with aushape_conv_begin,
+ *                                            or after ending it with
+ *                                            aushape_conv_end with
+ *                                            events_per_doc == SSIZE_MAX,
  *          AUSHAPE_CONV_RC_NOMEM           - memory allocation failed,
  *          AUSHAPE_CONV_RC_AUPARSE_FAILED  - an auparse call failed,
  *          AUSHAPE_CONV_RC_INVALID_EXECVE  - invalid execve record sequence
@@ -110,6 +155,24 @@ enum aushape_conv_rc aushape_conv_input(struct aushape_conv *conv,
  *          AUSHAPE_CONV_RC_OUTPUT_FAILED   - output function failed.
  */
 enum aushape_conv_rc aushape_conv_flush(struct aushape_conv *conv);
+
+/**
+ * End converter document output. Can only be called after aushape_conv_begin.
+ * Has effect only if converter was created with events_per_doc != 0 and a
+ * document was started.
+ *
+ * @param pconv         Converter to start the document output with.
+ *
+ * @return Return code:
+ *          AUSHAPE_CONV_RC_OK              - document finished succesfully,
+ *          AUSHAPE_CONV_RC_INVALID_ARGS    - invalid arguments received,
+ *          AUSHAPE_CONV_RC_INVALID_STATE   - called before starting document
+ *                                            output with aushape_conv_begin,
+ *                                            if events_per_doc == SSIZE_MAX,
+ *          AUSHAPE_CONV_RC_NOMEM           - memory allocation failed,
+ *          AUSHAPE_CONV_RC_OUTPUT_FAILED   - output function failed.
+ */
+enum aushape_conv_rc aushape_conv_end(struct aushape_conv *conv);
 
 /**
  * Destroy (cleanup and free) a converter.

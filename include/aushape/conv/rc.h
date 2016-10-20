@@ -27,6 +27,8 @@ enum aushape_conv_rc {
     AUSHAPE_CONV_RC_OK  = 0,
     /** Invalid arguments supplied to a function */
     AUSHAPE_CONV_RC_INVALID_ARGS,
+    /** Object is in invalid state */
+    AUSHAPE_CONV_RC_INVALID_STATE,
     /** Memory allocation failed */
     AUSHAPE_CONV_RC_NOMEM,
     /** Output function failed */

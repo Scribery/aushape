@@ -33,6 +33,7 @@ static const struct aushape_conv_rc_info \
     [AUSHAPE_CONV_RC_##_name] = {.name = #_name, .desc = _desc}
     RC(OK,              "Success"),
     RC(INVALID_ARGS,    "Invalid arguments supplied to a function"),
+    RC(INVALID_STATE,   "Object is in invalid state"),
     RC(NOMEM,           "Memory allocation failed"),
     RC(OUTPUT_FAILED,   "Output function failed"),
     RC(AUPARSE_FAILED,  "An underlying auparse call failed"),

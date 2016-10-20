@@ -24,6 +24,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <limits.h>
 
 void
 usage(FILE *stream)
@@ -37,23 +38,13 @@ usage(FILE *stream)
             "\n");
 }
 
-struct conv_output_data {
-    /** True if output an event already */
-    bool got_event;
-};
-
 bool conv_output_fn(const struct aushape_format *format,
                     const char *ptr, size_t len,
                     void *abstract_data)
 {
-    struct conv_output_data *data = (struct conv_output_data *)abstract_data;
-
-    if (data->got_event && format->lang == AUSHAPE_LANG_JSON) {
-        write(STDOUT_FILENO, ",", 1);
-    }
-    write(STDOUT_FILENO, "\n", 1);
+    (void)format;
+    (void)abstract_data;
     write(STDOUT_FILENO, ptr, len);
-    data->got_event = true;
     return true;
 }
 
@@ -61,14 +52,12 @@ int
 main(int argc, char **argv)
 {
     int status = 1;
-    struct aushape_format format = {.fold_level = 4,
-                                    .init_indent = 4,
+    struct aushape_format format = {.fold_level = 5,
+                                    .init_indent = 0,
                                     .nest_indent = 4};
-    struct conv_output_data conv_output_data = {.got_event = false};
     struct aushape_conv *conv = NULL;
     enum aushape_conv_rc conv_rc;
     char buf[4096];
-    const char *str;
     ssize_t rc;
 
     if (argc != 2) {
@@ -87,21 +76,20 @@ main(int argc, char **argv)
         goto cleanup;
     }
 
-    conv_rc = aushape_conv_create(&conv, &format,
-                                  conv_output_fn, &conv_output_data);
+    conv_rc = aushape_conv_create(&conv, SSIZE_MAX, &format,
+                                  conv_output_fn, true, NULL);
     if (conv_rc != AUSHAPE_CONV_RC_OK) {
         fprintf(stderr, "Failed creating converter: %s\n",
                 aushape_conv_rc_to_desc(conv_rc));
         goto cleanup;
     }
 
-    if (format.lang == AUSHAPE_LANG_XML) {
-        str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-              "<log>";
-    } else {
-        str = "[";
+    conv_rc = aushape_conv_begin(conv);
+    if (conv_rc != AUSHAPE_CONV_RC_OK) {
+        fprintf(stderr, "Failed starting document: %s\n",
+                aushape_conv_rc_to_desc(conv_rc));
+        goto cleanup;
     }
-    write(STDOUT_FILENO, str, strlen(str));
 
     while ((rc = read(STDIN_FILENO, buf, sizeof(buf))) > 0) {
         conv_rc = aushape_conv_input(conv, buf, (size_t)rc);
@@ -119,12 +107,12 @@ main(int argc, char **argv)
         goto cleanup;
     }
 
-    if (format.lang == AUSHAPE_LANG_XML) {
-        str = "\n</log>\n";
-    } else {
-        str = "\n]\n";
+    conv_rc = aushape_conv_end(conv);
+    if (conv_rc != AUSHAPE_CONV_RC_OK) {
+        fprintf(stderr, "Failed finishing document: %s\n",
+                aushape_conv_rc_to_desc(conv_rc));
+        goto cleanup;
     }
-    write(STDOUT_FILENO, str, strlen(str));
 
     if (rc < 0) {
         fprintf(stderr, "Failed reading stdin: %s\n", strerror(errno));

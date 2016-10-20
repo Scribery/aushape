@@ -64,11 +64,29 @@ extern void aushape_conv_buf_cleanup(struct aushape_conv_buf *buf);
 extern void aushape_conv_buf_empty(struct aushape_conv_buf *buf);
 
 /**
+ * Add a document prologue fragment to a converter output buffer.
+ *
+ * @param buf       The converter output buffer to add the fragment to.
+ * @param format    The output format to use.
+ * @param level     Syntactic nesting level the document is output at.
+ *
+ * @return Return code:
+ *          AUSHAPE_CONV_RC_OK              - added succesfully,
+ *          AUSHAPE_CONV_RC_NOMEM           - memory allocation failed.
+ */
+extern enum aushape_conv_rc aushape_conv_buf_add_prologue(
+                                    struct aushape_conv_buf *buf,
+                                    const struct aushape_format *format,
+                                    size_t level);
+
+/**
  * Add a formatted fragment for an auparse event to a converter output buffer.
  *
  * @param buf       The converter buffer to add the fragment to.
  * @param format    The output format to use.
  * @param level     Syntactic nesting level the event is output at.
+ * @param first     True if this is the first event being output for a record,
+ *                  false otherwise.
  * @param au        The auparse state with the current event as the one to be
  *                  output.
  *
@@ -83,6 +101,23 @@ extern enum aushape_conv_rc aushape_conv_buf_add_event(
                                     struct aushape_conv_buf *buf,
                                     const struct aushape_format *format,
                                     size_t level,
+                                    bool first,
                                     auparse_state_t *au);
+
+/**
+ * Add a document epilogue fragment to a converter output buffer.
+ *
+ * @param buf       The converter output buffer to add the fragment to.
+ * @param format    The output format to use.
+ * @param level     Syntactic nesting level the document is output at.
+ *
+ * @return Return code:
+ *          AUSHAPE_CONV_RC_OK              - added succesfully,
+ *          AUSHAPE_CONV_RC_NOMEM           - memory allocation failed.
+ */
+extern enum aushape_conv_rc aushape_conv_buf_add_epilogue(
+                                    struct aushape_conv_buf *buf,
+                                    const struct aushape_format *format,
+                                    size_t level);
 
 #endif /* _AUSHAPE_CONV_BUF_H */

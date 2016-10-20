@@ -358,6 +358,7 @@ enum aushape_conv_rc
 aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
                            const struct aushape_format *format,
                            size_t level,
+                           bool first,
                            auparse_state_t *au)
 {
     enum aushape_conv_rc rc;
@@ -399,6 +400,9 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         }
         GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, ">"));
     } else {
+        if (!first) {
+            GUARD_BOOL(aushape_gbuf_add_char(&buf->gbuf, ','));
+        }
         GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, l));
         GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, '{'));
         l++;
@@ -472,6 +476,51 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     }
 
     assert(l == level);
+    assert(aushape_conv_buf_is_valid(buf));
+    return AUSHAPE_CONV_RC_OK;
+}
+
+enum aushape_conv_rc
+aushape_conv_buf_add_prologue(struct aushape_conv_buf *buf,
+                              const struct aushape_format *format,
+                              size_t level)
+{
+    assert(aushape_conv_buf_is_valid(buf));
+    assert(aushape_format_is_valid(format));
+
+    GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, level));
+    if (format->lang == AUSHAPE_LANG_XML) {
+        GUARD_RC(aushape_gbuf_add_str(&buf->gbuf,
+                                      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
+        /* If this is an unfolded zero level, which is special for XML */
+        if (level == 0 && level < format->fold_level) {
+            GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, '\n'));
+        }
+        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, level));
+        GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "<log>"));
+    } else if (format->lang == AUSHAPE_LANG_JSON) {
+        GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, '['));
+    }
+
+    assert(aushape_conv_buf_is_valid(buf));
+    return AUSHAPE_CONV_RC_OK;
+}
+
+enum aushape_conv_rc
+aushape_conv_buf_add_epilogue(struct aushape_conv_buf *buf,
+                              const struct aushape_format *format,
+                              size_t level)
+{
+    assert(aushape_conv_buf_is_valid(buf));
+    assert(aushape_format_is_valid(format));
+
+    GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, format, level));
+    if (format->lang == AUSHAPE_LANG_XML) {
+        GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "</log>"));
+    } else if (format->lang == AUSHAPE_LANG_JSON) {
+        GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, ']'));
+    }
+
     assert(aushape_conv_buf_is_valid(buf));
     return AUSHAPE_CONV_RC_OK;
 }
