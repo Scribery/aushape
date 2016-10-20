@@ -92,6 +92,7 @@ main(int argc, char **argv)
     if (conv_rc != AUSHAPE_CONV_RC_OK) {
         fprintf(stderr, "Failed creating converter: %s\n",
                 aushape_conv_rc_to_desc(conv_rc));
+        goto cleanup;
     }
 
     if (format.lang == AUSHAPE_LANG_XML) {
