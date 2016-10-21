@@ -167,7 +167,8 @@ extern bool aushape_gbuf_add_vfmt(struct aushape_gbuf *gbuf,
  * @return True if added successfully, false if memory allocation failed.
  */
 extern bool aushape_gbuf_add_fmt(struct aushape_gbuf *gbuf,
-                                 const char *fmt, ...);
+                                 const char *fmt, ...)
+                                    __attribute__((format(printf, 2, 3)));
 
 /**
  * Add leading whitespace for an opening of a nested block to a growing
