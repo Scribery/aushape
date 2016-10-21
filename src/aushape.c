@@ -56,7 +56,7 @@ main(int argc, char **argv)
                                     .init_indent = 0,
                                     .nest_indent = 4};
     struct aushape_conv *conv = NULL;
-    enum aushape_conv_rc conv_rc;
+    enum aushape_rc aushape_rc;
     char buf[4096];
     ssize_t rc;
 
@@ -76,41 +76,41 @@ main(int argc, char **argv)
         goto cleanup;
     }
 
-    conv_rc = aushape_conv_create(&conv, SSIZE_MAX, &format,
+    aushape_rc = aushape_conv_create(&conv, SSIZE_MAX, &format,
                                   conv_output_fn, true, NULL);
-    if (conv_rc != AUSHAPE_CONV_RC_OK) {
+    if (aushape_rc != AUSHAPE_RC_OK) {
         fprintf(stderr, "Failed creating converter: %s\n",
-                aushape_conv_rc_to_desc(conv_rc));
+                aushape_rc_to_desc(aushape_rc));
         goto cleanup;
     }
 
-    conv_rc = aushape_conv_begin(conv);
-    if (conv_rc != AUSHAPE_CONV_RC_OK) {
+    aushape_rc = aushape_conv_begin(conv);
+    if (aushape_rc != AUSHAPE_RC_OK) {
         fprintf(stderr, "Failed starting document: %s\n",
-                aushape_conv_rc_to_desc(conv_rc));
+                aushape_rc_to_desc(aushape_rc));
         goto cleanup;
     }
 
     while ((rc = read(STDIN_FILENO, buf, sizeof(buf))) > 0) {
-        conv_rc = aushape_conv_input(conv, buf, (size_t)rc);
-        if (conv_rc != AUSHAPE_CONV_RC_OK) {
+        aushape_rc = aushape_conv_input(conv, buf, (size_t)rc);
+        if (aushape_rc != AUSHAPE_RC_OK) {
             fprintf(stderr, "Failed feeding the converter: %s\n",
-                    aushape_conv_rc_to_desc(conv_rc));
+                    aushape_rc_to_desc(aushape_rc));
             goto cleanup;
         }
     }
 
-    conv_rc = aushape_conv_flush(conv);
-    if (conv_rc != AUSHAPE_CONV_RC_OK) {
+    aushape_rc = aushape_conv_flush(conv);
+    if (aushape_rc != AUSHAPE_RC_OK) {
         fprintf(stderr, "Failed flushing the converter: %s\n",
-                aushape_conv_rc_to_desc(conv_rc));
+                aushape_rc_to_desc(aushape_rc));
         goto cleanup;
     }
 
-    conv_rc = aushape_conv_end(conv);
-    if (conv_rc != AUSHAPE_CONV_RC_OK) {
+    aushape_rc = aushape_conv_end(conv);
+    if (aushape_rc != AUSHAPE_RC_OK) {
         fprintf(stderr, "Failed finishing document: %s\n",
-                aushape_conv_rc_to_desc(conv_rc));
+                aushape_rc_to_desc(aushape_rc));
         goto cleanup;
     }
 

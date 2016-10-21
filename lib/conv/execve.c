@@ -71,31 +71,31 @@ aushape_conv_execve_empty(struct aushape_conv_execve *execve)
  * Exit with the specified return code if a bool expression is false.
  * To exit stores return code in "rc" variable and goes to "cleanup" label.
  *
- * @param _RC_TOKEN     The return code name without the AUSHAPE_CONV_RC_
+ * @param _RC_TOKEN     The return code name without the AUSHAPE_RC_
  *                      prefix.
  * @param _bool_expr    The bool expression to evaluate.
  */
 #define GUARD_BOOL(_RC_TOKEN, _bool_expr) \
-    do {                                        \
-        if (!(_bool_expr)) {                    \
-            rc = AUSHAPE_CONV_RC_##_RC_TOKEN;   \
-            goto cleanup;                       \
-        }                                       \
+    do {                                    \
+        if (!(_bool_expr)) {                \
+            rc = AUSHAPE_RC_##_RC_TOKEN;    \
+            goto cleanup;                   \
+        }                                   \
     } while (0)
 
 /**
- * If an expression producing return code doesn't evaluate to
- * AUSHAPE_CONV_RC_OK, then exit with the evaluated return code. Stores the
- * evaluated return code in "rc" variable, goes to "cleanup" label to exit.
+ * If an expression producing return code doesn't evaluate to AUSHAPE_RC_OK,
+ * then exit with the evaluated return code. Stores the evaluated return code
+ * in "rc" variable, goes to "cleanup" label to exit.
  *
  * @param _rc_expr  The return code expression to evaluate.
  */
 #define GUARD(_rc_expr) \
-    do {                                \
-        rc = (_rc_expr);                \
-        if (rc != AUSHAPE_CONV_RC_OK) { \
-            goto cleanup;               \
-        }                               \
+    do {                            \
+        rc = (_rc_expr);            \
+        if (rc != AUSHAPE_RC_OK) {  \
+            goto cleanup;           \
+        }                           \
     } while (0)
 
 /**
@@ -106,16 +106,16 @@ aushape_conv_execve_empty(struct aushape_conv_execve *execve)
  *                  current field.
  *
  * @return Return code:
- *          AUSHAPE_CONV_RC_OK              - added succesfully,
- *          AUSHAPE_CONV_RC_AUPARSE_FAILED  - an auparse call failed,
- *          AUSHAPE_CONV_RC_INVALID_EXECVE  - invalid execve record sequence
+ *          AUSHAPE_RC_OK                   - added succesfully,
+ *          AUSHAPE_RC_AUPARSE_FAILED       - an auparse call failed,
+ *          AUSHAPE_RC_CONV_INVALID_EXECVE  - invalid execve record sequence
  *                                            encountered.
  */
-static enum aushape_conv_rc
+static enum aushape_rc
 aushape_conv_execve_add_argc(struct aushape_conv_execve *execve,
                              auparse_state_t *au)
 {
-    enum aushape_conv_rc rc;
+    enum aushape_rc rc;
     const char *str;
     size_t num;
     int end;
@@ -123,15 +123,15 @@ aushape_conv_execve_add_argc(struct aushape_conv_execve *execve,
     assert(aushape_conv_execve_is_valid(execve));
     assert(au != NULL);
 
-    GUARD_BOOL(INVALID_EXECVE, execve->arg_num == 0);
+    GUARD_BOOL(CONV_INVALID_EXECVE, execve->arg_num == 0);
     str = auparse_get_field_str(au);
-    GUARD_BOOL(AUPARSE_FAILED, str != NULL);
+    GUARD_BOOL(CONV_AUPARSE_FAILED, str != NULL);
     end = 0;
-    GUARD_BOOL(INVALID_EXECVE,
+    GUARD_BOOL(CONV_INVALID_EXECVE,
                sscanf(str, "%zu%n", &num, &end) >= 1 &&
                (size_t)end == strlen(str));
     execve->arg_num = num;
-    rc = AUSHAPE_CONV_RC_OK;
+    rc = AUSHAPE_RC_OK;
 cleanup:
     assert(aushape_conv_execve_is_valid(execve));
     return rc;
@@ -148,32 +148,32 @@ cleanup:
  *                  current field.
  *
  * @return Return code:
- *          AUSHAPE_CONV_RC_OK              - added succesfully,
- *          AUSHAPE_CONV_RC_NOMEM           - memory allocation failed,
- *          AUSHAPE_CONV_RC_AUPARSE_FAILED  - an auparse call failed,
- *          AUSHAPE_CONV_RC_INVALID_EXECVE  - invalid execve record sequence
+ *          AUSHAPE_RC_OK                   - added succesfully,
+ *          AUSHAPE_RC_NOMEM                - memory allocation failed,
+ *          AUSHAPE_RC_CONV_AUPARSE_FAILED  - an auparse call failed,
+ *          AUSHAPE_RC_CONV_INVALID_EXECVE  - invalid execve record sequence
  *                                            encountered.
  */
-static enum aushape_conv_rc
+static enum aushape_rc
 aushape_conv_execve_add_arg(struct aushape_conv_execve *execve,
                             const struct aushape_format *format,
                             size_t level,
                             size_t arg_idx,
                             auparse_state_t *au)
 {
-    enum aushape_conv_rc rc;
+    enum aushape_rc rc;
     const char *str;
 
     assert(aushape_conv_execve_is_valid(execve));
     assert(aushape_format_is_valid(format));
     assert(au != NULL);
 
-    GUARD_BOOL(INVALID_EXECVE,
+    GUARD_BOOL(CONV_INVALID_EXECVE,
                arg_idx == execve->arg_idx &&
                arg_idx < execve->arg_num);
 
     str = auparse_interpret_field(au);
-    GUARD_BOOL(AUPARSE_FAILED, str != NULL);
+    GUARD_BOOL(CONV_AUPARSE_FAILED, str != NULL);
     if (format->lang == AUSHAPE_LANG_XML) {
         GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(&execve->args,
                                                      format, level));
@@ -194,7 +194,7 @@ aushape_conv_execve_add_arg(struct aushape_conv_execve *execve,
 
     execve->arg_idx++;
 
-    rc = AUSHAPE_CONV_RC_OK;
+    rc = AUSHAPE_RC_OK;
 cleanup:
     assert(aushape_conv_execve_is_valid(execve));
     return rc;
@@ -209,17 +209,17 @@ cleanup:
  *                  current field.
  *
  * @return Return code:
- *          AUSHAPE_CONV_RC_OK              - added succesfully,
- *          AUSHAPE_CONV_RC_AUPARSE_FAILED  - an auparse call failed,
- *          AUSHAPE_CONV_RC_INVALID_EXECVE  - invalid execve record sequence
+ *          AUSHAPE_RC_OK                   - added succesfully,
+ *          AUSHAPE_RC_CONV_AUPARSE_FAILED  - an auparse call failed,
+ *          AUSHAPE_RC_CONV_INVALID_EXECVE  - invalid execve record sequence
  *                                            encountered.
  */
-static enum aushape_conv_rc
+static enum aushape_rc
 aushape_conv_execve_add_arg_len(struct aushape_conv_execve *execve,
                                 size_t arg_idx,
                                 auparse_state_t *au)
 {
-    enum aushape_conv_rc rc;
+    enum aushape_rc rc;
     const char *str;
     size_t num;
     int end;
@@ -227,7 +227,7 @@ aushape_conv_execve_add_arg_len(struct aushape_conv_execve *execve,
     assert(aushape_conv_execve_is_valid(execve));
     assert(au != NULL);
 
-    GUARD_BOOL(INVALID_EXECVE,
+    GUARD_BOOL(CONV_INVALID_EXECVE,
                arg_idx == execve->arg_idx &&
                arg_idx < execve->arg_num &&
                !execve->got_len);
@@ -235,14 +235,14 @@ aushape_conv_execve_add_arg_len(struct aushape_conv_execve *execve,
     execve->got_len = true;
 
     str = auparse_get_field_str(au);
-    GUARD_BOOL(AUPARSE_FAILED, str != NULL);
+    GUARD_BOOL(CONV_AUPARSE_FAILED, str != NULL);
     end = 0;
-    GUARD_BOOL(INVALID_EXECVE,
+    GUARD_BOOL(CONV_INVALID_EXECVE,
                sscanf(str, "%zu%n", &num, &end) >= 1 &&
                (size_t)end == strlen(str));
     execve->len_total = num;
 
-    rc = AUSHAPE_CONV_RC_OK;
+    rc = AUSHAPE_RC_OK;
 cleanup:
     assert(aushape_conv_execve_is_valid(execve));
     return rc;
@@ -260,20 +260,20 @@ cleanup:
  *                  current field.
  *
  * @return Return code:
- *          AUSHAPE_CONV_RC_OK              - added succesfully,
- *          AUSHAPE_CONV_RC_NOMEM           - memory allocation failed,
- *          AUSHAPE_CONV_RC_AUPARSE_FAILED  - an auparse call failed,
- *          AUSHAPE_CONV_RC_INVALID_EXECVE  - invalid execve record sequence
+ *          AUSHAPE_RC_OK                   - added succesfully,
+ *          AUSHAPE_RC_NOMEM                - memory allocation failed,
+ *          AUSHAPE_RC_CONV_AUPARSE_FAILED  - an auparse call failed,
+ *          AUSHAPE_RC_CONV_INVALID_EXECVE  - invalid execve record sequence
  *                                            encountered.
  */
-static enum aushape_conv_rc
+static enum aushape_rc
 aushape_conv_execve_add_arg_slice(struct aushape_conv_execve *execve,
                                   const struct aushape_format *format,
                                   size_t level,
                                   size_t arg_idx, size_t slice_idx,
                                   auparse_state_t *au)
 {
-    enum aushape_conv_rc rc;
+    enum aushape_rc rc;
     const char *str;
     size_t len;
 
@@ -281,16 +281,16 @@ aushape_conv_execve_add_arg_slice(struct aushape_conv_execve *execve,
     assert(aushape_format_is_valid(format));
     assert(au != NULL);
 
-    GUARD_BOOL(INVALID_EXECVE,
+    GUARD_BOOL(CONV_INVALID_EXECVE,
                arg_idx == execve->arg_idx &&
                arg_idx < execve->arg_num &&
                execve->got_len &&
                slice_idx == execve->slice_idx);
 
     str = auparse_get_field_str(au);
-    GUARD_BOOL(AUPARSE_FAILED, str != NULL);
+    GUARD_BOOL(CONV_AUPARSE_FAILED, str != NULL);
     len = strlen(str);
-    GUARD_BOOL(INVALID_EXECVE,
+    GUARD_BOOL(CONV_INVALID_EXECVE,
                execve->len_read + len <= execve->len_total);
     /* If we are starting a new argument */
     if (slice_idx == 0) {
@@ -311,7 +311,7 @@ aushape_conv_execve_add_arg_slice(struct aushape_conv_execve *execve,
     }
     /* Add the slice */
     str = auparse_interpret_field(au);
-    GUARD_BOOL(AUPARSE_FAILED, str != NULL);
+    GUARD_BOOL(CONV_AUPARSE_FAILED, str != NULL);
     if (format->lang == AUSHAPE_LANG_XML) {
         GUARD_BOOL(NOMEM, aushape_gbuf_add_str_xml(&execve->args, str));
     } else if (format->lang == AUSHAPE_LANG_JSON) {
@@ -335,19 +335,19 @@ aushape_conv_execve_add_arg_slice(struct aushape_conv_execve *execve,
         execve->slice_idx++;
     }
 
-    rc = AUSHAPE_CONV_RC_OK;
+    rc = AUSHAPE_RC_OK;
 cleanup:
     assert(aushape_conv_execve_is_valid(execve));
     return rc;
 }
 
-enum aushape_conv_rc
+enum aushape_rc
 aushape_conv_execve_add(struct aushape_conv_execve *execve,
                         const struct aushape_format *format,
                         size_t level,
                         auparse_state_t *au)
 {
-    enum aushape_conv_rc rc;
+    enum aushape_rc rc;
     const char *raw;
     const char *field_name;
     size_t arg_idx;
@@ -366,16 +366,16 @@ aushape_conv_execve_add(struct aushape_conv_execve *execve,
         GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->raw, '\n'));
     }
     raw = auparse_get_record_text(au);
-    GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
+    GUARD_BOOL(CONV_AUPARSE_FAILED, raw != NULL);
     GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->raw, raw));
 
     /*
      * For each field in the record
      */
-    GUARD_BOOL(INVALID_EXECVE, auparse_first_field(au) != 0);
+    GUARD_BOOL(CONV_INVALID_EXECVE, auparse_first_field(au) != 0);
     do {
         field_name = auparse_get_field_name(au);
-        GUARD_BOOL(AUPARSE_FAILED, field_name != NULL);
+        GUARD_BOOL(CONV_AUPARSE_FAILED, field_name != NULL);
         /* If it's the "type" pseudo-field */
         if (strcmp(field_name, "type") == 0) {
             continue;
@@ -402,12 +402,12 @@ aushape_conv_execve_add(struct aushape_conv_execve *execve,
                                                     arg_idx, slice_idx, au));
         /* If it's something else */
         } else {
-            rc = AUSHAPE_CONV_RC_INVALID_EXECVE;
+            rc = AUSHAPE_RC_CONV_INVALID_EXECVE;
             goto cleanup;
         }
     } while (auparse_next_field(au) > 0);
 
-    rc = AUSHAPE_CONV_RC_OK;
+    rc = AUSHAPE_RC_OK;
 cleanup:
     assert(aushape_conv_execve_is_valid(execve));
     return rc;

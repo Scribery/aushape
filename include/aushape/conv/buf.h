@@ -22,7 +22,7 @@
 #define _AUSHAPE_CONV_BUF_H
 
 #include <aushape/conv/execve.h>
-#include <aushape/conv/rc.h>
+#include <aushape/rc.h>
 #include <auparse.h>
 
 /** Converter's output buffer */
@@ -71,10 +71,10 @@ extern void aushape_conv_buf_empty(struct aushape_conv_buf *buf);
  * @param level     Syntactic nesting level the document is output at.
  *
  * @return Return code:
- *          AUSHAPE_CONV_RC_OK              - added succesfully,
- *          AUSHAPE_CONV_RC_NOMEM           - memory allocation failed.
+ *          AUSHAPE_RC_OK                   - added succesfully,
+ *          AUSHAPE_RC_NOMEM                - memory allocation failed.
  */
-extern enum aushape_conv_rc aushape_conv_buf_add_prologue(
+extern enum aushape_rc aushape_conv_buf_add_prologue(
                                     struct aushape_conv_buf *buf,
                                     const struct aushape_format *format,
                                     size_t level);
@@ -91,13 +91,13 @@ extern enum aushape_conv_rc aushape_conv_buf_add_prologue(
  *                  output.
  *
  * @return Return code:
- *          AUSHAPE_CONV_RC_OK              - added succesfully,
- *          AUSHAPE_CONV_RC_NOMEM           - memory allocation failed,
- *          AUSHAPE_CONV_RC_AUPARSE_FAILED  - an auparse call failed,
- *          AUSHAPE_CONV_RC_INVALID_EXECVE  - invalid execve record sequence
+ *          AUSHAPE_RC_OK                   - added succesfully,
+ *          AUSHAPE_RC_NOMEM                - memory allocation failed,
+ *          AUSHAPE_RC_CONV_AUPARSE_FAILED  - an auparse call failed,
+ *          AUSHAPE_RC_CONV_INVALID_EXECVE  - invalid execve record sequence
  *                                            encountered.
  */
-extern enum aushape_conv_rc aushape_conv_buf_add_event(
+extern enum aushape_rc aushape_conv_buf_add_event(
                                     struct aushape_conv_buf *buf,
                                     const struct aushape_format *format,
                                     size_t level,
@@ -112,10 +112,10 @@ extern enum aushape_conv_rc aushape_conv_buf_add_event(
  * @param level     Syntactic nesting level the document is output at.
  *
  * @return Return code:
- *          AUSHAPE_CONV_RC_OK              - added succesfully,
- *          AUSHAPE_CONV_RC_NOMEM           - memory allocation failed.
+ *          AUSHAPE_RC_OK                   - added succesfully,
+ *          AUSHAPE_RC_NOMEM                - memory allocation failed.
  */
-extern enum aushape_conv_rc aushape_conv_buf_add_epilogue(
+extern enum aushape_rc aushape_conv_buf_add_epilogue(
                                     struct aushape_conv_buf *buf,
                                     const struct aushape_format *format,
                                     size_t level);

@@ -1,5 +1,5 @@
 /**
- * @brief An aushape raw audit log converter return code
+ * @brief Aushape function return codes
  *
  * Copyright (C) 2016 Red Hat
  *
@@ -18,27 +18,27 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _AUSHAPE_CONV_RC_H
-#define _AUSHAPE_CONV_RC_H
+#ifndef _AUSHAPE_RC_H
+#define _AUSHAPE_RC_H
 
 /** Return codes */
-enum aushape_conv_rc {
+enum aushape_rc {
     /** Execution succeeded */
-    AUSHAPE_CONV_RC_OK  = 0,
+    AUSHAPE_RC_OK  = 0,
     /** Invalid arguments supplied to a function */
-    AUSHAPE_CONV_RC_INVALID_ARGS,
+    AUSHAPE_RC_INVALID_ARGS,
     /** Object is in invalid state */
-    AUSHAPE_CONV_RC_INVALID_STATE,
+    AUSHAPE_RC_INVALID_STATE,
     /** Memory allocation failed */
-    AUSHAPE_CONV_RC_NOMEM,
-    /** Output function failed */
-    AUSHAPE_CONV_RC_OUTPUT_FAILED,
-    /** An underlying auparse call failed */
-    AUSHAPE_CONV_RC_AUPARSE_FAILED,
-    /** Invalid execve record sequence encountered */
-    AUSHAPE_CONV_RC_INVALID_EXECVE,
+    AUSHAPE_RC_NOMEM,
+    /** Converter output function failed */
+    AUSHAPE_RC_CONV_OUTPUT_FAILED,
+    /** A converter's call to auparse failed */
+    AUSHAPE_RC_CONV_AUPARSE_FAILED,
+    /** Invalid execve record sequence encountered by converter */
+    AUSHAPE_RC_CONV_INVALID_EXECVE,
     /** Number of return codes (not a valid return code) */
-    AUSHAPE_CONV_RC_NUM
+    AUSHAPE_RC_NUM
 };
 
 /**
@@ -48,7 +48,7 @@ enum aushape_conv_rc {
  *
  * @return A constant string with the name of the return code.
  */
-extern const char *aushape_conv_rc_to_name(enum aushape_conv_rc rc);
+extern const char *aushape_rc_to_name(enum aushape_rc rc);
 
 /**
  * Retrieve the description of a return code.
@@ -57,6 +57,6 @@ extern const char *aushape_conv_rc_to_name(enum aushape_conv_rc rc);
  *
  * @return A constant string describing the return code.
  */
-extern const char *aushape_conv_rc_to_desc(enum aushape_conv_rc rc);
+extern const char *aushape_rc_to_desc(enum aushape_rc rc);
 
-#endif /* _AUSHAPE_CONV_RC_H */
+#endif /* _AUSHAPE_RC_H */

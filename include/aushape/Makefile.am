@@ -24,7 +24,8 @@ aushapedir = $(includedir)/aushape
 aushape_HEADERS = \
 	conv.h      \
 	format.h    \
-	lang.h
+	lang.h      \
+	rc.h
 
 noinst_HEADERS = \
 	gbuf.h          \

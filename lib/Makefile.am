@@ -24,8 +24,9 @@ lib_LTLIBRARIES = \
 	libaushape.la
 
 libaushape_la_SOURCES = \
+	conv.c          \
 	gbuf.c          \
-	conv.c
+	rc.c
 
 libaushape_la_LIBADD = \
 	conv/libaushape_conv.la

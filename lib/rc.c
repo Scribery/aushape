@@ -1,5 +1,5 @@
 /*
- * An aushape raw audit log converter return code
+ * Aushape function return codes
  *
  * Copyright (C) 2016 Red Hat
  *
@@ -18,35 +18,41 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <aushape/conv/rc.h>
+#include <aushape/rc.h>
 #include <aushape/misc.h>
 #include <stddef.h>
 
-struct aushape_conv_rc_info {
+struct aushape_rc_info {
     const char *name;
     const char *desc;
 };
 
-static const struct aushape_conv_rc_info \
-                        aushape_conv_rc_info_list[AUSHAPE_CONV_RC_NUM] = {
+static const struct aushape_rc_info \
+                        aushape_rc_info_list[AUSHAPE_RC_NUM] = {
 #define RC(_name, _desc) \
-    [AUSHAPE_CONV_RC_##_name] = {.name = #_name, .desc = _desc}
-    RC(OK,              "Success"),
-    RC(INVALID_ARGS,    "Invalid arguments supplied to a function"),
-    RC(INVALID_STATE,   "Object is in invalid state"),
-    RC(NOMEM,           "Memory allocation failed"),
-    RC(OUTPUT_FAILED,   "Output function failed"),
-    RC(AUPARSE_FAILED,  "An underlying auparse call failed"),
-    RC(INVALID_EXECVE,  "Invalid execve record sequence encountered"),
+    [AUSHAPE_RC_##_name] = {.name = #_name, .desc = _desc}
+    RC(OK,
+       "Success"),
+    RC(INVALID_ARGS,
+       "Invalid arguments supplied to a function"),
+    RC(INVALID_STATE,
+       "Object is in invalid state"),
+    RC(NOMEM,
+       "Memory allocation failed"),
+    RC(CONV_OUTPUT_FAILED,
+       "Converter output function failed"),
+    RC(CONV_AUPARSE_FAILED,
+       "A converter's call to auparse failed"),
+    RC(CONV_INVALID_EXECVE,
+       "Invalid execve record sequence encountered by converter"),
 #undef RC
 };
 
 const char *
-aushape_conv_rc_to_name(enum aushape_conv_rc rc)
+aushape_rc_to_name(enum aushape_rc rc)
 {
-    if ((size_t)rc < AUSHAPE_ARRAY_SIZE(aushape_conv_rc_info_list)) {
-        const struct aushape_conv_rc_info *info =
-                        aushape_conv_rc_info_list + rc;
+    if ((size_t)rc < AUSHAPE_ARRAY_SIZE(aushape_rc_info_list)) {
+        const struct aushape_rc_info *info = aushape_rc_info_list + rc;
         if (info->name != NULL) {
             return info->name;
         }
@@ -55,11 +61,10 @@ aushape_conv_rc_to_name(enum aushape_conv_rc rc)
 }
 
 const char *
-aushape_conv_rc_to_desc(enum aushape_conv_rc rc)
+aushape_rc_to_desc(enum aushape_rc rc)
 {
-    if ((size_t)rc < AUSHAPE_ARRAY_SIZE(aushape_conv_rc_info_list)) {
-        const struct aushape_conv_rc_info *info =
-                        aushape_conv_rc_info_list + rc;
+    if ((size_t)rc < AUSHAPE_ARRAY_SIZE(aushape_rc_info_list)) {
+        const struct aushape_rc_info *info = aushape_rc_info_list + rc;
         if (info->desc != NULL) {
             return info->desc;
         }

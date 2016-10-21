@@ -35,15 +35,15 @@
     } while (0)
 
 /**
- * Evaluate an expression and return AUSHAPE_CONV_RC_NOMEM if it is false.
+ * Evaluate an expression and return AUSHAPE_RC_NOMEM if it is false.
  *
  * @param _expr The expression to evaluate.
  */
 #define GUARD_RC(_expr) \
-    do {                                    \
-        if (!(_expr)) {                     \
-            return AUSHAPE_CONV_RC_NOMEM;   \
-        }                                   \
+    do {                                \
+        if (!(_expr)) {                 \
+            return AUSHAPE_RC_NOMEM;    \
+        }                               \
     } while (0)
 
 /**
@@ -172,7 +172,7 @@ aushape_conv_buf_add_record(struct aushape_gbuf *gbuf,
         GUARD_BOOL(aushape_gbuf_add_char(gbuf, '<'));
         GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, name));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, " raw=\""));
-        /* TODO: Return AUSHAPE_CONV_RC_AUPARSE_FAILED on failure */
+        /* TODO: Return AUSHAPE_RC_CONV_AUPARSE_FAILED on failure */
         GUARD_BOOL(aushape_gbuf_add_str_xml(
                                         gbuf, auparse_get_record_text(au)));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\">"));
@@ -187,7 +187,7 @@ aushape_conv_buf_add_record(struct aushape_gbuf *gbuf,
         l++;
         GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"raw\": \""));
-        /* TODO: Return AUSHAPE_CONV_RC_AUPARSE_FAILED on failure */
+        /* TODO: Return AUSHAPE_RC_CONV_AUPARSE_FAILED on failure */
         GUARD_BOOL(aushape_gbuf_add_str_json(
                                         gbuf, auparse_get_record_text(au)));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\","));
@@ -354,14 +354,14 @@ aushape_conv_buf_empty(struct aushape_conv_buf *buf)
     assert(aushape_conv_buf_is_valid(buf));
 }
 
-enum aushape_conv_rc
+enum aushape_rc
 aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
                            const struct aushape_format *format,
                            size_t level,
                            bool first,
                            auparse_state_t *au)
 {
-    enum aushape_conv_rc rc;
+    enum aushape_rc rc;
     size_t l = level;
     const au_event_t *e;
     struct tm *tm;
@@ -377,7 +377,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
 
     e = auparse_get_timestamp(au);
     if (e == NULL) {
-        return AUSHAPE_CONV_RC_AUPARSE_FAILED;
+        return AUSHAPE_RC_CONV_AUPARSE_FAILED;
     }
 
     /* Format timestamp */
@@ -425,7 +425,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     /* Output records */
     l++;
     if (auparse_first_record(au) <= 0) {
-        return AUSHAPE_CONV_RC_AUPARSE_FAILED;
+        return AUSHAPE_RC_CONV_AUPARSE_FAILED;
     }
     first_record = true;
     do {
@@ -436,7 +436,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
                             &buf->execve, format,
                             l + aushape_conv_buf_get_execve_depth(format),
                             au);
-            if (rc != AUSHAPE_CONV_RC_OK) {
+            if (rc != AUSHAPE_RC_OK) {
                 assert(aushape_conv_buf_is_valid(buf));
                 return rc;
             }
@@ -451,7 +451,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         } else {
             /* If the execve series wasn't finished */
             if (!aushape_conv_execve_is_complete(&buf->execve)) {
-                return AUSHAPE_CONV_RC_INVALID_EXECVE;
+                return AUSHAPE_RC_CONV_INVALID_EXECVE;
             }
             GUARD_RC(aushape_conv_buf_add_record(&buf->gbuf, format, l,
                                                  first_record, record_name,
@@ -477,10 +477,10 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
 
     assert(l == level);
     assert(aushape_conv_buf_is_valid(buf));
-    return AUSHAPE_CONV_RC_OK;
+    return AUSHAPE_RC_OK;
 }
 
-enum aushape_conv_rc
+enum aushape_rc
 aushape_conv_buf_add_prologue(struct aushape_conv_buf *buf,
                               const struct aushape_format *format,
                               size_t level)
@@ -503,10 +503,10 @@ aushape_conv_buf_add_prologue(struct aushape_conv_buf *buf,
     }
 
     assert(aushape_conv_buf_is_valid(buf));
-    return AUSHAPE_CONV_RC_OK;
+    return AUSHAPE_RC_OK;
 }
 
-enum aushape_conv_rc
+enum aushape_rc
 aushape_conv_buf_add_epilogue(struct aushape_conv_buf *buf,
                               const struct aushape_format *format,
                               size_t level)
@@ -522,5 +522,5 @@ aushape_conv_buf_add_epilogue(struct aushape_conv_buf *buf,
     }
 
     assert(aushape_conv_buf_is_valid(buf));
-    return AUSHAPE_CONV_RC_OK;
+    return AUSHAPE_RC_OK;
 }

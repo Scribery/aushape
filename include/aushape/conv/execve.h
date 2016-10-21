@@ -23,7 +23,7 @@
 
 #include <aushape/format.h>
 #include <aushape/gbuf.h>
-#include <aushape/conv/rc.h>
+#include <aushape/rc.h>
 #include <auparse.h>
 
 /** Execve record aggregation buffer */
@@ -88,13 +88,13 @@ extern void aushape_conv_execve_empty(struct aushape_conv_execve *execve);
  *                  record to be aggregated.
  *
  * @return Return code:
- *          AUSHAPE_CONV_RC_OK              - added succesfully,
- *          AUSHAPE_CONV_RC_NOMEM           - memory allocation failed,
- *          AUSHAPE_CONV_RC_AUPARSE_FAILED  - an auparse call failed,
- *          AUSHAPE_CONV_RC_INVALID_EXECVE  - invalid execve record sequence
+ *          AUSHAPE_RC_OK                   - added succesfully,
+ *          AUSHAPE_RC_NOMEM                - memory allocation failed,
+ *          AUSHAPE_RC_CONV_AUPARSE_FAILED  - an auparse call failed,
+ *          AUSHAPE_RC_CONV_INVALID_EXECVE  - invalid execve record sequence
  *                                            encountered.
  */
-extern enum aushape_conv_rc aushape_conv_execve_add(
+extern enum aushape_rc aushape_conv_execve_add(
                                     struct aushape_conv_execve *execve,
                                     const struct aushape_format *format,
                                     size_t level,
