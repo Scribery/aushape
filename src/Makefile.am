@@ -18,14 +18,14 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 AM_CPPFLAGS = \
-	$(AUPARSE_CFLAGS)
+    $(AUPARSE_CFLAGS)
 
 bin_PROGRAMS = \
-	aushape
+    aushape
 
 aushape_SOURCES = \
-	aushape.c
+    aushape.c
 
 aushape_LDADD = \
-	../lib/libaushape.la \
-	$(AUPARSE_LIBS)
+    ../lib/libaushape.la    \
+    $(AUPARSE_LIBS)

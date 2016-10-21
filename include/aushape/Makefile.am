@@ -22,11 +22,11 @@ SUBDIRS = conv
 aushapedir = $(includedir)/aushape
 
 aushape_HEADERS = \
-	conv.h      \
-	format.h    \
-	lang.h      \
-	rc.h
+    conv.h          \
+    format.h        \
+    lang.h          \
+    rc.h
 
 noinst_HEADERS = \
-	gbuf.h          \
-	misc.h
+    gbuf.h          \
+    misc.h

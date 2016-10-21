@@ -20,5 +20,5 @@
 aushape_convdir = $(includedir)/aushape/conv
 
 noinst_HEADERS = \
-	buf.h       \
-	execve.h
+    buf.h           \
+    execve.h

@@ -16,18 +16,18 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 AM_CPPFLAGS = \
-	$(AUPARSE_CFLAGS)
+    $(AUPARSE_CFLAGS)
 
 SUBDIRS = conv
 
 lib_LTLIBRARIES = \
-	libaushape.la
+    libaushape.la
 
 libaushape_la_SOURCES = \
-	conv.c          \
-	gbuf.c          \
-	rc.c
+    conv.c              \
+    gbuf.c              \
+    rc.c
 
 libaushape_la_LIBADD = \
-	conv/libaushape_conv.la
-	$(AUPARSE_LIBS)
+    conv/libaushape_conv.la \
+    $(AUPARSE_LIBS)
