@@ -34,7 +34,7 @@ struct aushape_format {
      * Syntactic nesting level at which the output should be
      * "folded" into single line. Zero for the whole output to be on the same
      * line. SIZE_MAX for the output to be fully "unfolded". Total number of
-     * nesting levels depends on output format.
+     * nesting levels depends on output language.
      */
     size_t              fold_level;
     /** Initial indentation of each output line, in spaces */
