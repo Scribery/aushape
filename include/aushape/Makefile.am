@@ -25,6 +25,8 @@ aushape_HEADERS = \
     conv.h          \
     format.h        \
     lang.h          \
+    output.h        \
+    output_type.h   \
     rc.h
 
 noinst_HEADERS = \
