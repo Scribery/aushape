@@ -23,11 +23,13 @@ aushapedir = $(includedir)/aushape
 
 aushape_HEADERS = \
     conv.h          \
+    fd_output.h     \
     format.h        \
     lang.h          \
     output.h        \
     output_type.h   \
-    rc.h
+    rc.h            \
+    syslog_output.h
 
 noinst_HEADERS = \
     gbuf.h          \

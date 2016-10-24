@@ -25,9 +25,11 @@ lib_LTLIBRARIES = \
 
 libaushape_la_SOURCES = \
     conv.c              \
+    fd_output.c         \
     gbuf.c              \
     output.c            \
-    rc.c
+    rc.c                \
+    syslog_output.c
 
 libaushape_la_LIBADD = \
     conv/libaushape_conv.la \
