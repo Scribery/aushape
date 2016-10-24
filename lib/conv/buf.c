@@ -111,7 +111,7 @@ aushape_conv_buf_add_field(struct aushape_gbuf *gbuf,
         GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, name));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\": ["));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\":["));
         l++;
         GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
@@ -183,16 +183,16 @@ aushape_conv_buf_add_record(struct aushape_gbuf *gbuf,
         GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
         GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, name));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\": {"));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\":{"));
         l++;
         GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"raw\": \""));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"raw\":\""));
         /* TODO: Return AUSHAPE_RC_CONV_AUPARSE_FAILED on failure */
         GUARD_BOOL(aushape_gbuf_add_str_json(
                                         gbuf, auparse_get_record_text(au)));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\","));
         GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"fields\": {"));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"fields\":{"));
     }
 
     l++;
@@ -284,16 +284,16 @@ aushape_conv_buf_add_execve(struct aushape_gbuf *gbuf,
             GUARD_BOOL(aushape_gbuf_add_char(gbuf, ','));
         }
         GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"execve\": {"));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"execve\":{"));
         l++;
         GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"raw\": \""));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"raw\":\""));
         GUARD_BOOL(aushape_gbuf_add_buf_json(gbuf,
                                              execve->raw.ptr,
                                              execve->raw.len));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\","));
         GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"args\": ["));
+        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"args\":["));
     }
     l++;
 
@@ -408,18 +408,18 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         l++;
         GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, l));
         GUARD_RC(aushape_gbuf_add_fmt(&buf->gbuf,
-                                      "\"serial\": %lu,", e->serial));
+                                      "\"serial\":%lu,", e->serial));
         GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, l));
         GUARD_RC(aushape_gbuf_add_fmt(&buf->gbuf,
-                                      "\"time\": \"%s\",", timestamp_buf));
+                                      "\"time\":\"%s\",", timestamp_buf));
         if (e->host != NULL) {
             GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, l));
-            GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "\"host\": \""));
+            GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "\"host\":\""));
             GUARD_RC(aushape_gbuf_add_str_json(&buf->gbuf, e->host));
             GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "\","));
         }
         GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, l));
-        GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "\"records\": {"));
+        GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "\"records\":{"));
     }
 
     /* Output records */
