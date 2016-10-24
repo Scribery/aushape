@@ -39,8 +39,6 @@ static const struct aushape_rc_info \
        "Object is in invalid state"),
     RC(NOMEM,
        "Memory allocation failed"),
-    RC(CONV_OUTPUT_FAILED,
-       "Converter output function failed"),
     RC(CONV_AUPARSE_FAILED,
        "A converter's call to auparse failed"),
     RC(CONV_INVALID_EXECVE,

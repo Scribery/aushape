@@ -34,15 +34,13 @@ struct aushape_conv {
     ssize_t                     events_per_doc;
     /** Output format */
     struct aushape_format       format;
-    /** Output function pointer */
-    aushape_conv_output_fn      output_fn;
+    /** Output */
+    struct aushape_output      *output;
     /**
-     * True if the output function accepts continuous input, i.e. arbitrary
-     * pieces of the output, false if it expects complete documents/events.
+     * True if the output should be destroyed when converter is destroyed.
+     * False otherwise.
      */
-    bool                        output_cont;
-    /** Output function data */
-    void                       *output_data;
+    bool                        output_owned;
     /** First conversion failure return code, or OK */
     enum aushape_rc             rc;
     /** Output buffer */
@@ -61,7 +59,7 @@ aushape_conv_is_valid(const struct aushape_conv *conv)
 {
     return conv != NULL &&
            conv->au != NULL &&
-           conv->output_fn != NULL &&
+           aushape_output_is_valid(conv->output) &&
            aushape_conv_buf_is_valid(&conv->buf);
 }
 
@@ -93,12 +91,14 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
                 rc = aushape_conv_buf_add_prologue(&conv->buf, &conv->format, 0);
                 if (rc == AUSHAPE_RC_OK) {
                     conv->in_doc = true;
-                    if (conv->output_cont) {
-                        if (conv->output_fn(conv->buf.gbuf.ptr, conv->buf.gbuf.len,
-                                            conv->output_data)) {
+                    if (aushape_output_is_cont(conv->output)) {
+                        rc = aushape_output_write(conv->output,
+                                                  conv->buf.gbuf.ptr,
+                                                  conv->buf.gbuf.len);
+                        if (rc == AUSHAPE_RC_OK) {
                             aushape_conv_buf_empty(&conv->buf);
                         } else {
-                            conv->rc = AUSHAPE_RC_CONV_OUTPUT_FAILED;
+                            conv->rc = rc;
                         }
                     }
                 } else {
@@ -121,12 +121,15 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
             } else if (conv->events_per_doc < 0) {
                 conv->events_in_doc += conv->buf.gbuf.len;
             }
-            if (conv->output_cont || conv->events_per_doc == 0) {
-                if (conv->output_fn(conv->buf.gbuf.ptr, conv->buf.gbuf.len,
-                                     conv->output_data)) {
+            if (aushape_output_is_cont(conv->output) ||
+                conv->events_per_doc == 0) {
+                rc = aushape_output_write(conv->output,
+                                          conv->buf.gbuf.ptr,
+                                          conv->buf.gbuf.len);
+                if (rc == AUSHAPE_RC_OK) {
                     aushape_conv_buf_empty(&conv->buf);
                 } else {
-                    conv->rc = AUSHAPE_RC_CONV_OUTPUT_FAILED;
+                    conv->rc = rc;
                 }
             }
         } else {
@@ -147,13 +150,15 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
                  conv->events_in_doc >= (size_t)-conv->events_per_doc)) {
                 rc = aushape_conv_buf_add_epilogue(&conv->buf, &conv->format, 0);
                 if (rc == AUSHAPE_RC_OK) {
-                    if (conv->output_fn(conv->buf.gbuf.ptr, conv->buf.gbuf.len,
-                                        conv->output_data)) {
+                    rc = aushape_output_write(conv->output,
+                                              conv->buf.gbuf.ptr,
+                                              conv->buf.gbuf.len);
+                    if (rc == AUSHAPE_RC_OK) {
                         aushape_conv_buf_empty(&conv->buf);
                         conv->events_in_doc = 0;
                         conv->in_doc = false;
                     } else {
-                        conv->rc = AUSHAPE_RC_CONV_OUTPUT_FAILED;
+                        conv->rc = rc;
                     }
                 } else {
                     conv->rc = rc;
@@ -167,16 +172,15 @@ enum aushape_rc
 aushape_conv_create(struct aushape_conv **pconv,
                     ssize_t events_per_doc,
                     const struct aushape_format *format,
-                    aushape_conv_output_fn output_fn,
-                    bool output_cont,
-                    void *output_data)
+                    struct aushape_output *output,
+                    bool output_owned)
 {
     enum aushape_rc rc;
     struct aushape_conv *conv;
 
     if (pconv == NULL ||
         !aushape_format_is_valid(format) ||
-        output_fn == NULL) {
+        !aushape_output_is_valid(output)) {
         rc = AUSHAPE_RC_INVALID_ARGS;
         goto cleanup;
     }
@@ -198,9 +202,8 @@ aushape_conv_create(struct aushape_conv **pconv,
     aushape_conv_buf_init(&conv->buf);
     conv->events_per_doc = events_per_doc;
     conv->format = *format;
-    conv->output_fn = output_fn;
-    conv->output_cont = output_cont;
-    conv->output_data = output_data;
+    conv->output = output;
+    conv->output_owned = output_owned;
 
     *pconv = conv;
     conv = NULL;
@@ -234,12 +237,14 @@ aushape_conv_begin(struct aushape_conv *conv)
         rc = aushape_conv_buf_add_prologue(&conv->buf, &conv->format, 0);
         if (rc == AUSHAPE_RC_OK) {
             conv->in_doc = true;
-            if (conv->output_cont) {
-                if (conv->output_fn(conv->buf.gbuf.ptr, conv->buf.gbuf.len,
-                                    conv->output_data)) {
+            if (aushape_output_is_cont(conv->output)) {
+                rc = aushape_output_write(conv->output,
+                                          conv->buf.gbuf.ptr,
+                                          conv->buf.gbuf.len);
+                if (rc == AUSHAPE_RC_OK) {
                     aushape_conv_buf_empty(&conv->buf);
                 } else {
-                    conv->rc = AUSHAPE_RC_CONV_OUTPUT_FAILED;
+                    conv->rc = rc;
                 }
             }
         } else {
@@ -271,13 +276,15 @@ aushape_conv_end(struct aushape_conv *conv)
         enum aushape_rc rc;
         rc = aushape_conv_buf_add_epilogue(&conv->buf, &conv->format, 0);
         if (rc == AUSHAPE_RC_OK) {
-            if (conv->output_fn(conv->buf.gbuf.ptr, conv->buf.gbuf.len,
-                                conv->output_data)) {
+            rc = aushape_output_write(conv->output,
+                                      conv->buf.gbuf.ptr,
+                                      conv->buf.gbuf.len);
+            if (rc == AUSHAPE_RC_OK) {
                 aushape_conv_buf_empty(&conv->buf);
                 conv->events_in_doc = 0;
                 conv->in_doc = false;
             } else {
-                conv->rc = AUSHAPE_RC_CONV_OUTPUT_FAILED;
+                conv->rc = rc;
             }
         } else {
             conv->rc = rc;

@@ -17,6 +17,7 @@
  */
 
 #include <aushape/conv.h>
+#include <aushape/fd_output.h>
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
@@ -53,6 +54,7 @@ main(int argc, char **argv)
     struct aushape_format format = {.fold_level = 5,
                                     .init_indent = 0,
                                     .nest_indent = 4};
+    struct aushape_output *output = NULL;
     struct aushape_conv *conv = NULL;
     enum aushape_rc aushape_rc;
     char buf[4096];
@@ -74,8 +76,15 @@ main(int argc, char **argv)
         goto cleanup;
     }
 
+    aushape_rc = aushape_fd_output_create(&output, STDOUT_FILENO, false);
+    if (aushape_rc != AUSHAPE_RC_OK) {
+        fprintf(stderr, "Failed creating output: %s\n",
+                aushape_rc_to_desc(aushape_rc));
+        goto cleanup;
+    }
+
     aushape_rc = aushape_conv_create(&conv, SSIZE_MAX, &format,
-                                  conv_output_fn, true, NULL);
+                                     output, false);
     if (aushape_rc != AUSHAPE_RC_OK) {
         fprintf(stderr, "Failed creating converter: %s\n",
                 aushape_rc_to_desc(aushape_rc));
@@ -122,5 +131,6 @@ main(int argc, char **argv)
 cleanup:
 
     aushape_conv_destroy(conv);
+    aushape_output_destroy(output);
     return status;
 }

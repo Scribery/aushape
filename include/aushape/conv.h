@@ -21,25 +21,12 @@
 #ifndef _AUSHAPE_CONV_H
 #define _AUSHAPE_CONV_H
 
+#include <aushape/output.h>
 #include <aushape/format.h>
 #include <aushape/rc.h>
 #include <unistd.h>
 #include <stddef.h>
 #include <stdbool.h>
-
-/**
- * Output function prototype. Called for each output fragment.
- *
- * @param format    Output format.
- * @param ptr       Pointer to the output fragment.
- * @param len       Length of the output fragment in bytes.
- * @param data      The opaque data pointer, supplied upon converter creation.
- *
- * @return True if the function executed succesfully, false if it failed and
- *         conversion should be terminated.
- */
-typedef bool (*aushape_conv_output_fn)(const char *ptr, size_t len,
-                                       void *data);
 
 /** Converter state */
 struct aushape_conv;
@@ -68,12 +55,9 @@ bool aushape_conv_is_valid(const struct aushape_conv *conv);
  *                          size of event text added to it crosses the negated
  *                          number.
  * @param format            The output format to use.
- * @param output_fn         The function to call for each completely formatted
- *                          fragment. Cannot be NULL.
- * @param output_cont       True if the output function accepts continuous
- *                          input, i.e. arbitrary pieces of the output,
- *                          false if it expects complete documents/events.
- * @param output_data       The data to pass to the output function.
+ * @param output            The output to write to.
+ * @param output_owned      True if the output should be destroyed when
+ *                          converter is destroyed.
  *
  * @return Return code:
  *          AUSHAPE_RC_OK                   - created succesfully,
@@ -83,9 +67,8 @@ bool aushape_conv_is_valid(const struct aushape_conv *conv);
 enum aushape_rc aushape_conv_create(struct aushape_conv **pconv,
                                     ssize_t events_per_doc,
                                     const struct aushape_format *format,
-                                    aushape_conv_output_fn output_fn,
-                                    bool output_cont,
-                                    void *output_data);
+                                    struct aushape_output *output,
+                                    bool output_owned);
 
 /**
  * Begin converter document output. Must be called once before
@@ -102,7 +85,7 @@ enum aushape_rc aushape_conv_create(struct aushape_conv **pconv,
  *                                            but not finished with
  *                                            aushape_conv_end,
  *          AUSHAPE_RC_NOMEM                - memory allocation failed,
- *          AUSHAPE_RC_CONV_OUTPUT_FAILED   - output function failed.
+ *          AUSHAPE_RC_OUTPUT_WRITE_FAILED  - output write failed.
  */
 enum aushape_rc aushape_conv_begin(struct aushape_conv *conv);
 
@@ -126,7 +109,7 @@ enum aushape_rc aushape_conv_begin(struct aushape_conv *conv);
  *          AUSHAPE_RC_CONV_AUPARSE_FAILED  - an auparse call failed,
  *          AUSHAPE_RC_CONV_INVALID_EXECVE  - invalid execve record sequence
  *                                            encountered,
- *          AUSHAPE_RC_CONV_OUTPUT_FAILED   - output function failed.
+ *          AUSHAPE_RC_OUTPUT_WRITE_FAILED  - output write failed.
  */
 enum aushape_rc aushape_conv_input(struct aushape_conv *conv,
                                    const char *ptr,
@@ -151,7 +134,7 @@ enum aushape_rc aushape_conv_input(struct aushape_conv *conv,
  *          AUSHAPE_RC_CONV_AUPARSE_FAILED  - an auparse call failed,
  *          AUSHAPE_RC_CONV_INVALID_EXECVE  - invalid execve record sequence
  *                                            encountered,
- *          AUSHAPE_RC_CONV_OUTPUT_FAILED   - output function failed.
+ *          AUSHAPE_RC_OUTPUT_WRITE_FAILED  - output write failed.
  */
 enum aushape_rc aushape_conv_flush(struct aushape_conv *conv);
 
@@ -169,12 +152,13 @@ enum aushape_rc aushape_conv_flush(struct aushape_conv *conv);
  *                                            output with aushape_conv_begin,
  *                                            if events_per_doc == SSIZE_MAX,
  *          AUSHAPE_RC_NOMEM                - memory allocation failed,
- *          AUSHAPE_RC_CONV_OUTPUT_FAILED   - output function failed.
+ *          AUSHAPE_RC_OUTPUT_WRITE_FAILED  - output write failed.
  */
 enum aushape_rc aushape_conv_end(struct aushape_conv *conv);
 
 /**
- * Destroy (cleanup and free) a converter.
+ * Destroy (cleanup and free) a converter. If converter was created with
+ * output_owned true, then the supplied output is destroyed as well.
  *
  * @param conv  The converter to destroy. Can be NULL.
  *              Must be valid, if not NULL.

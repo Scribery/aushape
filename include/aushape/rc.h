@@ -31,8 +31,6 @@ enum aushape_rc {
     AUSHAPE_RC_INVALID_STATE,
     /** Memory allocation failed */
     AUSHAPE_RC_NOMEM,
-    /** Converter output function failed */
-    AUSHAPE_RC_CONV_OUTPUT_FAILED,
     /** A converter's call to auparse failed */
     AUSHAPE_RC_CONV_AUPARSE_FAILED,
     /** Invalid execve record sequence encountered by converter */
