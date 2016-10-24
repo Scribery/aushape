@@ -38,8 +38,7 @@
  * @return True if the function executed succesfully, false if it failed and
  *         conversion should be terminated.
  */
-typedef bool (*aushape_conv_output_fn)(const struct aushape_format *format,
-                                       const char *ptr, size_t len,
+typedef bool (*aushape_conv_output_fn)(const char *ptr, size_t len,
                                        void *data);
 
 /** Converter state */

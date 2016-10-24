@@ -94,8 +94,7 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
                 if (rc == AUSHAPE_RC_OK) {
                     conv->in_doc = true;
                     if (conv->output_cont) {
-                        if (conv->output_fn(&conv->format,
-                                            conv->buf.gbuf.ptr, conv->buf.gbuf.len,
+                        if (conv->output_fn(conv->buf.gbuf.ptr, conv->buf.gbuf.len,
                                             conv->output_data)) {
                             aushape_conv_buf_empty(&conv->buf);
                         } else {
@@ -123,8 +122,7 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
                 conv->events_in_doc += conv->buf.gbuf.len;
             }
             if (conv->output_cont || conv->events_per_doc == 0) {
-                if (conv->output_fn(&conv->format,
-                                     conv->buf.gbuf.ptr, conv->buf.gbuf.len,
+                if (conv->output_fn(conv->buf.gbuf.ptr, conv->buf.gbuf.len,
                                      conv->output_data)) {
                     aushape_conv_buf_empty(&conv->buf);
                 } else {
@@ -149,8 +147,7 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
                  conv->events_in_doc >= (size_t)-conv->events_per_doc)) {
                 rc = aushape_conv_buf_add_epilogue(&conv->buf, &conv->format, 0);
                 if (rc == AUSHAPE_RC_OK) {
-                    if (conv->output_fn(&conv->format,
-                                        conv->buf.gbuf.ptr, conv->buf.gbuf.len,
+                    if (conv->output_fn(conv->buf.gbuf.ptr, conv->buf.gbuf.len,
                                         conv->output_data)) {
                         aushape_conv_buf_empty(&conv->buf);
                         conv->events_in_doc = 0;
@@ -238,8 +235,7 @@ aushape_conv_begin(struct aushape_conv *conv)
         if (rc == AUSHAPE_RC_OK) {
             conv->in_doc = true;
             if (conv->output_cont) {
-                if (conv->output_fn(&conv->format,
-                                    conv->buf.gbuf.ptr, conv->buf.gbuf.len,
+                if (conv->output_fn(conv->buf.gbuf.ptr, conv->buf.gbuf.len,
                                     conv->output_data)) {
                     aushape_conv_buf_empty(&conv->buf);
                 } else {
@@ -275,8 +271,7 @@ aushape_conv_end(struct aushape_conv *conv)
         enum aushape_rc rc;
         rc = aushape_conv_buf_add_epilogue(&conv->buf, &conv->format, 0);
         if (rc == AUSHAPE_RC_OK) {
-            if (conv->output_fn(&conv->format,
-                                conv->buf.gbuf.ptr, conv->buf.gbuf.len,
+            if (conv->output_fn(conv->buf.gbuf.ptr, conv->buf.gbuf.len,
                                 conv->output_data)) {
                 aushape_conv_buf_empty(&conv->buf);
                 conv->events_in_doc = 0;

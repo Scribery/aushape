@@ -38,11 +38,9 @@ usage(FILE *stream)
             "\n");
 }
 
-bool conv_output_fn(const struct aushape_format *format,
-                    const char *ptr, size_t len,
+bool conv_output_fn(const char *ptr, size_t len,
                     void *abstract_data)
 {
-    (void)format;
     (void)abstract_data;
     write(STDOUT_FILENO, ptr, len);
     return true;
