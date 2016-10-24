@@ -53,7 +53,8 @@ main(int argc, char **argv)
     int status = 1;
     struct aushape_format format = {.fold_level = 5,
                                     .init_indent = 0,
-                                    .nest_indent = 4};
+                                    .nest_indent = 4,
+                                    .events_per_doc = SSIZE_MAX};
     struct aushape_output *output = NULL;
     struct aushape_conv *conv = NULL;
     enum aushape_rc aushape_rc;
@@ -83,8 +84,7 @@ main(int argc, char **argv)
         goto cleanup;
     }
 
-    aushape_rc = aushape_conv_create(&conv, SSIZE_MAX, &format,
-                                     output, false);
+    aushape_rc = aushape_conv_create(&conv, &format, output, false);
     if (aushape_rc != AUSHAPE_RC_OK) {
         fprintf(stderr, "Failed creating converter: %s\n",
                 aushape_rc_to_desc(aushape_rc));

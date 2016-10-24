@@ -27,11 +27,6 @@
 struct aushape_conv {
     /** Auparse state */
     auparse_state_t            *au;
-    /**
-     * Amount of events per document.
-     * Positive for events, negative for bytes
-     */
-    ssize_t                     events_per_doc;
     /** Output format */
     struct aushape_format       format;
     /** Output */
@@ -49,7 +44,7 @@ struct aushape_conv {
     bool                        in_doc;
     /**
      * Amount of events in current document.
-     * Events, if events_per_doc is positive, bytes if negative.
+     * Events, if format.events_per_doc is positive, bytes if negative.
      */
     size_t                      events_in_doc;
 };
@@ -86,7 +81,8 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
      * Output document prologue, if needed
      */
     if (conv->rc == AUSHAPE_RC_OK) {
-        if (conv->events_per_doc != 0 && conv->events_per_doc != SSIZE_MAX) {
+        if (conv->format.events_per_doc != 0 &&
+            conv->format.events_per_doc != SSIZE_MAX) {
             if (!conv->in_doc) {
                 rc = aushape_conv_buf_add_prologue(&conv->buf, &conv->format, 0);
                 if (rc == AUSHAPE_RC_OK) {
@@ -116,13 +112,13 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
                                         conv->in_doc ? 1 : 0,
                                         conv->events_in_doc == 0, au);
         if (rc == AUSHAPE_RC_OK) {
-            if (conv->events_per_doc > 0) {
+            if (conv->format.events_per_doc > 0) {
                 conv->events_in_doc++;
-            } else if (conv->events_per_doc < 0) {
+            } else if (conv->format.events_per_doc < 0) {
                 conv->events_in_doc += conv->buf.gbuf.len;
             }
             if (aushape_output_is_cont(conv->output) ||
-                conv->events_per_doc == 0) {
+                conv->format.events_per_doc == 0) {
                 rc = aushape_output_write(conv->output,
                                           conv->buf.gbuf.ptr,
                                           conv->buf.gbuf.len);
@@ -141,13 +137,14 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
      * Output document epilogue, if needed
      */
     if (conv->rc == AUSHAPE_RC_OK) {
-        if (conv->events_per_doc != 0 && conv->events_per_doc != SSIZE_MAX) {
+        if (conv->format.events_per_doc != 0 &&
+            conv->format.events_per_doc != SSIZE_MAX) {
             assert(conv->in_doc);
             /* If hit the limit */
-            if ((conv->events_per_doc > 0 &&
-                 conv->events_in_doc >= (size_t)conv->events_per_doc) ||
-                (conv->events_per_doc < 0 &&
-                 conv->events_in_doc >= (size_t)-conv->events_per_doc)) {
+            if ((conv->format.events_per_doc > 0 &&
+                 conv->events_in_doc >= (size_t)conv->format.events_per_doc) ||
+                (conv->format.events_per_doc < 0 &&
+                 conv->events_in_doc >= (size_t)-conv->format.events_per_doc)) {
                 rc = aushape_conv_buf_add_epilogue(&conv->buf, &conv->format, 0);
                 if (rc == AUSHAPE_RC_OK) {
                     rc = aushape_output_write(conv->output,
@@ -170,7 +167,6 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
 
 enum aushape_rc
 aushape_conv_create(struct aushape_conv **pconv,
-                    ssize_t events_per_doc,
                     const struct aushape_format *format,
                     struct aushape_output *output,
                     bool output_owned)
@@ -200,7 +196,6 @@ aushape_conv_create(struct aushape_conv **pconv,
     auparse_add_callback(conv->au, aushape_conv_cb, conv, NULL);
 
     aushape_conv_buf_init(&conv->buf);
-    conv->events_per_doc = events_per_doc;
     conv->format = *format;
     conv->output = output;
     conv->output_owned = output_owned;
@@ -225,7 +220,7 @@ aushape_conv_begin(struct aushape_conv *conv)
     if (!aushape_conv_is_valid(conv)) {
         return AUSHAPE_RC_INVALID_ARGS;
     }
-    if (conv->events_per_doc != SSIZE_MAX) {
+    if (conv->format.events_per_doc != SSIZE_MAX) {
         return AUSHAPE_RC_OK;
     }
     if (conv->in_doc) {
@@ -262,10 +257,10 @@ aushape_conv_end(struct aushape_conv *conv)
     if (!aushape_conv_is_valid(conv)) {
         return AUSHAPE_RC_INVALID_ARGS;
     }
-    if (conv->events_per_doc == 0) {
+    if (conv->format.events_per_doc == 0) {
         return AUSHAPE_RC_OK;
     } else if (!conv->in_doc) {
-        if (conv->events_per_doc == SSIZE_MAX) {
+        if (conv->format.events_per_doc == SSIZE_MAX) {
             return AUSHAPE_RC_INVALID_STATE;
         } else {
             return AUSHAPE_RC_OK;
@@ -304,7 +299,7 @@ aushape_conv_input(struct aushape_conv *conv,
         (ptr == NULL && len > 0)) {
         return AUSHAPE_RC_INVALID_ARGS;
     }
-    if (conv->events_per_doc == SSIZE_MAX && !conv->in_doc) {
+    if (conv->format.events_per_doc == SSIZE_MAX && !conv->in_doc) {
         return AUSHAPE_RC_INVALID_STATE;
     }
 
@@ -323,7 +318,7 @@ aushape_conv_flush(struct aushape_conv *conv)
     if (!aushape_conv_is_valid(conv)) {
         return AUSHAPE_RC_INVALID_ARGS;
     }
-    if (conv->events_per_doc == SSIZE_MAX && !conv->in_doc) {
+    if (conv->format.events_per_doc == SSIZE_MAX && !conv->in_doc) {
         return AUSHAPE_RC_INVALID_STATE;
     }
 

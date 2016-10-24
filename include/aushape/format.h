@@ -23,6 +23,7 @@
 #define _AUSHAPE_FORMAT_H
 
 #include <aushape/lang.h>
+#include <unistd.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -41,6 +42,15 @@ struct aushape_format {
     size_t              init_indent;
     /** Indentation for each nesting level, in spaces */
     size_t              nest_indent;
+    /**
+     * Amount of events to put into a single output document. Zero means
+     * "bare" output - no document wrapping, and no event separators. One
+     * means each event is wrapped in a document. SSIZE_MAX means all events
+     * are put into a single document, even if there were none. Negative
+     * numbers specify size of documents in bytes. Documents are finished when
+     * the size of accumulated event text crosses the negated number.
+     */
+    ssize_t             events_per_doc;
 };
 
 /**

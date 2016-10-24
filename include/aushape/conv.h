@@ -24,7 +24,6 @@
 #include <aushape/output.h>
 #include <aushape/format.h>
 #include <aushape/rc.h>
-#include <unistd.h>
 #include <stddef.h>
 #include <stdbool.h>
 
@@ -45,15 +44,6 @@ bool aushape_conv_is_valid(const struct aushape_conv *conv);
  *
  * @param pconv             Location for the created converter pointer.
  *                          Not modified in case of error. Cannot be NULL.
- * @param events_per_doc    Amount of events to put into a single output
- *                          document. Zero means "bare" output - no document
- *                          wrapping, and no event separators. One means each
- *                          event is wrapped in a document. SSIZE_MAX means
- *                          all events are put into a single document, even if
- *                          there were none. Negative numbers specify size of
- *                          documents in bytes. Documents are finished when
- *                          size of event text added to it crosses the negated
- *                          number.
  * @param format            The output format to use.
  * @param output            The output to write to.
  * @param output_owned      True if the output should be destroyed when
@@ -65,7 +55,6 @@ bool aushape_conv_is_valid(const struct aushape_conv *conv);
  *          AUSHAPE_RC_NOMEM                - memory allocation failed.
  */
 enum aushape_rc aushape_conv_create(struct aushape_conv **pconv,
-                                    ssize_t events_per_doc,
                                     const struct aushape_format *format,
                                     struct aushape_output *output,
                                     bool output_owned);
@@ -73,7 +62,7 @@ enum aushape_rc aushape_conv_create(struct aushape_conv **pconv,
 /**
  * Begin converter document output. Must be called once before
  * aushape_conv_input, aushape_conv_flush, and aushape_conv_end. Has effect
- * only if converter was created with events_per_doc == SSIZE_MAX.
+ * only if converter was created with format->events_per_doc == SSIZE_MAX.
  *
  * @param pconv         Converter to start the document output with.
  *
@@ -104,7 +93,8 @@ enum aushape_rc aushape_conv_begin(struct aushape_conv *conv);
  *                                            output with aushape_conv_begin,
  *                                            or after ending it with
  *                                            aushape_conv_end with
- *                                            events_per_doc == SSIZE_MAX,
+ *                                            format->events_per_doc ==
+ *                                            SSIZE_MAX,
  *          AUSHAPE_RC_NOMEM                - memory allocation failed,
  *          AUSHAPE_RC_CONV_AUPARSE_FAILED  - an auparse call failed,
  *          AUSHAPE_RC_CONV_INVALID_EXECVE  - invalid execve record sequence
@@ -129,7 +119,8 @@ enum aushape_rc aushape_conv_input(struct aushape_conv *conv,
  *                                            output with aushape_conv_begin,
  *                                            or after ending it with
  *                                            aushape_conv_end with
- *                                            events_per_doc == SSIZE_MAX,
+ *                                            format->events_per_doc ==
+ *                                            SSIZE_MAX,
  *          AUSHAPE_RC_NOMEM                - memory allocation failed,
  *          AUSHAPE_RC_CONV_AUPARSE_FAILED  - an auparse call failed,
  *          AUSHAPE_RC_CONV_INVALID_EXECVE  - invalid execve record sequence
@@ -140,8 +131,8 @@ enum aushape_rc aushape_conv_flush(struct aushape_conv *conv);
 
 /**
  * End converter document output. Can only be called after aushape_conv_begin.
- * Has effect only if converter was created with events_per_doc != 0 and a
- * document was started.
+ * Has effect only if converter was created with format->events_per_doc != 0
+ * and a document was started.
  *
  * @param pconv         Converter to start the document output with.
  *
@@ -150,7 +141,8 @@ enum aushape_rc aushape_conv_flush(struct aushape_conv *conv);
  *          AUSHAPE_RC_INVALID_ARGS         - invalid arguments received,
  *          AUSHAPE_RC_INVALID_STATE        - called before starting document
  *                                            output with aushape_conv_begin,
- *                                            if events_per_doc == SSIZE_MAX,
+ *                                            if format->events_per_doc ==
+ *                                            SSIZE_MAX,
  *          AUSHAPE_RC_NOMEM                - memory allocation failed,
  *          AUSHAPE_RC_OUTPUT_WRITE_FAILED  - output write failed.
  */
