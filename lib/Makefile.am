@@ -24,11 +24,13 @@ lib_LTLIBRARIES = \
     libaushape.la
 
 libaushape_la_SOURCES = \
+    conf.c              \
     conv.c              \
     fd_output.c         \
     gbuf.c              \
     output.c            \
     rc.c                \
+    syslog_misc.c       \
     syslog_output.c
 
 libaushape_la_LIBADD = \

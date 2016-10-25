@@ -32,5 +32,7 @@ aushape_HEADERS = \
     syslog_output.h
 
 noinst_HEADERS = \
+    conf.h          \
     gbuf.h          \
-    misc.h
+    misc.h          \
+    syslog_misc.h
