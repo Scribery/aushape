@@ -23,7 +23,7 @@ Auditd code defining record structure and sometimes changing it from version
 to version, without an official specification being there. Yet, we have
 developed draft schemas for both [JSON](lib/aushape.json) and
 [XML](lib/aushape.xsd), and will continue on improving them in collaboration
-with auditd developers.
+with Auditd developers.
 
 We encourage you to simply try running aushape on your logs to see what the
 output structure is like.
