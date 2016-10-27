@@ -63,7 +63,8 @@ create_converter(struct aushape_conv **pconv,
         } else {
             output_fd = open(conf->output_conf.fd.path,
                              O_CREAT | O_TRUNC | O_WRONLY,
-                             S_IRWXU | S_IRWXG | S_IRWXO);
+                             S_IRUSR | S_IRGRP | S_IROTH |
+                             S_IWUSR | S_IWGRP | S_IWOTH);
             if (output_fd < 0) {
                 fprintf(stderr, "Failed opening output file \"%s\": %s\n",
                         conf->output_conf.fd.path, strerror(errno));
