@@ -10,6 +10,14 @@ outputs one document or event per message.
 **NOTE**: Aushape is in early development stage and anything about its
 interfaces and outputs can change. Use at your own risk.
 
+Dependencies
+------------
+
+Aushape uses the Auparse library (a part of the Auditd package) to parse audit
+logs. The development version of this library needs to be installed before
+building Aushape. It is available in "audit-libs-devel" package on Fedora and
+RHEL, and "libauparse-dev" package on Debian-based systems.
+
 Building
 --------
 
