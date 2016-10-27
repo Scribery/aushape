@@ -200,7 +200,8 @@ aushape_conv_buf_add_record(struct aushape_gbuf *gbuf,
     first_field = true;
     do {
         field_name = auparse_get_field_name(au);
-        if (strcmp(field_name, "type") != 0) {
+        if (strcmp(field_name, "type") != 0 &&
+            strcmp(field_name, "node") != 0) {
             GUARD_BOOL(aushape_conv_buf_add_field(gbuf, format, l,
                                       first_field, field_name, au));
             first_field = false;
