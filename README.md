@@ -21,8 +21,8 @@ original audit log as possible.
 There is a number of challenges, the main one being both the Linux kernel and
 Auditd code defining record structure and sometimes changing it from version
 to version, without an official specification being there. Yet, we have
-developed draft schemas for both [JSON][lib/aushape.json] and
-[XML][lib/aushape.xsd], and will continue on improving them in collaboration
+developed draft schemas for both [JSON](lib/aushape.json) and
+[XML](lib/aushape.xsd), and will continue on improving them in collaboration
 with auditd developers.
 
 We encourage you to simply try running aushape on your logs to see what the
