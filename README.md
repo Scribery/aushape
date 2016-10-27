@@ -10,6 +10,24 @@ outputs one document or event per message.
 **NOTE**: Aushape is in early development stage and anything about its
 interfaces and outputs can change. Use at your own risk.
 
+Schemas
+-------
+
+Aushape output document schemas are still in flux, but the main idea is to
+aggregate input records belonging to the same event into single output event
+object/element, while keeping the naming and the structure as close to the
+original audit log as possible.
+
+There is a number of challenges, the main one being both the Linux kernel and
+Auditd code defining record structure and sometimes changing it from version
+to version, without an official specification being there. Yet, we have
+developed draft schemas for both [JSON][lib/aushape.json] and
+[XML][lib/aushape.xsd], and will continue on improving them in collaboration
+with auditd developers.
+
+We encourage you to simply try running aushape on your logs to see what the
+output structure is like.
+
 Dependencies
 ------------
 
