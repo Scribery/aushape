@@ -79,7 +79,7 @@ To write output to a file:
 
 or:
 
-    aushape -faudit.json audit.log
+    aushape -f audit.json audit.log
 
 ### Live
 
