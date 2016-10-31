@@ -379,6 +379,9 @@ aushape_conv_execve_add(struct aushape_conv_execve *execve,
         /* If it's the "type" pseudo-field */
         if (strcmp(field_name, "type") == 0) {
             continue;
+        /* If it's the "node" which we handle at event level */
+        } else if (strcmp(field_name, "node") == 0) {
+            continue;
         /* If it's the number of arguments */
         } else if (strcmp(field_name, "argc") == 0) {
             GUARD(aushape_conv_execve_add_argc(execve, au));
