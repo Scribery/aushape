@@ -65,6 +65,13 @@ aushape_gbuf_empty(struct aushape_gbuf *gbuf)
 }
 
 bool
+aushape_gbuf_is_empty(const struct aushape_gbuf *gbuf)
+{
+    assert(aushape_gbuf_is_valid(gbuf));
+    return gbuf->len == 0;
+}
+
+bool
 aushape_gbuf_accomodate(struct aushape_gbuf *gbuf, size_t len)
 {
     assert(aushape_gbuf_is_valid(gbuf));

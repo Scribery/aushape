@@ -65,6 +65,15 @@ extern void aushape_gbuf_cleanup(struct aushape_gbuf *gbuf);
 extern void aushape_gbuf_empty(struct aushape_gbuf *gbuf);
 
 /**
+ * Check if a growing buffer is empty.
+ *
+ * @param gbuf  The growing buffer to check.
+ *
+ * @return True if the buffer is empty, false otherwise.
+ */
+extern bool aushape_gbuf_is_empty(const struct aushape_gbuf *gbuf);
+
+/**
  * Make sure a growing buffer can accomodate contents of the specified size in
  * bytes. If the allocated buffer memory wasn't enough to accomodate the
  * specified size, then the memory is reallocated appropriately.
