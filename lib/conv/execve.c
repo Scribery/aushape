@@ -67,6 +67,13 @@ aushape_conv_execve_empty(struct aushape_conv_execve *execve)
     assert(aushape_conv_execve_is_valid(execve));
 }
 
+bool
+aushape_conv_execve_is_empty(const struct aushape_conv_execve *execve)
+{
+    assert(aushape_conv_execve_is_valid(execve));
+    return execve->arg_num == 0;
+}
+
 /**
  * Exit with the specified return code if a bool expression is false.
  * To exit stores return code in "rc" variable and goes to "cleanup" label.
@@ -138,6 +145,56 @@ cleanup:
 }
 
 /**
+ * Add markup for the specified argument string value.
+ *
+ * @param execve    The aggregation buffer to add markup to.
+ * @param format    The output format to use.
+ * @param level     Syntactic nesting level the argument is output at.
+ * @param str       The argument string value.
+ *
+ * @return Return code:
+ *          AUSHAPE_RC_OK                   - added succesfully,
+ *          AUSHAPE_RC_NOMEM                - memory allocation failed,
+ */
+static enum aushape_rc
+aushape_conv_execve_add_arg_str(struct aushape_conv_execve *execve,
+                                const struct aushape_format *format,
+                                size_t level,
+                                const char *str)
+{
+    enum aushape_rc rc;
+
+    assert(aushape_conv_execve_is_valid(execve));
+    assert(aushape_format_is_valid(format));
+    assert(str != NULL);
+
+    if (format->lang == AUSHAPE_LANG_XML) {
+        GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(&execve->args,
+                                                     format, level));
+        GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args, "<a i=\""));
+        GUARD_BOOL(NOMEM, aushape_gbuf_add_str_xml(&execve->args, str));
+        GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args, "\"/>"));
+    } else if (format->lang == AUSHAPE_LANG_JSON) {
+        /* If it's not the first argument in the record */
+        if (execve->arg_idx > 0) {
+            GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->args, ','));
+        }
+        GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(&execve->args,
+                                                     format, level));
+        GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->args, '"'));
+        GUARD_BOOL(NOMEM, aushape_gbuf_add_str_json(&execve->args, str));
+        GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->args, '"'));
+    }
+
+    execve->arg_idx++;
+
+    rc = AUSHAPE_RC_OK;
+cleanup:
+    assert(aushape_conv_execve_is_valid(execve));
+    return rc;
+}
+
+/**
  * Process "a[0-9]+" field for the execve record being aggregated.
  *
  * @param execve    The aggregation buffer to process the field for.
@@ -169,32 +226,21 @@ aushape_conv_execve_add_arg(struct aushape_conv_execve *execve,
     assert(au != NULL);
 
     GUARD_BOOL(CONV_INVALID_EXECVE,
-               arg_idx == execve->arg_idx &&
                arg_idx < execve->arg_num);
 
-    str = auparse_interpret_field(au);
-    GUARD_BOOL(CONV_AUPARSE_FAILED, str != NULL);
-    if (format->lang == AUSHAPE_LANG_XML) {
-        GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(&execve->args,
-                                                     format, level));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args, "<a i=\""));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str_xml(&execve->args, str));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve->args, "\"/>"));
-    } else if (format->lang == AUSHAPE_LANG_JSON) {
-        /* If it's not the first argument in the record */
-        if (execve->arg_idx > 0) {
-            GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->args, ','));
+    /* Add skipped empty arguments */
+    while (execve->arg_idx < arg_idx) {
+        rc = aushape_conv_execve_add_arg_str(execve, format, level, "");
+        if (rc != AUSHAPE_RC_OK) {
+            goto cleanup;
         }
-        GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(&execve->args,
-                                                     format, level));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->args, '"'));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str_json(&execve->args, str));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve->args, '"'));
     }
 
-    execve->arg_idx++;
+    /* Add the argument in question */
+    str = auparse_interpret_field(au);
+    GUARD_BOOL(CONV_AUPARSE_FAILED, str != NULL);
+    rc = aushape_conv_execve_add_arg_str(execve, format, level, str);
 
-    rc = AUSHAPE_RC_OK;
 cleanup:
     assert(aushape_conv_execve_is_valid(execve));
     return rc;
@@ -204,6 +250,8 @@ cleanup:
  * Process "a[0-9]+_len" field for the execve record being aggregated.
  *
  * @param execve    The aggregation buffer to process the field for.
+ * @param format    The output format to use.
+ * @param level     Syntactic nesting level the argument is output at.
  * @param arg_idx   The argument index from the field name.
  * @param au        The auparse context with the field to be processed as the
  *                  current field.
@@ -216,6 +264,8 @@ cleanup:
  */
 static enum aushape_rc
 aushape_conv_execve_add_arg_len(struct aushape_conv_execve *execve,
+                                const struct aushape_format *format,
+                                size_t level,
                                 size_t arg_idx,
                                 auparse_state_t *au)
 {
@@ -228,9 +278,16 @@ aushape_conv_execve_add_arg_len(struct aushape_conv_execve *execve,
     assert(au != NULL);
 
     GUARD_BOOL(CONV_INVALID_EXECVE,
-               arg_idx == execve->arg_idx &&
                arg_idx < execve->arg_num &&
                !execve->got_len);
+
+    /* Add skipped empty arguments */
+    while (execve->arg_idx < arg_idx) {
+        rc = aushape_conv_execve_add_arg_str(execve, format, level, "");
+        if (rc != AUSHAPE_RC_OK) {
+            goto cleanup;
+        }
+    }
 
     execve->got_len = true;
 
@@ -416,7 +473,8 @@ aushape_conv_execve_add(struct aushape_conv_execve *execve,
         } else if (end = 0,
                    sscanf(field_name, "a%zu_len%n", &arg_idx, &end) >= 1 &&
                    (size_t)end == strlen(field_name)) {
-            GUARD(aushape_conv_execve_add_arg_len(execve, arg_idx, au));
+            GUARD(aushape_conv_execve_add_arg_len(execve, format, level,
+                                                  arg_idx, au));
         /* If it's an argument slice */
         } else if (end = 0,
                    sscanf(field_name, "a%zu[%zu]%n",
@@ -432,6 +490,36 @@ aushape_conv_execve_add(struct aushape_conv_execve *execve,
     } while (auparse_next_field(au) > 0);
 
     rc = AUSHAPE_RC_OK;
+cleanup:
+    assert(aushape_conv_execve_is_valid(execve));
+    return rc;
+}
+
+bool
+aushape_conv_execve_is_complete(const struct aushape_conv_execve *execve)
+{
+    assert(aushape_conv_execve_is_valid(execve));
+    return execve->arg_idx == execve->arg_num;
+}
+
+enum aushape_rc
+aushape_conv_execve_complete(struct aushape_conv_execve *execve,
+                             const struct aushape_format *format,
+                             size_t level)
+{
+    enum aushape_rc rc;
+
+    assert(aushape_conv_execve_is_valid(execve));
+    assert(aushape_format_is_valid(format));
+
+    /* Add skipped empty arguments */
+    while (execve->arg_idx < execve->arg_num) {
+        rc = aushape_conv_execve_add_arg_str(execve, format, level, "");
+        if (rc != AUSHAPE_RC_OK) {
+            goto cleanup;
+        }
+    }
+
 cleanup:
     assert(aushape_conv_execve_is_valid(execve));
     return rc;

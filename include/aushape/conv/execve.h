@@ -79,6 +79,16 @@ extern void aushape_conv_execve_cleanup(struct aushape_conv_execve *execve);
 extern void aushape_conv_execve_empty(struct aushape_conv_execve *execve);
 
 /**
+ * Check if an execve record aggregation buffer is empty.
+ *
+ * @param execve    The buffer to check.
+ *
+ * @return True if the buffer is empty.
+ */
+extern bool aushape_conv_execve_is_empty(
+                                    const struct aushape_conv_execve *execve);
+
+/**
  * Aggregate an execve record data into a buffer.
  *
  * @param execve    The buffer to aggregate the record into.
@@ -107,11 +117,23 @@ extern enum aushape_rc aushape_conv_execve_add(
  *
  * @return True if the execve aggregation buffer is complete, false otherwise.
  */
-static inline bool
-aushape_conv_execve_is_complete(const struct aushape_conv_execve *execve)
-{
-    assert(aushape_conv_execve_is_valid(execve));
-    return execve->arg_idx == execve->arg_num;
-}
+extern bool aushape_conv_execve_is_complete(
+                                    const struct aushape_conv_execve *execve);
+
+/**
+ * Add any missing (empty) trailing arguments to an execve aggregation buffer.
+ *
+ * @param execve    The buffer to aggregate the record into.
+ * @param format    The output format to use.
+ * @param level     Syntactic nesting level the record is output at.
+ *
+ * @return Return code:
+ *          AUSHAPE_RC_OK                   - added succesfully,
+ *          AUSHAPE_RC_NOMEM                - memory allocation failed,
+ */
+extern enum aushape_rc aushape_conv_execve_complete(
+                                    struct aushape_conv_execve *execve,
+                                    const struct aushape_format *format,
+                                    size_t level);
 
 #endif /* _AUSHAPE_CONV_EXECVE_H */

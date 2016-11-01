@@ -355,6 +355,60 @@ aushape_conv_buf_empty(struct aushape_conv_buf *buf)
     assert(aushape_conv_buf_is_valid(buf));
 }
 
+/**
+ * Make sure the execve record aggregation buffer in a converter output buffer
+ * is completed and added to the output, if it is not empty.
+ *
+ * @param buf           The converter buffer to flush execve for.
+ * @param format        The output format to use.
+ * @param level         Syntactic nesting level the execve record is output at.
+ * @param pfirst_record Location of the first_record flag to be updated if the
+ *                      record was added to the output.
+ * @return Return code:
+ *          AUSHAPE_RC_OK                   - added succesfully,
+ *          AUSHAPE_RC_NOMEM                - memory allocation failed,
+ */
+static enum aushape_rc
+aushape_conv_buf_flush_execve(struct aushape_conv_buf *buf,
+                              const struct aushape_format *format,
+                              size_t level,
+                              bool *pfirst_record)
+{
+    enum aushape_rc rc;
+
+    assert(aushape_conv_buf_is_valid(buf));
+    assert(aushape_format_is_valid(format));
+    assert(pfirst_record != NULL);
+
+    /* If an execve record wasn't started */
+    if (aushape_conv_execve_is_empty(&buf->execve)) {
+        return AUSHAPE_RC_OK;
+    }
+
+    /* If the execve series wasn't finished */
+    if (!aushape_conv_execve_is_complete(&buf->execve)) {
+        /* Finish it */
+        rc = aushape_conv_execve_complete(
+                    &buf->execve, format,
+                    level + aushape_conv_buf_get_execve_depth(format));
+        if (rc != AUSHAPE_RC_OK) {
+            assert(aushape_conv_buf_is_valid(buf));
+            return rc;
+        }
+    }
+
+    /* Add the contents */
+    GUARD_RC(aushape_conv_buf_add_execve(&buf->gbuf, format,
+                                         level, *pfirst_record,
+                                         &buf->execve));
+    *pfirst_record = false;
+    /* Empty it */
+    aushape_conv_execve_empty(&buf->execve);
+
+    assert(aushape_conv_buf_is_valid(buf));
+    return AUSHAPE_RC_OK;
+}
+
 enum aushape_rc
 aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
                            const struct aushape_format *format,
@@ -450,16 +504,26 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
                 aushape_conv_execve_empty(&buf->execve);
             }
         } else {
-            /* If the execve series wasn't finished */
-            if (!aushape_conv_execve_is_complete(&buf->execve)) {
-                return AUSHAPE_RC_CONV_INVALID_EXECVE;
+            /* Make sure the execve record is complete and added, if any */
+            rc = aushape_conv_buf_flush_execve(buf, format, l, &first_record);
+            if (rc != AUSHAPE_RC_OK) {
+                assert(aushape_conv_buf_is_valid(buf));
+                return rc;
             }
+            /* Add the record */
             GUARD_RC(aushape_conv_buf_add_record(&buf->gbuf, format, l,
                                                  first_record, record_name,
                                                  au));
             first_record = false;
         }
     } while(auparse_next_record(au) > 0);
+
+    /* Make sure the execve record is complete and added, if any */
+    rc = aushape_conv_buf_flush_execve(buf, format, l, &first_record);
+    if (rc != AUSHAPE_RC_OK) {
+        assert(aushape_conv_buf_is_valid(buf));
+        return rc;
+    }
 
     /* Terminate event */
     l--;
