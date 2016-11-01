@@ -226,6 +226,7 @@ aushape_conv_execve_add_arg(struct aushape_conv_execve *execve,
     assert(au != NULL);
 
     GUARD_BOOL(CONV_INVALID_EXECVE,
+               arg_idx >= execve->arg_idx &&
                arg_idx < execve->arg_num);
 
     /* Add skipped empty arguments */
@@ -278,6 +279,7 @@ aushape_conv_execve_add_arg_len(struct aushape_conv_execve *execve,
     assert(au != NULL);
 
     GUARD_BOOL(CONV_INVALID_EXECVE,
+               arg_idx >= execve->arg_idx &&
                arg_idx < execve->arg_num &&
                !execve->got_len);
 
