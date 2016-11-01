@@ -274,7 +274,10 @@ aushape_conv_execve_add_arg_slice(struct aushape_conv_execve *execve,
                                   auparse_state_t *au)
 {
     enum aushape_rc rc;
-    const char *str;
+    const char *raw_str;
+    size_t raw_len;
+    const char *int_str;
+    size_t int_len;
     size_t len;
 
     assert(aushape_conv_execve_is_valid(execve));
@@ -287,11 +290,31 @@ aushape_conv_execve_add_arg_slice(struct aushape_conv_execve *execve,
                execve->got_len &&
                slice_idx == execve->slice_idx);
 
-    str = auparse_get_field_str(au);
-    GUARD_BOOL(CONV_AUPARSE_FAILED, str != NULL);
-    len = strlen(str);
+    raw_str = auparse_get_field_str(au);
+    GUARD_BOOL(CONV_AUPARSE_FAILED, raw_str != NULL);
+    raw_len = strlen(raw_str);
+
+    int_str = auparse_interpret_field(au);
+    GUARD_BOOL(CONV_AUPARSE_FAILED, int_str != NULL);
+    int_len = strlen(int_str);
+
+    /*
+     * The kernel specifies the length of transferred argument in aX_len
+     * fields. The transferred argument slice can be as is, or HEX-encoded.
+     * However, the userspace sometimes double-quotes non-HEX-encoded
+     * argument slices, making them longer than what kernel supplied.
+     *
+     * As that logic is not exposed, we use the safest assumption to derive
+     * the length the kernel transferred. That being that only HEX-encoded
+     * argument slices can be half the length when "interpreted" (decoded).
+     * This seems to be true, since there is no sense in outputting an empty
+     * quoted argument slice - the only quoted slice that can be half the
+     * length when "interpreted".
+     */
+    len = (int_len == raw_len / 2) ? raw_len : int_len;
     GUARD_BOOL(CONV_INVALID_EXECVE,
                execve->len_read + len <= execve->len_total);
+
     /* If we are starting a new argument */
     if (slice_idx == 0) {
         /* Begin argument markup */
@@ -310,12 +333,10 @@ aushape_conv_execve_add_arg_slice(struct aushape_conv_execve *execve,
         }
     }
     /* Add the slice */
-    str = auparse_interpret_field(au);
-    GUARD_BOOL(CONV_AUPARSE_FAILED, str != NULL);
     if (format->lang == AUSHAPE_LANG_XML) {
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str_xml(&execve->args, str));
+        GUARD_BOOL(NOMEM, aushape_gbuf_add_str_xml(&execve->args, int_str));
     } else if (format->lang == AUSHAPE_LANG_JSON) {
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str_json(&execve->args, str));
+        GUARD_BOOL(NOMEM, aushape_gbuf_add_str_json(&execve->args, int_str));
     }
     execve->len_read += len;
     /* If we have finished the argument */
