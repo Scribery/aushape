@@ -22,6 +22,8 @@
 #define _AUSHAPE_CONV_BUF_H
 
 #include <aushape/conv/execve.h>
+#include <aushape/format.h>
+#include <aushape/gbuf.h>
 #include <aushape/rc.h>
 #include <auparse.h>
 
