@@ -323,15 +323,18 @@ bool
 aushape_conv_buf_is_valid(const struct aushape_conv_buf *buf)
 {
     return buf != NULL &&
+           aushape_format_is_valid(&buf->format) &&
            aushape_gbuf_is_valid(&buf->gbuf) &&
            aushape_conv_execve_is_valid(&buf->execve);
 }
 
 void
-aushape_conv_buf_init(struct aushape_conv_buf *buf)
+aushape_conv_buf_init(struct aushape_conv_buf *buf,
+                      const struct aushape_format *format)
 {
     assert(buf != NULL);
     memset(buf, 0, sizeof(*buf));
+    buf->format = *format;
     aushape_gbuf_init(&buf->gbuf);
     aushape_conv_execve_init(&buf->execve);
     assert(aushape_conv_buf_is_valid(buf));
@@ -370,14 +373,12 @@ aushape_conv_buf_empty(struct aushape_conv_buf *buf)
  */
 static enum aushape_rc
 aushape_conv_buf_flush_execve(struct aushape_conv_buf *buf,
-                              const struct aushape_format *format,
                               size_t level,
                               bool *pfirst_record)
 {
     enum aushape_rc rc;
 
     assert(aushape_conv_buf_is_valid(buf));
-    assert(aushape_format_is_valid(format));
     assert(pfirst_record != NULL);
 
     /* If an execve record wasn't started */
@@ -389,8 +390,8 @@ aushape_conv_buf_flush_execve(struct aushape_conv_buf *buf,
     if (!aushape_conv_execve_is_complete(&buf->execve)) {
         /* Finish it */
         rc = aushape_conv_execve_complete(
-                    &buf->execve, format,
-                    level + aushape_conv_buf_get_execve_depth(format));
+                    &buf->execve, &buf->format,
+                    level + aushape_conv_buf_get_execve_depth(&buf->format));
         if (rc != AUSHAPE_RC_OK) {
             assert(aushape_conv_buf_is_valid(buf));
             return rc;
@@ -398,7 +399,7 @@ aushape_conv_buf_flush_execve(struct aushape_conv_buf *buf,
     }
 
     /* Add the contents */
-    GUARD_RC(aushape_conv_buf_add_execve(&buf->gbuf, format,
+    GUARD_RC(aushape_conv_buf_add_execve(&buf->gbuf, &buf->format,
                                          level, *pfirst_record,
                                          &buf->execve));
     *pfirst_record = false;
@@ -411,13 +412,12 @@ aushape_conv_buf_flush_execve(struct aushape_conv_buf *buf,
 
 enum aushape_rc
 aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
-                           const struct aushape_format *format,
-                           size_t level,
                            bool first,
                            auparse_state_t *au)
 {
     enum aushape_rc rc;
-    size_t l = level;
+    size_t level;
+    size_t l;
     const au_event_t *e;
     struct tm *tm;
     char time_buf[32];
@@ -427,8 +427,10 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     const char *record_name;
 
     assert(aushape_conv_buf_is_valid(buf));
-    assert(aushape_format_is_valid(format));
     assert(au != NULL);
+
+    level = buf->format.events_per_doc != 0;
+    l = level;
 
     e = auparse_get_timestamp(au);
     if (e == NULL) {
@@ -443,8 +445,8 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
              time_buf, e->milli, zone_buf, zone_buf + 3);
 
     /* Output event header */
-    if (format->lang == AUSHAPE_LANG_XML) {
-        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, l));
+    if (buf->format.lang == AUSHAPE_LANG_XML) {
+        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, &buf->format, l));
         GUARD_RC(aushape_gbuf_add_fmt(
                             &buf->gbuf, "<event serial=\"%lu\" time=\"%s\"",
                             e->serial, timestamp_buf));
@@ -458,22 +460,22 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         if (!first) {
             GUARD_BOOL(aushape_gbuf_add_char(&buf->gbuf, ','));
         }
-        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, l));
+        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, &buf->format, l));
         GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, '{'));
         l++;
-        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, l));
+        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, &buf->format, l));
         GUARD_RC(aushape_gbuf_add_fmt(&buf->gbuf,
                                       "\"serial\":%lu,", e->serial));
-        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, l));
+        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, &buf->format, l));
         GUARD_RC(aushape_gbuf_add_fmt(&buf->gbuf,
                                       "\"time\":\"%s\",", timestamp_buf));
         if (e->host != NULL) {
-            GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, l));
+            GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, &buf->format, l));
             GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "\"host\":\""));
             GUARD_RC(aushape_gbuf_add_str_json(&buf->gbuf, e->host));
             GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "\","));
         }
-        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, l));
+        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, &buf->format, l));
         GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "\"records\":{"));
     }
 
@@ -488,8 +490,8 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         /* If this is an "execve" record */
         if (strcmp(record_name, "EXECVE") == 0) {
             rc = aushape_conv_execve_add(
-                            &buf->execve, format,
-                            l + aushape_conv_buf_get_execve_depth(format),
+                            &buf->execve, &buf->format,
+                            l + aushape_conv_buf_get_execve_depth(&buf->format),
                             au);
             if (rc != AUSHAPE_RC_OK) {
                 assert(aushape_conv_buf_is_valid(buf));
@@ -497,7 +499,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
             }
             /* If the execve series was finished */
             if (aushape_conv_execve_is_complete(&buf->execve)) {
-                GUARD_RC(aushape_conv_buf_add_execve(&buf->gbuf, format,
+                GUARD_RC(aushape_conv_buf_add_execve(&buf->gbuf, &buf->format,
                                                      l, first_record,
                                                      &buf->execve));
                 first_record = false;
@@ -505,13 +507,13 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
             }
         } else {
             /* Make sure the execve record is complete and added, if any */
-            rc = aushape_conv_buf_flush_execve(buf, format, l, &first_record);
+            rc = aushape_conv_buf_flush_execve(buf, l, &first_record);
             if (rc != AUSHAPE_RC_OK) {
                 assert(aushape_conv_buf_is_valid(buf));
                 return rc;
             }
             /* Add the record */
-            GUARD_RC(aushape_conv_buf_add_record(&buf->gbuf, format, l,
+            GUARD_RC(aushape_conv_buf_add_record(&buf->gbuf, &buf->format, l,
                                                  first_record, record_name,
                                                  au));
             first_record = false;
@@ -519,7 +521,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     } while(auparse_next_record(au) > 0);
 
     /* Make sure the execve record is complete and added, if any */
-    rc = aushape_conv_buf_flush_execve(buf, format, l, &first_record);
+    rc = aushape_conv_buf_flush_execve(buf, l, &first_record);
     if (rc != AUSHAPE_RC_OK) {
         assert(aushape_conv_buf_is_valid(buf));
         return rc;
@@ -527,16 +529,16 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
 
     /* Terminate event */
     l--;
-    if (format->lang == AUSHAPE_LANG_XML) {
-        GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, format, l));
+    if (buf->format.lang == AUSHAPE_LANG_XML) {
+        GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, &buf->format, l));
         GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "</event>"));
     } else {
         if (!first_record) {
-            GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, format, l));
+            GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, &buf->format, l));
         }
         GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, '}'));
         l--;
-        GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, format, l));
+        GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, &buf->format, l));
         GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, '}'));
     }
 
@@ -546,24 +548,21 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
 }
 
 enum aushape_rc
-aushape_conv_buf_add_prologue(struct aushape_conv_buf *buf,
-                              const struct aushape_format *format,
-                              size_t level)
+aushape_conv_buf_add_prologue(struct aushape_conv_buf *buf)
 {
     assert(aushape_conv_buf_is_valid(buf));
-    assert(aushape_format_is_valid(format));
 
-    GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, level));
-    if (format->lang == AUSHAPE_LANG_XML) {
+    GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, &buf->format, 0));
+    if (buf->format.lang == AUSHAPE_LANG_XML) {
         GUARD_RC(aushape_gbuf_add_str(&buf->gbuf,
                                       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
-        /* If this is an unfolded zero level, which is special for XML */
-        if (level == 0 && level < format->fold_level) {
+        /* If level zero is unfolded, which is special for XML */
+        if (buf->format.fold_level > 0) {
             GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, '\n'));
         }
-        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, format, level));
+        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, &buf->format, 0));
         GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "<log>"));
-    } else if (format->lang == AUSHAPE_LANG_JSON) {
+    } else if (buf->format.lang == AUSHAPE_LANG_JSON) {
         GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, '['));
     }
 
@@ -572,17 +571,14 @@ aushape_conv_buf_add_prologue(struct aushape_conv_buf *buf,
 }
 
 enum aushape_rc
-aushape_conv_buf_add_epilogue(struct aushape_conv_buf *buf,
-                              const struct aushape_format *format,
-                              size_t level)
+aushape_conv_buf_add_epilogue(struct aushape_conv_buf *buf)
 {
     assert(aushape_conv_buf_is_valid(buf));
-    assert(aushape_format_is_valid(format));
 
-    GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, format, level));
-    if (format->lang == AUSHAPE_LANG_XML) {
+    GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, &buf->format, 0));
+    if (buf->format.lang == AUSHAPE_LANG_XML) {
         GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "</log>"));
-    } else if (format->lang == AUSHAPE_LANG_JSON) {
+    } else if (buf->format.lang == AUSHAPE_LANG_JSON) {
         GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, ']'));
     }
 

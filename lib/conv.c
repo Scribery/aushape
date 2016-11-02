@@ -86,7 +86,7 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
         if (conv->format.events_per_doc != 0 &&
             conv->format.events_per_doc != SSIZE_MAX) {
             if (!conv->in_doc) {
-                rc = aushape_conv_buf_add_prologue(&conv->buf, &conv->format, 0);
+                rc = aushape_conv_buf_add_prologue(&conv->buf);
                 if (rc == AUSHAPE_RC_OK) {
                     conv->in_doc = true;
                     if (aushape_output_is_cont(conv->output)) {
@@ -110,8 +110,7 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
      * Output the event
      */
     if (conv->rc == AUSHAPE_RC_OK) {
-        rc = aushape_conv_buf_add_event(&conv->buf, &conv->format,
-                                        conv->in_doc ? 1 : 0,
+        rc = aushape_conv_buf_add_event(&conv->buf,
                                         conv->events_in_doc == 0, au);
         if (rc == AUSHAPE_RC_OK) {
             if (conv->format.events_per_doc > 0) {
@@ -147,7 +146,7 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
                  conv->events_in_doc >= (size_t)conv->format.events_per_doc) ||
                 (conv->format.events_per_doc < 0 &&
                  conv->events_in_doc >= (size_t)-conv->format.events_per_doc)) {
-                rc = aushape_conv_buf_add_epilogue(&conv->buf, &conv->format, 0);
+                rc = aushape_conv_buf_add_epilogue(&conv->buf);
                 if (rc == AUSHAPE_RC_OK) {
                     rc = aushape_output_write(conv->output,
                                               conv->buf.gbuf.ptr,
@@ -197,8 +196,8 @@ aushape_conv_create(struct aushape_conv **pconv,
     auparse_set_escape_mode(conv->au, AUPARSE_ESC_RAW);
     auparse_add_callback(conv->au, aushape_conv_cb, conv, NULL);
 
-    aushape_conv_buf_init(&conv->buf);
     conv->format = *format;
+    aushape_conv_buf_init(&conv->buf, &conv->format);
     conv->output = output;
     conv->output_owned = output_owned;
 
@@ -231,7 +230,7 @@ aushape_conv_begin(struct aushape_conv *conv)
 
     if (conv->rc == AUSHAPE_RC_OK) {
         enum aushape_rc rc;
-        rc = aushape_conv_buf_add_prologue(&conv->buf, &conv->format, 0);
+        rc = aushape_conv_buf_add_prologue(&conv->buf);
         if (rc == AUSHAPE_RC_OK) {
             conv->in_doc = true;
             if (aushape_output_is_cont(conv->output)) {
@@ -271,7 +270,7 @@ aushape_conv_end(struct aushape_conv *conv)
 
     if (conv->rc == AUSHAPE_RC_OK) {
         enum aushape_rc rc;
-        rc = aushape_conv_buf_add_epilogue(&conv->buf, &conv->format, 0);
+        rc = aushape_conv_buf_add_epilogue(&conv->buf);
         if (rc == AUSHAPE_RC_OK) {
             rc = aushape_output_write(conv->output,
                                       conv->buf.gbuf.ptr,

@@ -27,6 +27,8 @@
 
 /** Converter's output buffer */
 struct aushape_conv_buf {
+    /** The output format to use */
+    struct aushape_format       format;
     /** Growing buffer for an output piece */
     struct aushape_gbuf         gbuf;
     /** Execve record aggregation state */
@@ -45,9 +47,11 @@ extern bool aushape_conv_buf_is_valid(const struct aushape_conv_buf *buf);
 /**
  * Initialize a converter output buffer
  *
- * @param buf   The buffer to initialize.
+ * @param buf       The buffer to initialize.
+ * @param format    The output format to use.
  */
-extern void aushape_conv_buf_init(struct aushape_conv_buf *buf);
+extern void aushape_conv_buf_init(struct aushape_conv_buf *buf,
+                                  const struct aushape_format *format);
 
 /**
  * Cleanup a converter output buffer (free allocated data).
@@ -67,24 +71,18 @@ extern void aushape_conv_buf_empty(struct aushape_conv_buf *buf);
  * Add a document prologue fragment to a converter output buffer.
  *
  * @param buf       The converter output buffer to add the fragment to.
- * @param format    The output format to use.
- * @param level     Syntactic nesting level the document is output at.
  *
  * @return Return code:
  *          AUSHAPE_RC_OK                   - added succesfully,
  *          AUSHAPE_RC_NOMEM                - memory allocation failed.
  */
 extern enum aushape_rc aushape_conv_buf_add_prologue(
-                                    struct aushape_conv_buf *buf,
-                                    const struct aushape_format *format,
-                                    size_t level);
+                                    struct aushape_conv_buf *buf);
 
 /**
  * Add a formatted fragment for an auparse event to a converter output buffer.
  *
  * @param buf       The converter buffer to add the fragment to.
- * @param format    The output format to use.
- * @param level     Syntactic nesting level the event is output at.
  * @param first     True if this is the first event being output for a record,
  *                  false otherwise.
  * @param au        The auparse state with the current event as the one to be
@@ -99,8 +97,6 @@ extern enum aushape_rc aushape_conv_buf_add_prologue(
  */
 extern enum aushape_rc aushape_conv_buf_add_event(
                                     struct aushape_conv_buf *buf,
-                                    const struct aushape_format *format,
-                                    size_t level,
                                     bool first,
                                     auparse_state_t *au);
 
@@ -108,16 +104,12 @@ extern enum aushape_rc aushape_conv_buf_add_event(
  * Add a document epilogue fragment to a converter output buffer.
  *
  * @param buf       The converter output buffer to add the fragment to.
- * @param format    The output format to use.
- * @param level     Syntactic nesting level the document is output at.
  *
  * @return Return code:
  *          AUSHAPE_RC_OK                   - added succesfully,
  *          AUSHAPE_RC_NOMEM                - memory allocation failed.
  */
 extern enum aushape_rc aushape_conv_buf_add_epilogue(
-                                    struct aushape_conv_buf *buf,
-                                    const struct aushape_format *format,
-                                    size_t level);
+                                    struct aushape_conv_buf *buf);
 
 #endif /* _AUSHAPE_CONV_BUF_H */
