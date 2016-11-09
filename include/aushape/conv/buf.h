@@ -21,7 +21,7 @@
 #ifndef _AUSHAPE_CONV_BUF_H
 #define _AUSHAPE_CONV_BUF_H
 
-#include <aushape/conv/execve.h>
+#include <aushape/conv/coll.h>
 #include <aushape/format.h>
 #include <aushape/gbuf.h>
 #include <aushape/rc.h>
@@ -33,8 +33,8 @@ struct aushape_conv_buf {
     struct aushape_format       format;
     /** Growing buffer for an output piece */
     struct aushape_gbuf         gbuf;
-    /** Execve record aggregation state */
-    struct aushape_conv_execve  execve;
+    /** Execve record collector */
+    struct aushape_conv_coll   *execve_coll;
 };
 
 /**
@@ -51,9 +51,15 @@ extern bool aushape_conv_buf_is_valid(const struct aushape_conv_buf *buf);
  *
  * @param buf       The buffer to initialize.
  * @param format    The output format to use.
+ *
+ * @return Return code:
+ *          AUSHAPE_RC_OK                   - initialized successfully,
+ *          AUSHAPE_RC_INVALID_ARGS         - invalid arguments supplied,
+ *          AUSHAPE_RC_NOMEM                - memory allocation failed.
  */
-extern void aushape_conv_buf_init(struct aushape_conv_buf *buf,
-                                  const struct aushape_format *format);
+extern enum aushape_rc aushape_conv_buf_init(
+                                        struct aushape_conv_buf *buf,
+                                        const struct aushape_format *format);
 
 /**
  * Cleanup a converter output buffer (free allocated data).

@@ -197,7 +197,11 @@ aushape_conv_create(struct aushape_conv **pconv,
     auparse_add_callback(conv->au, aushape_conv_cb, conv, NULL);
 
     conv->format = *format;
-    aushape_conv_buf_init(&conv->buf, &conv->format);
+    rc = aushape_conv_buf_init(&conv->buf, &conv->format);
+    if (rc != AUSHAPE_RC_OK) {
+        assert(rc != AUSHAPE_RC_INVALID_ARGS);
+        goto cleanup;
+    }
     conv->output = output;
     conv->output_owned = output_owned;
 
