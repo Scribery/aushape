@@ -36,7 +36,12 @@ struct aushape_output;
  * @param output    The output to initialize, must be cleared to zero.
  * @param ap        Argument list.
  *
- * @return Global return code.
+ * @return Return code:
+ *          AUSHAPE_RC_OK                   - output created succesfully,
+ *          AUSHAPE_RC_INVALID_ARGS         - invalid arguments supplied,
+ *          AUSHAPE_RC_NOMEM                - failed allocating memory,
+ *          AUSHAPE_RC_OUTPUT_INIT_FAILED   - output-specific initialization
+ *                                            failed.
  */
 typedef enum aushape_rc (*aushape_output_type_init_fn)(
                                 struct aushape_output *output,
@@ -59,8 +64,10 @@ typedef bool (*aushape_output_type_is_valid_fn)(
  * @param ptr       Pointer to the output fragment.
  * @param len       Length of the output fragment in bytes.
  *
- * @return Return code.
- *         See specific type descriptions for particular return codes.
+ * @return Return code:
+ *          AUSHAPE_RC_OK                   - written succesfully,
+ *          AUSHAPE_RC_INVALID_ARGS         - invalid arguments supplied,
+ *          AUSHAPE_RC_OUTPUT_WRITE_FAILED  - output-specific write failure.
  */
 typedef enum aushape_rc (*aushape_output_type_write_fn)(
                                 struct aushape_output *output,
