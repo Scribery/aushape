@@ -47,7 +47,7 @@ extern const struct aushape_output_type aushape_fd_output_type;
  */
 static inline enum aushape_rc
 aushape_fd_output_create(struct aushape_output **poutput,
-                           int fd, bool fd_owned)
+                         int fd, bool fd_owned)
 {
     if (fd < 0) {
         return AUSHAPE_RC_INVALID_ARGS;
