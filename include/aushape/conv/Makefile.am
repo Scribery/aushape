@@ -23,4 +23,5 @@ noinst_HEADERS = \
     buf.h           \
     coll.h          \
     coll_type.h     \
-    execve.h
+    execve.h        \
+    execve_coll.h
