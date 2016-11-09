@@ -23,6 +23,7 @@ noinst_LTLIBRARIES = \
 
 libaushape_conv_la_SOURCES = \
     buf.c                       \
+    coll.c                      \
     execve.c
 
 libaushape_conv_la_LIBADD = \
