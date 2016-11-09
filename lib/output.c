@@ -20,6 +20,7 @@
 
 #include <aushape/output.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 enum aushape_rc
@@ -93,5 +94,6 @@ aushape_output_destroy(struct aushape_output *output)
     if (output->type->cleanup != NULL) {
         output->type->cleanup(output);
     }
+    memset(output, 0, output->type->size);
     free(output);
 }
