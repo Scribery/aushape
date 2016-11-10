@@ -343,6 +343,9 @@ aushape_conv_destroy(struct aushape_conv *conv)
         assert(aushape_conv_is_valid(conv));
         auparse_destroy(conv->au);
         aushape_conv_buf_cleanup(&conv->buf);
+        if (conv->output_owned) {
+            aushape_output_destroy(conv->output);
+        }
         memset(conv, 0, sizeof(*conv));
         free(conv);
     }
