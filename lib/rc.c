@@ -43,6 +43,8 @@ static const struct aushape_rc_info \
        "A converter's call to auparse failed"),
     RC(CONV_INVALID_EXECVE,
        "Invalid execve record sequence encountered by converter"),
+    RC(CONV_REPEATED_RECORD,
+       "An unexpected repeated record type encountered"),
     RC(OUTPUT_INIT_FAILED,
        "Output initialization failed"),
     RC(OUTPUT_WRITE_FAILED,

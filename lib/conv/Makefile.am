@@ -24,7 +24,8 @@ noinst_LTLIBRARIES = \
 libaushape_conv_la_SOURCES = \
     buf.c                       \
     coll.c                      \
-    execve_coll.c
+    execve_coll.c               \
+    unique_coll.c
 
 libaushape_conv_la_LIBADD = \
     $(AUPARSE_LIBS)
