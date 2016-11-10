@@ -35,6 +35,8 @@ struct aushape_conv_buf {
     struct aushape_gbuf         gbuf;
     /** Execve record collector */
     struct aushape_conv_coll   *execve_coll;
+    /** Unique record collector */
+    struct aushape_conv_coll   *unique_coll;
 };
 
 /**

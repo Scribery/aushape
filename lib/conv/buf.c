@@ -20,6 +20,7 @@
 
 #include <aushape/conv/buf.h>
 #include <aushape/conv/execve_coll.h>
+#include <aushape/conv/unique_coll.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -46,188 +47,6 @@
             return AUSHAPE_RC_NOMEM;    \
         }                               \
     } while (0)
-
-/**
- * Add a formatted fragment for an auparse field to a growing buffer.
- *
- * @param gbuf      The growing buffer to add the fragment to.
- * @param format    The output format to use.
- * @param level     Syntactic nesting level the field is output at.
- * @param first     True if this is the first field being output for a record,
- *                  false otherwise.
- * @param name      The field name.
- * @param au        The auparse state with the current field as the one to be
- *                  output.
- *
- * @return True if added succesfully, false if memory allocation failed.
- */
-static bool
-aushape_conv_buf_add_field(struct aushape_gbuf *gbuf,
-                           const struct aushape_format *format,
-                           size_t level,
-                           bool first,
-                           const char *name,
-                           auparse_state_t *au)
-{
-    size_t l = level;
-    const char *value_r;
-    const char *value_i = auparse_interpret_field(au);
-    int type = auparse_get_field_type(au);
-
-    assert(aushape_gbuf_is_valid(gbuf));
-    assert(aushape_format_is_valid(format));
-    assert(name != NULL);
-    assert(au != NULL);
-
-    switch (type) {
-    case AUPARSE_TYPE_ESCAPED:
-    case AUPARSE_TYPE_ESCAPED_KEY:
-        value_r = NULL;
-        break;
-    default:
-        value_r = auparse_get_field_str(au);
-        if (strcmp(value_r, value_i) == 0) {
-            value_r = NULL;
-        }
-        break;
-    }
-
-    switch (format->lang) {
-    case AUSHAPE_LANG_XML:
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_char(gbuf, '<'));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, name));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, " i=\""));
-        GUARD_BOOL(aushape_gbuf_add_str_xml(gbuf, value_i));
-        if (value_r != NULL) {
-            GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\" r=\""));
-            GUARD_BOOL(aushape_gbuf_add_str_xml(gbuf, value_r));
-        }
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"/>"));
-        break;
-    case AUSHAPE_LANG_JSON:
-        if (!first) {
-            GUARD_BOOL(aushape_gbuf_add_char(gbuf, ','));
-        }
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, name));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\":["));
-        l++;
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
-        GUARD_BOOL(aushape_gbuf_add_str_json(gbuf, value_i));
-        GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
-        if (value_r != NULL) {
-            GUARD_BOOL(aushape_gbuf_add_char(gbuf, ','));
-            GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-            GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
-            GUARD_BOOL(aushape_gbuf_add_str_json(gbuf, value_r));
-            GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
-        }
-        l--;
-        GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_char(gbuf, ']'));
-        break;
-    default:
-        assert(false);
-        return false;
-    }
-
-    assert(l == level);
-    return true;
-}
-
-/**
- * Add a formatted fragment for an auparse record to a growing buffer.
- *
- * @param gbuf      The growing buffer to add the fragment to.
- * @param format    The output format to use.
- * @param level     Syntactic nesting level the record is output at.
- * @param first     True if this is the first record being output,
- *                  false otherwise.
- * @param name      The record (type) name.
- * @param au        The auparse state with the current record as the one to be
- *                  output.
- *
- * @return True if added succesfully, false if memory allocation failed.
- */
-static bool
-aushape_conv_buf_add_record(struct aushape_gbuf *gbuf,
-                            const struct aushape_format *format,
-                            size_t level,
-                            bool first,
-                            const char *name,
-                            auparse_state_t *au)
-{
-    size_t l = level;
-    bool first_field;
-    const char *field_name;
-
-    assert(aushape_gbuf_is_valid(gbuf));
-    assert(aushape_format_is_valid(format));
-    assert(au != NULL);
-
-    if (format->lang == AUSHAPE_LANG_XML) {
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_char(gbuf, '<'));
-        GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, name));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, " raw=\""));
-        /* TODO: Return AUSHAPE_RC_CONV_AUPARSE_FAILED on failure */
-        GUARD_BOOL(aushape_gbuf_add_str_xml(
-                                        gbuf, auparse_get_record_text(au)));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\">"));
-    } else {
-        if (!first) {
-            GUARD_BOOL(aushape_gbuf_add_char(gbuf, ','));
-        }
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
-        GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, name));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\":{"));
-        l++;
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"raw\":\""));
-        /* TODO: Return AUSHAPE_RC_CONV_AUPARSE_FAILED on failure */
-        GUARD_BOOL(aushape_gbuf_add_str_json(
-                                        gbuf, auparse_get_record_text(au)));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\","));
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"fields\":{"));
-    }
-
-    l++;
-    auparse_first_field(au);
-    first_field = true;
-    do {
-        field_name = auparse_get_field_name(au);
-        if (strcmp(field_name, "type") != 0 &&
-            strcmp(field_name, "node") != 0) {
-            GUARD_BOOL(aushape_conv_buf_add_field(gbuf, format, l,
-                                      first_field, field_name, au));
-            first_field = false;
-        }
-    } while (auparse_next_field(au) > 0);
-
-    l--;
-    if (format->lang == AUSHAPE_LANG_XML) {
-        GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "</"));
-        GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, name));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, ">"));
-    } else {
-        if (!first_field) {
-            GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, l));
-        }
-        GUARD_BOOL(aushape_gbuf_add_char(gbuf, '}'));
-        l--;
-        GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_char(gbuf, '}'));
-    }
-
-    assert(l == level);
-    return true;
-}
 
 bool
 aushape_conv_buf_is_valid(const struct aushape_conv_buf *buf)
@@ -257,6 +76,14 @@ aushape_conv_buf_init(struct aushape_conv_buf *buf,
         assert(rc != AUSHAPE_RC_INVALID_ARGS);
         return rc;
     }
+    rc = aushape_conv_coll_create(&buf->unique_coll,
+                                  &aushape_conv_unique_coll_type,
+                                  &buf->format,
+                                  &buf->gbuf);
+    if (rc != AUSHAPE_RC_OK) {
+        assert(rc != AUSHAPE_RC_INVALID_ARGS);
+        return rc;
+    }
     assert(aushape_conv_buf_is_valid(buf));
     return AUSHAPE_RC_OK;
 }
@@ -267,6 +94,7 @@ aushape_conv_buf_cleanup(struct aushape_conv_buf *buf)
     assert(aushape_conv_buf_is_valid(buf));
     aushape_gbuf_cleanup(&buf->gbuf);
     aushape_conv_coll_destroy(buf->execve_coll);
+    aushape_conv_coll_destroy(buf->unique_coll);
     memset(buf, 0, sizeof(*buf));
 }
 
@@ -276,6 +104,7 @@ aushape_conv_buf_empty(struct aushape_conv_buf *buf)
     assert(aushape_conv_buf_is_valid(buf));
     aushape_gbuf_empty(&buf->gbuf);
     aushape_conv_coll_empty(buf->execve_coll);
+    aushape_conv_coll_empty(buf->unique_coll);
     assert(aushape_conv_buf_is_valid(buf));
 }
 
@@ -358,6 +187,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         record_name = auparse_get_type_name(au);
         /* If this is an "execve" record */
         if (strcmp(record_name, "EXECVE") == 0) {
+            /* Add the record */
             rc = aushape_conv_coll_add(buf->execve_coll, l, &first_record, au);
             if (rc != AUSHAPE_RC_OK) {
                 assert(rc != AUSHAPE_RC_INVALID_ARGS);
@@ -366,23 +196,26 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
                 return rc;
             }
         } else {
-            /* Make sure the execve record is complete and added, if any */
-            rc = aushape_conv_coll_end(buf->execve_coll, l, &first_record);
+            /* Add the record */
+            rc = aushape_conv_coll_add(buf->unique_coll, l, &first_record, au);
             if (rc != AUSHAPE_RC_OK) {
                 assert(rc != AUSHAPE_RC_INVALID_ARGS);
+                assert(rc != AUSHAPE_RC_INVALID_STATE);
                 assert(aushape_conv_buf_is_valid(buf));
                 return rc;
             }
-            /* Add the record */
-            GUARD_RC(aushape_conv_buf_add_record(&buf->gbuf, &buf->format, l,
-                                                 first_record, record_name,
-                                                 au));
-            first_record = false;
         }
     } while(auparse_next_record(au) > 0);
 
     /* Make sure the execve record is complete and added, if any */
     rc = aushape_conv_coll_end(buf->execve_coll, l, &first_record);
+    if (rc != AUSHAPE_RC_OK) {
+        assert(rc != AUSHAPE_RC_INVALID_ARGS);
+        assert(aushape_conv_buf_is_valid(buf));
+        return rc;
+    }
+    /* Make sure the unique record is complete and added, if any */
+    rc = aushape_conv_coll_end(buf->unique_coll, l, &first_record);
     if (rc != AUSHAPE_RC_OK) {
         assert(rc != AUSHAPE_RC_INVALID_ARGS);
         assert(aushape_conv_buf_is_valid(buf));
