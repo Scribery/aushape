@@ -20,6 +20,8 @@
 
 #include <aushape/single_coll.h>
 #include <aushape/coll.h>
+#include <aushape/field.h>
+#include <aushape/guard.h>
 #include <string.h>
 
 static const struct aushape_single_coll_args
@@ -164,97 +166,6 @@ aushape_single_coll_seen_add(struct aushape_coll *coll,
     } while (0)
 
 /**
- * Add a formatted fragment for an auparse field to a growing buffer.
- *
- * @param gbuf      The growing buffer to add the fragment to.
- * @param format    The output format to use.
- * @param level     Syntactic nesting level the field is output at.
- * @param first     True if this is the first field being output for a record,
- *                  false otherwise.
- * @param name      The field name.
- * @param au        The auparse state with the current field as the one to be
- *                  output.
- *
- * @return True if added succesfully, false if memory allocation failed.
- */
-static bool
-aushape_single_coll_add_field(struct aushape_gbuf *gbuf,
-                              const struct aushape_format *format,
-                              size_t level,
-                              bool first,
-                              const char *name,
-                              auparse_state_t *au)
-{
-    size_t l = level;
-    const char *value_r;
-    const char *value_i = auparse_interpret_field(au);
-    int type = auparse_get_field_type(au);
-
-    assert(aushape_gbuf_is_valid(gbuf));
-    assert(aushape_format_is_valid(format));
-    assert(name != NULL);
-    assert(au != NULL);
-
-    switch (type) {
-    case AUPARSE_TYPE_ESCAPED:
-    case AUPARSE_TYPE_ESCAPED_KEY:
-        value_r = NULL;
-        break;
-    default:
-        value_r = auparse_get_field_str(au);
-        if (strcmp(value_r, value_i) == 0) {
-            value_r = NULL;
-        }
-        break;
-    }
-
-    switch (format->lang) {
-    case AUSHAPE_LANG_XML:
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_char(gbuf, '<'));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, name));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, " i=\""));
-        GUARD_BOOL(aushape_gbuf_add_str_xml(gbuf, value_i));
-        if (value_r != NULL) {
-            GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\" r=\""));
-            GUARD_BOOL(aushape_gbuf_add_str_xml(gbuf, value_r));
-        }
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"/>"));
-        break;
-    case AUSHAPE_LANG_JSON:
-        if (!first) {
-            GUARD_BOOL(aushape_gbuf_add_char(gbuf, ','));
-        }
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, name));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\":["));
-        l++;
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
-        GUARD_BOOL(aushape_gbuf_add_str_json(gbuf, value_i));
-        GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
-        if (value_r != NULL) {
-            GUARD_BOOL(aushape_gbuf_add_char(gbuf, ','));
-            GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-            GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
-            GUARD_BOOL(aushape_gbuf_add_str_json(gbuf, value_r));
-            GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
-        }
-        l--;
-        GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_char(gbuf, ']'));
-        break;
-    default:
-        assert(false);
-        return false;
-    }
-
-    assert(l == level);
-    return true;
-}
-
-/**
  * Add a formatted fragment for an auparse record to a growing buffer.
  *
  * @param gbuf      The growing buffer to add the fragment to.
@@ -266,9 +177,13 @@ aushape_single_coll_add_field(struct aushape_gbuf *gbuf,
  * @param au        The auparse state with the current record as the one to be
  *                  output.
  *
- * @return True if added succesfully, false if memory allocation failed.
+ * @return Return code:
+ *          AUSHAPE_RC_OK               - added succesfully,
+ *          AUSHAPE_RC_INVALID_ARGS     - invalid arguments supplied,
+ *          AUSHAPE_RC_NOMEM            - memory allocation failed,
+ *          AUSHAPE_RC_AUPARSE_FAILED   - an auparse call failed.
  */
-static bool
+static enum aushape_rc
 aushape_single_coll_add_record(struct aushape_gbuf *gbuf,
                                const struct aushape_format *format,
                                size_t level,
@@ -276,40 +191,50 @@ aushape_single_coll_add_record(struct aushape_gbuf *gbuf,
                                const char *name,
                                auparse_state_t *au)
 {
+    enum aushape_rc rc;
     size_t l = level;
     bool first_field;
     const char *field_name;
+    const char *raw;
 
-    assert(aushape_gbuf_is_valid(gbuf));
-    assert(aushape_format_is_valid(format));
-    assert(au != NULL);
+    if (!aushape_gbuf_is_valid(gbuf) ||
+        !aushape_format_is_valid(format) ||
+        au == NULL) {
+        rc = AUSHAPE_RC_INVALID_ARGS;
+        goto cleanup;
+    }
 
     if (format->lang == AUSHAPE_LANG_XML) {
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_char(gbuf, '<'));
-        GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, name));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, " raw=\""));
-        /* TODO: Return AUSHAPE_RC_AUPARSE_FAILED on failure */
-        GUARD_BOOL(aushape_gbuf_add_str_xml(
-                                        gbuf, auparse_get_record_text(au)));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\">"));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_opening(gbuf, format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, '<'));
+        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str_lowercase(gbuf, name));
+        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, " raw=\""));
+        raw = auparse_get_record_text(au);
+        AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
+        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str_xml(gbuf, raw));
+        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\">"));
     } else {
         if (!first) {
-            GUARD_BOOL(aushape_gbuf_add_char(gbuf, ','));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_add_char(gbuf, ','));
         }
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_char(gbuf, '"'));
-        GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, name));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\":{"));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_opening(gbuf, format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, '"'));
+        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str_lowercase(gbuf, name));
+        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\":{"));
         l++;
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"raw\":\""));
-        /* TODO: Return AUSHAPE_RC_AUPARSE_FAILED on failure */
-        GUARD_BOOL(aushape_gbuf_add_str_json(
-                                        gbuf, auparse_get_record_text(au)));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\","));
-        GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"fields\":{"));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_opening(gbuf, format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\"raw\":\""));
+        raw = auparse_get_record_text(au);
+        AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
+        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str_json(gbuf, raw));
+        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\","));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_opening(gbuf, format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\"fields\":{"));
     }
 
     l++;
@@ -319,31 +244,45 @@ aushape_single_coll_add_record(struct aushape_gbuf *gbuf,
         field_name = auparse_get_field_name(au);
         if (strcmp(field_name, "type") != 0 &&
             strcmp(field_name, "node") != 0) {
-            GUARD_BOOL(aushape_single_coll_add_field(gbuf, format, l,
-                                                     first_field,
-                                                     field_name, au));
+            rc = aushape_field_format(gbuf, format, l,
+                                      first_field,
+                                      field_name, au);
+            if (rc != AUSHAPE_RC_OK) {
+                assert(rc != AUSHAPE_RC_INVALID_ARGS);
+                goto cleanup;
+            }
             first_field = false;
         }
     } while (auparse_next_field(au) > 0);
 
     l--;
     if (format->lang == AUSHAPE_LANG_XML) {
-        GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, "</"));
-        GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, name));
-        GUARD_BOOL(aushape_gbuf_add_str(gbuf, ">"));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_closing(gbuf, format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_str(gbuf, "</"));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_str_lowercase(gbuf, name));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_str(gbuf, ">"));
     } else {
         if (!first_field) {
-            GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, l));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_space_closing(gbuf, format, l));
         }
-        GUARD_BOOL(aushape_gbuf_add_char(gbuf, '}'));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_char(gbuf, '}'));
         l--;
-        GUARD_BOOL(aushape_gbuf_space_closing(gbuf, format, l));
-        GUARD_BOOL(aushape_gbuf_add_char(gbuf, '}'));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_closing(gbuf, format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_char(gbuf, '}'));
     }
 
     assert(l == level);
-    return true;
+    rc = AUSHAPE_RC_OK;
+cleanup:
+    return rc;
 }
 
 static enum aushape_rc
@@ -352,6 +291,7 @@ aushape_single_coll_add(struct aushape_coll *coll,
                         bool *pfirst,
                         auparse_state_t *au)
 {
+    enum aushape_rc rc;
     struct aushape_single_coll *single_coll =
                     (struct aushape_single_coll *)coll;
     const char *name;
@@ -371,8 +311,12 @@ aushape_single_coll_add(struct aushape_coll *coll,
     } else {
         GUARD_BOOL(aushape_single_coll_seen_add(coll, name));
     }
-    GUARD_BOOL(aushape_single_coll_add_record(coll->gbuf, &coll->format,
-                                              level, *pfirst, name, au));
+    rc = aushape_single_coll_add_record(coll->gbuf, &coll->format,
+                                        level, *pfirst, name, au);
+    if (rc != AUSHAPE_RC_OK) {
+        assert(rc != AUSHAPE_RC_INVALID_ARGS);
+        return rc;
+    }
     *pfirst = false;
     return AUSHAPE_RC_OK;
 }
