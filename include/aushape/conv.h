@@ -96,8 +96,8 @@ enum aushape_rc aushape_conv_begin(struct aushape_conv *conv);
  *                                            format->events_per_doc ==
  *                                            SSIZE_MAX,
  *          AUSHAPE_RC_NOMEM                - memory allocation failed,
- *          AUSHAPE_RC_CONV_AUPARSE_FAILED  - an auparse call failed,
- *          AUSHAPE_RC_CONV_INVALID_EXECVE  - invalid execve record sequence
+ *          AUSHAPE_RC_AUPARSE_FAILED       - an auparse call failed,
+ *          AUSHAPE_RC_INVALID_EXECVE       - invalid execve record sequence
  *                                            encountered,
  *          AUSHAPE_RC_OUTPUT_WRITE_FAILED  - output write failed.
  */
@@ -122,8 +122,8 @@ enum aushape_rc aushape_conv_input(struct aushape_conv *conv,
  *                                            format->events_per_doc ==
  *                                            SSIZE_MAX,
  *          AUSHAPE_RC_NOMEM                - memory allocation failed,
- *          AUSHAPE_RC_CONV_AUPARSE_FAILED  - an auparse call failed,
- *          AUSHAPE_RC_CONV_INVALID_EXECVE  - invalid execve record sequence
+ *          AUSHAPE_RC_AUPARSE_FAILED       - an auparse call failed,
+ *          AUSHAPE_RC_INVALID_EXECVE       - invalid execve record sequence
  *                                            encountered,
  *          AUSHAPE_RC_OUTPUT_WRITE_FAILED  - output write failed.
  */

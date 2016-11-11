@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _AUSHAPE_CONV_COLL_TYPE_H
-#define _AUSHAPE_CONV_COLL_TYPE_H
+#ifndef _AUSHAPE_COLL_TYPE_H
+#define _AUSHAPE_COLL_TYPE_H
 
 #include <aushape/gbuf.h>
 #include <aushape/rc.h>
@@ -27,7 +27,7 @@
 #include <stdlib.h>
 
 /** Forward declaration of record collector instance */
-struct aushape_conv_coll;
+struct aushape_coll;
 
 /**
  * Collector initialization function prototype.
@@ -45,8 +45,8 @@ struct aushape_conv_coll;
  *                                    see corresponding collector type
  *                                    documentation.
  */
-typedef enum aushape_rc (*aushape_conv_coll_type_init_fn)(
-                                struct aushape_conv_coll *coll,
+typedef enum aushape_rc (*aushape_coll_type_init_fn)(
+                                struct aushape_coll *coll,
                                 const void *params);
 
 /**
@@ -56,16 +56,16 @@ typedef enum aushape_rc (*aushape_conv_coll_type_init_fn)(
  *
  * @return True if the collector is valid, false otherwise.
  */
-typedef bool (*aushape_conv_coll_type_is_valid_fn)(
-                                const struct aushape_conv_coll *coll);
+typedef bool (*aushape_coll_type_is_valid_fn)(
+                                const struct aushape_coll *coll);
 
 /**
  * Collector cleanup function prototype.
  *
  * @param coll      The collector to cleanup. Cannot be NULL, must be valid.
  */
-typedef void (*aushape_conv_coll_type_cleanup_fn)(
-                                struct aushape_conv_coll *coll);
+typedef void (*aushape_coll_type_cleanup_fn)(
+                                struct aushape_coll *coll);
 
 /**
  * Prototype for a function checking if a collector is empty.
@@ -74,8 +74,8 @@ typedef void (*aushape_conv_coll_type_cleanup_fn)(
  *
  * @return True if the collector is empty, false otherwise.
  */
-typedef bool (*aushape_conv_coll_type_is_empty_fn)(
-                                const struct aushape_conv_coll *coll);
+typedef bool (*aushape_coll_type_is_empty_fn)(
+                                const struct aushape_coll *coll);
 
 /**
  * Prototype for a function emptying a collector and preparing it for
@@ -83,8 +83,8 @@ typedef bool (*aushape_conv_coll_type_is_empty_fn)(
  *
  * @param coll      The collector to empty.
  */
-typedef void (*aushape_conv_coll_type_empty_fn)(
-                                struct aushape_conv_coll *coll);
+typedef void (*aushape_coll_type_empty_fn)(
+                                struct aushape_coll *coll);
 
 /**
  * Prototype for a function adding a record to the collector record sequence.
@@ -100,15 +100,15 @@ typedef void (*aushape_conv_coll_type_empty_fn)(
  *                  be added.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK                   - added succesfully,
- *          AUSHAPE_RC_NOMEM                - memory allocation failed,
- *          AUSHAPE_RC_CONV_AUPARSE_FAILED  - an auparse call failed,
- *          other                           - collector-specific return code,
- *                                            see corresponding collector type
- *                                            documentation.
+ *          AUSHAPE_RC_OK               - added succesfully,
+ *          AUSHAPE_RC_NOMEM            - memory allocation failed,
+ *          AUSHAPE_RC_AUPARSE_FAILED   - an auparse call failed,
+ *          other                       - collector-specific return code,
+ *                                        see corresponding collector type
+ *                                        documentation.
  */
-typedef enum aushape_rc (*aushape_conv_coll_type_add_fn)(
-                                struct aushape_conv_coll *coll,
+typedef enum aushape_rc (*aushape_coll_type_add_fn)(
+                                struct aushape_coll *coll,
                                 size_t level,
                                 bool *pfirst,
                                 auparse_state_t *au);
@@ -125,35 +125,35 @@ typedef enum aushape_rc (*aushape_conv_coll_type_add_fn)(
  *                  set to false if the function added a record.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK                   - added succesfully,
- *          AUSHAPE_RC_NOMEM                - memory allocation failed,
- *          other                           - collector-specific return code,
- *                                            see corresponding collector type
- *                                            documentation.
+ *          AUSHAPE_RC_OK               - added succesfully,
+ *          AUSHAPE_RC_NOMEM            - memory allocation failed,
+ *          other                       - collector-specific return code,
+ *                                        see corresponding collector type
+ *                                        documentation.
  */
-typedef enum aushape_rc (*aushape_conv_coll_type_end_fn)(
-                                struct aushape_conv_coll *coll,
+typedef enum aushape_rc (*aushape_coll_type_end_fn)(
+                                struct aushape_coll *coll,
                                 size_t level,
                                 bool *pfirst);
 
 /** Record collector type */
-struct aushape_conv_coll_type {
+struct aushape_coll_type {
     /** Instance size */
     size_t  size;
     /** Initialization function */
-    aushape_conv_coll_type_init_fn      init;
+    aushape_coll_type_init_fn       init;
     /** Validation function */
-    aushape_conv_coll_type_is_valid_fn  is_valid;
+    aushape_coll_type_is_valid_fn   is_valid;
     /** Cleanup function */
-    aushape_conv_coll_type_cleanup_fn   cleanup;
+    aushape_coll_type_cleanup_fn    cleanup;
     /** Emptiness-checking function */
-    aushape_conv_coll_type_is_empty_fn  is_empty;
+    aushape_coll_type_is_empty_fn   is_empty;
     /** Emptying function */
-    aushape_conv_coll_type_empty_fn     empty;
+    aushape_coll_type_empty_fn      empty;
     /** Record-addition function */
-    aushape_conv_coll_type_add_fn       add;
+    aushape_coll_type_add_fn        add;
     /** Sequence-ending function */
-    aushape_conv_coll_type_end_fn       end;
+    aushape_coll_type_end_fn        end;
 };
 
 /**
@@ -164,7 +164,7 @@ struct aushape_conv_coll_type {
  * @return True if the collector type is valid, false otherwise.
  */
 static inline bool
-aushape_conv_coll_type_is_valid(const struct aushape_conv_coll_type *type)
+aushape_coll_type_is_valid(const struct aushape_coll_type *type)
 {
     return type != NULL &&
            type->size >= sizeof(type) &&
@@ -172,4 +172,4 @@ aushape_conv_coll_type_is_valid(const struct aushape_conv_coll_type *type)
            type->empty != NULL &&
            type->add != NULL;
 }
-#endif /* _AUSHAPE_CONV_COLL_TYPE_H */
+#endif /* _AUSHAPE_COLL_TYPE_H */

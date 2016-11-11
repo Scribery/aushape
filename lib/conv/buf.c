@@ -19,9 +19,9 @@
  */
 
 #include <aushape/conv/buf.h>
-#include <aushape/conv/disp_coll.h>
-#include <aushape/conv/single_coll.h>
-#include <aushape/conv/execve_coll.h>
+#include <aushape/disp_coll.h>
+#include <aushape/single_coll.h>
+#include <aushape/execve_coll.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -55,33 +55,33 @@ aushape_conv_buf_is_valid(const struct aushape_conv_buf *buf)
     return buf != NULL &&
            aushape_format_is_valid(&buf->format) &&
            aushape_gbuf_is_valid(&buf->gbuf) &&
-           aushape_conv_coll_is_valid(buf->coll);
+           aushape_coll_is_valid(buf->coll);
 }
 
 enum aushape_rc
 aushape_conv_buf_init(struct aushape_conv_buf *buf,
                       const struct aushape_format *format)
 {
-    static const struct aushape_conv_single_coll_args single_args_unique = {
+    static const struct aushape_single_coll_args single_args_unique = {
         .unique = true
     };
-    static const struct aushape_conv_single_coll_args single_args_repeated = {
+    static const struct aushape_single_coll_args single_args_repeated = {
         .unique = false
     };
-    static const struct aushape_conv_disp_coll_type_link map[] = {
+    static const struct aushape_disp_coll_type_link map[] = {
         {
             .name   = "EXECVE",
-            .type   = &aushape_conv_execve_coll_type,
+            .type   = &aushape_execve_coll_type,
             .args   = NULL,
         },
         {
             .name   = "PATH",
-            .type   = &aushape_conv_single_coll_type,
+            .type   = &aushape_single_coll_type,
             .args   = &single_args_repeated,
         },
         {
             .name   = NULL,
-            .type   = &aushape_conv_single_coll_type,
+            .type   = &aushape_single_coll_type,
             .args   = &single_args_unique,
         },
     };
@@ -94,11 +94,11 @@ aushape_conv_buf_init(struct aushape_conv_buf *buf,
     memset(buf, 0, sizeof(*buf));
     buf->format = *format;
     aushape_gbuf_init(&buf->gbuf);
-    rc = aushape_conv_coll_create(&buf->coll,
-                                  &aushape_conv_disp_coll_type,
-                                  &buf->format,
-                                  &buf->gbuf,
-                                  &map);
+    rc = aushape_coll_create(&buf->coll,
+                             &aushape_disp_coll_type,
+                             &buf->format,
+                             &buf->gbuf,
+                             &map);
     if (rc != AUSHAPE_RC_OK) {
         assert(rc != AUSHAPE_RC_INVALID_ARGS);
         return rc;
@@ -112,7 +112,7 @@ aushape_conv_buf_cleanup(struct aushape_conv_buf *buf)
 {
     assert(aushape_conv_buf_is_valid(buf));
     aushape_gbuf_cleanup(&buf->gbuf);
-    aushape_conv_coll_destroy(buf->coll);
+    aushape_coll_destroy(buf->coll);
     memset(buf, 0, sizeof(*buf));
 }
 
@@ -121,7 +121,7 @@ aushape_conv_buf_empty(struct aushape_conv_buf *buf)
 {
     assert(aushape_conv_buf_is_valid(buf));
     aushape_gbuf_empty(&buf->gbuf);
-    aushape_conv_coll_empty(buf->coll);
+    aushape_coll_empty(buf->coll);
     assert(aushape_conv_buf_is_valid(buf));
 }
 
@@ -148,7 +148,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
 
     e = auparse_get_timestamp(au);
     if (e == NULL) {
-        return AUSHAPE_RC_CONV_AUPARSE_FAILED;
+        return AUSHAPE_RC_AUPARSE_FAILED;
     }
 
     /* Format timestamp */
@@ -196,12 +196,12 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     /* Output records */
     l++;
     if (auparse_first_record(au) <= 0) {
-        return AUSHAPE_RC_CONV_AUPARSE_FAILED;
+        return AUSHAPE_RC_AUPARSE_FAILED;
     }
     first_record = true;
     do {
         /* Add the record to the collector */
-        rc = aushape_conv_coll_add(buf->coll, l, &first_record, au);
+        rc = aushape_coll_add(buf->coll, l, &first_record, au);
         if (rc != AUSHAPE_RC_OK) {
             assert(rc != AUSHAPE_RC_INVALID_ARGS);
             assert(rc != AUSHAPE_RC_INVALID_STATE);
@@ -211,7 +211,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     } while(auparse_next_record(au) > 0);
 
     /* Make sure the record sequence is complete and added, if any */
-    rc = aushape_conv_coll_end(buf->coll, l, &first_record);
+    rc = aushape_coll_end(buf->coll, l, &first_record);
     if (rc != AUSHAPE_RC_OK) {
         assert(rc != AUSHAPE_RC_INVALID_ARGS);
         assert(aushape_conv_buf_is_valid(buf));

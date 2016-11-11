@@ -18,14 +18,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <aushape/conv/execve_coll.h>
-#include <aushape/conv/coll.h>
+#include <aushape/execve_coll.h>
+#include <aushape/coll.h>
 #include <stdio.h>
 #include <string.h>
 
-struct aushape_conv_execve_coll {
+struct aushape_execve_coll {
     /** Abstract base collector */
-    struct aushape_conv_coll    coll;
+    struct aushape_coll coll;
     /** Formatted raw log buffer */
     struct aushape_gbuf raw;
     /** Formatted argument list buffer */
@@ -45,10 +45,10 @@ struct aushape_conv_execve_coll {
 };
 
 static bool
-aushape_conv_execve_coll_is_valid(const struct aushape_conv_coll *coll)
+aushape_execve_coll_is_valid(const struct aushape_coll *coll)
 {
-    struct aushape_conv_execve_coll *execve_coll =
-                    (struct aushape_conv_execve_coll *)coll;
+    struct aushape_execve_coll *execve_coll =
+                    (struct aushape_execve_coll *)coll;
     return aushape_gbuf_is_valid(&execve_coll->raw) &&
            aushape_gbuf_is_valid(&execve_coll->args) &&
            execve_coll->arg_idx <= execve_coll->arg_num &&
@@ -58,11 +58,10 @@ aushape_conv_execve_coll_is_valid(const struct aushape_conv_coll *coll)
 }
 
 static enum aushape_rc
-aushape_conv_execve_coll_init(struct aushape_conv_coll *coll,
-                              const void *args)
+aushape_execve_coll_init(struct aushape_coll *coll, const void *args)
 {
-    struct aushape_conv_execve_coll *execve_coll =
-                    (struct aushape_conv_execve_coll *)coll;
+    struct aushape_execve_coll *execve_coll =
+                    (struct aushape_execve_coll *)coll;
     (void)args;
     aushape_gbuf_init(&execve_coll->raw);
     aushape_gbuf_init(&execve_coll->args);
@@ -70,27 +69,27 @@ aushape_conv_execve_coll_init(struct aushape_conv_coll *coll,
 }
 
 static void
-aushape_conv_execve_coll_cleanup(struct aushape_conv_coll *coll)
+aushape_execve_coll_cleanup(struct aushape_coll *coll)
 {
-    struct aushape_conv_execve_coll *execve_coll =
-                    (struct aushape_conv_execve_coll *)coll;
+    struct aushape_execve_coll *execve_coll =
+                    (struct aushape_execve_coll *)coll;
     aushape_gbuf_cleanup(&execve_coll->raw);
     aushape_gbuf_cleanup(&execve_coll->args);
 }
 
 static bool
-aushape_conv_execve_coll_is_empty(const struct aushape_conv_coll *coll)
+aushape_execve_coll_is_empty(const struct aushape_coll *coll)
 {
-    struct aushape_conv_execve_coll *execve_coll =
-                    (struct aushape_conv_execve_coll *)coll;
+    struct aushape_execve_coll *execve_coll =
+                    (struct aushape_execve_coll *)coll;
     return execve_coll->arg_num == 0;
 }
 
 static void
-aushape_conv_execve_coll_empty(struct aushape_conv_coll *coll)
+aushape_execve_coll_empty(struct aushape_coll *coll)
 {
-    struct aushape_conv_execve_coll *execve_coll =
-                    (struct aushape_conv_execve_coll *)coll;
+    struct aushape_execve_coll *execve_coll =
+                    (struct aushape_execve_coll *)coll;
     aushape_gbuf_empty(&execve_coll->raw);
     aushape_gbuf_empty(&execve_coll->args);
     execve_coll->arg_num = 0;
@@ -140,39 +139,39 @@ aushape_conv_execve_coll_empty(struct aushape_conv_coll *coll)
  *                  the current field.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK                   - processed succesfully,
- *          AUSHAPE_RC_AUPARSE_FAILED       - an auparse call failed,
- *          AUSHAPE_RC_CONV_INVALID_EXECVE  - invalid execve record sequence
- *                                            encountered.
+ *          AUSHAPE_RC_OK               - processed succesfully,
+ *          AUSHAPE_RC_AUPARSE_FAILED   - an auparse call failed,
+ *          AUSHAPE_RC_INVALID_EXECVE   - invalid execve record sequence
+ *                                        encountered.
  */
 static enum aushape_rc
-aushape_conv_execve_coll_add_argc(struct aushape_conv_coll *coll,
-                                  size_t level,
-                                  auparse_state_t *au)
+aushape_execve_coll_add_argc(struct aushape_coll *coll,
+                             size_t level,
+                             auparse_state_t *au)
 {
-    struct aushape_conv_execve_coll *execve_coll =
-                    (struct aushape_conv_execve_coll *)coll;
+    struct aushape_execve_coll *execve_coll =
+                    (struct aushape_execve_coll *)coll;
     enum aushape_rc rc;
     const char *str;
     size_t num;
     int end;
 
-    assert(aushape_conv_coll_is_valid(coll));
-    assert(coll->type == &aushape_conv_execve_coll_type);
+    assert(aushape_coll_is_valid(coll));
+    assert(coll->type == &aushape_execve_coll_type);
     assert(au != NULL);
     (void)level;
 
-    GUARD_BOOL(CONV_INVALID_EXECVE, execve_coll->arg_num == 0);
+    GUARD_BOOL(INVALID_EXECVE, execve_coll->arg_num == 0);
     str = auparse_get_field_str(au);
-    GUARD_BOOL(CONV_AUPARSE_FAILED, str != NULL);
+    GUARD_BOOL(AUPARSE_FAILED, str != NULL);
     end = 0;
-    GUARD_BOOL(CONV_INVALID_EXECVE,
+    GUARD_BOOL(INVALID_EXECVE,
                sscanf(str, "%zu%n", &num, &end) >= 1 &&
                (size_t)end == strlen(str));
     execve_coll->arg_num = num;
     rc = AUSHAPE_RC_OK;
 cleanup:
-    assert(aushape_conv_coll_is_valid(coll));
+    assert(aushape_coll_is_valid(coll));
     return rc;
 }
 
@@ -188,16 +187,16 @@ cleanup:
  *          AUSHAPE_RC_NOMEM                - memory allocation failed,
  */
 static enum aushape_rc
-aushape_conv_execve_coll_add_arg_str(struct aushape_conv_coll *coll,
-                                     size_t level,
-                                     const char *str)
+aushape_execve_coll_add_arg_str(struct aushape_coll *coll,
+                                size_t level,
+                                const char *str)
 {
-    struct aushape_conv_execve_coll *execve_coll =
-                    (struct aushape_conv_execve_coll *)coll;
+    struct aushape_execve_coll *execve_coll =
+                    (struct aushape_execve_coll *)coll;
     enum aushape_rc rc;
 
-    assert(aushape_conv_coll_is_valid(coll));
-    assert(coll->type == &aushape_conv_execve_coll_type);
+    assert(aushape_coll_is_valid(coll));
+    assert(coll->type == &aushape_execve_coll_type);
     assert(str != NULL);
 
     if (coll->format.lang == AUSHAPE_LANG_XML) {
@@ -223,7 +222,7 @@ aushape_conv_execve_coll_add_arg_str(struct aushape_conv_coll *coll,
 
     rc = AUSHAPE_RC_OK;
 cleanup:
-    assert(aushape_conv_coll_is_valid(coll));
+    assert(aushape_coll_is_valid(coll));
     return rc;
 }
 
@@ -237,34 +236,34 @@ cleanup:
  *                  current field.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK                   - processed succesfully,
- *          AUSHAPE_RC_NOMEM                - memory allocation failed,
- *          AUSHAPE_RC_CONV_AUPARSE_FAILED  - an auparse call failed,
- *          AUSHAPE_RC_CONV_INVALID_EXECVE  - invalid execve record sequence
- *                                            encountered.
+ *          AUSHAPE_RC_OK               - processed succesfully,
+ *          AUSHAPE_RC_NOMEM            - memory allocation failed,
+ *          AUSHAPE_RC_AUPARSE_FAILED   - an auparse call failed,
+ *          AUSHAPE_RC_INVALID_EXECVE   - invalid execve record sequence
+ *                                        encountered.
  */
 static enum aushape_rc
-aushape_conv_execve_coll_add_arg(struct aushape_conv_coll *coll,
-                                 size_t level,
-                                 size_t arg_idx,
-                                 auparse_state_t *au)
+aushape_execve_coll_add_arg(struct aushape_coll *coll,
+                            size_t level,
+                            size_t arg_idx,
+                            auparse_state_t *au)
 {
-    struct aushape_conv_execve_coll *execve_coll =
-                    (struct aushape_conv_execve_coll *)coll;
+    struct aushape_execve_coll *execve_coll =
+                    (struct aushape_execve_coll *)coll;
     enum aushape_rc rc;
     const char *str;
 
-    assert(aushape_conv_coll_is_valid(coll));
-    assert(coll->type == &aushape_conv_execve_coll_type);
+    assert(aushape_coll_is_valid(coll));
+    assert(coll->type == &aushape_execve_coll_type);
     assert(au != NULL);
 
-    GUARD_BOOL(CONV_INVALID_EXECVE,
+    GUARD_BOOL(INVALID_EXECVE,
                arg_idx >= execve_coll->arg_idx &&
                arg_idx < execve_coll->arg_num);
 
     /* Add skipped empty arguments */
     while (execve_coll->arg_idx < arg_idx) {
-        rc = aushape_conv_execve_coll_add_arg_str(coll, level, "");
+        rc = aushape_execve_coll_add_arg_str(coll, level, "");
         if (rc != AUSHAPE_RC_OK) {
             goto cleanup;
         }
@@ -272,11 +271,11 @@ aushape_conv_execve_coll_add_arg(struct aushape_conv_coll *coll,
 
     /* Add the argument in question */
     str = auparse_interpret_field(au);
-    GUARD_BOOL(CONV_AUPARSE_FAILED, str != NULL);
-    rc = aushape_conv_execve_coll_add_arg_str(coll, level, str);
+    GUARD_BOOL(AUPARSE_FAILED, str != NULL);
+    rc = aushape_execve_coll_add_arg_str(coll, level, str);
 
 cleanup:
-    assert(aushape_conv_coll_is_valid(coll));
+    assert(aushape_coll_is_valid(coll));
     return rc;
 }
 
@@ -290,36 +289,36 @@ cleanup:
  *                  current field.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK                   - processed succesfully,
- *          AUSHAPE_RC_CONV_AUPARSE_FAILED  - an auparse call failed,
- *          AUSHAPE_RC_CONV_INVALID_EXECVE  - invalid execve record sequence
- *                                            encountered.
+ *          AUSHAPE_RC_OK               - processed succesfully,
+ *          AUSHAPE_RC_AUPARSE_FAILED   - an auparse call failed,
+ *          AUSHAPE_RC_INVALID_EXECVE   - invalid execve record sequence
+ *                                        encountered.
  */
 static enum aushape_rc
-aushape_conv_execve_coll_add_arg_len(struct aushape_conv_coll *coll,
-                                     size_t level,
-                                     size_t arg_idx,
-                                     auparse_state_t *au)
+aushape_execve_coll_add_arg_len(struct aushape_coll *coll,
+                                size_t level,
+                                size_t arg_idx,
+                                auparse_state_t *au)
 {
-    struct aushape_conv_execve_coll *execve_coll =
-                    (struct aushape_conv_execve_coll *)coll;
+    struct aushape_execve_coll *execve_coll =
+                    (struct aushape_execve_coll *)coll;
     enum aushape_rc rc;
     const char *str;
     size_t num;
     int end;
 
-    assert(aushape_conv_coll_is_valid(coll));
-    assert(coll->type == &aushape_conv_execve_coll_type);
+    assert(aushape_coll_is_valid(coll));
+    assert(coll->type == &aushape_execve_coll_type);
     assert(au != NULL);
 
-    GUARD_BOOL(CONV_INVALID_EXECVE,
+    GUARD_BOOL(INVALID_EXECVE,
                arg_idx >= execve_coll->arg_idx &&
                arg_idx < execve_coll->arg_num &&
                !execve_coll->got_len);
 
     /* Add skipped empty arguments */
     while (execve_coll->arg_idx < arg_idx) {
-        rc = aushape_conv_execve_coll_add_arg_str(coll, level, "");
+        rc = aushape_execve_coll_add_arg_str(coll, level, "");
         if (rc != AUSHAPE_RC_OK) {
             goto cleanup;
         }
@@ -328,16 +327,16 @@ aushape_conv_execve_coll_add_arg_len(struct aushape_conv_coll *coll,
     execve_coll->got_len = true;
 
     str = auparse_get_field_str(au);
-    GUARD_BOOL(CONV_AUPARSE_FAILED, str != NULL);
+    GUARD_BOOL(AUPARSE_FAILED, str != NULL);
     end = 0;
-    GUARD_BOOL(CONV_INVALID_EXECVE,
+    GUARD_BOOL(INVALID_EXECVE,
                sscanf(str, "%zu%n", &num, &end) >= 1 &&
                (size_t)end == strlen(str));
     execve_coll->len_total = num;
 
     rc = AUSHAPE_RC_OK;
 cleanup:
-    assert(aushape_conv_coll_is_valid(coll));
+    assert(aushape_coll_is_valid(coll));
     return rc;
 }
 
@@ -352,21 +351,20 @@ cleanup:
  *                  current field.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK                   - processed succesfully,
- *          AUSHAPE_RC_NOMEM                - memory allocation failed,
- *          AUSHAPE_RC_CONV_AUPARSE_FAILED  - an auparse call failed,
- *          AUSHAPE_RC_CONV_INVALID_EXECVE  - invalid execve record sequence
- *                                            encountered.
+ *          AUSHAPE_RC_OK               - processed succesfully,
+ *          AUSHAPE_RC_NOMEM            - memory allocation failed,
+ *          AUSHAPE_RC_AUPARSE_FAILED   - an auparse call failed,
+ *          AUSHAPE_RC_INVALID_EXECVE   - invalid execve record sequence
+ *                                        encountered.
  */
 static enum aushape_rc
-aushape_conv_execve_coll_add_arg_slice(
-                            struct aushape_conv_coll *coll,
-                            size_t level,
-                            size_t arg_idx, size_t slice_idx,
-                            auparse_state_t *au)
+aushape_execve_coll_add_arg_slice(struct aushape_coll *coll,
+                                  size_t level,
+                                  size_t arg_idx, size_t slice_idx,
+                                  auparse_state_t *au)
 {
-    struct aushape_conv_execve_coll *execve_coll =
-                    (struct aushape_conv_execve_coll *)coll;
+    struct aushape_execve_coll *execve_coll =
+                    (struct aushape_execve_coll *)coll;
     enum aushape_rc rc;
     const char *raw_str;
     size_t raw_len;
@@ -374,22 +372,22 @@ aushape_conv_execve_coll_add_arg_slice(
     size_t int_len;
     size_t len;
 
-    assert(aushape_conv_coll_is_valid(coll));
-    assert(coll->type == &aushape_conv_execve_coll_type);
+    assert(aushape_coll_is_valid(coll));
+    assert(coll->type == &aushape_execve_coll_type);
     assert(au != NULL);
 
-    GUARD_BOOL(CONV_INVALID_EXECVE,
+    GUARD_BOOL(INVALID_EXECVE,
                arg_idx == execve_coll->arg_idx &&
                arg_idx < execve_coll->arg_num &&
                execve_coll->got_len &&
                slice_idx == execve_coll->slice_idx);
 
     raw_str = auparse_get_field_str(au);
-    GUARD_BOOL(CONV_AUPARSE_FAILED, raw_str != NULL);
+    GUARD_BOOL(AUPARSE_FAILED, raw_str != NULL);
     raw_len = strlen(raw_str);
 
     int_str = auparse_interpret_field(au);
-    GUARD_BOOL(CONV_AUPARSE_FAILED, int_str != NULL);
+    GUARD_BOOL(AUPARSE_FAILED, int_str != NULL);
     int_len = strlen(int_str);
 
     /*
@@ -406,7 +404,7 @@ aushape_conv_execve_coll_add_arg_slice(
      * length when "interpreted".
      */
     len = (int_len == raw_len / 2) ? raw_len : int_len;
-    GUARD_BOOL(CONV_INVALID_EXECVE,
+    GUARD_BOOL(INVALID_EXECVE,
                execve_coll->len_read + len <= execve_coll->len_total);
 
     /* If we are starting a new argument */
@@ -459,18 +457,18 @@ aushape_conv_execve_coll_add_arg_slice(
 
     rc = AUSHAPE_RC_OK;
 cleanup:
-    assert(aushape_conv_coll_is_valid(coll));
+    assert(aushape_coll_is_valid(coll));
     return rc;
 }
 
 static enum aushape_rc
-aushape_conv_execve_coll_add(struct aushape_conv_coll *coll,
-                             size_t level,
-                             bool *pfirst,
-                             auparse_state_t *au)
+aushape_execve_coll_add(struct aushape_coll *coll,
+                        size_t level,
+                        bool *pfirst,
+                        auparse_state_t *au)
 {
-    struct aushape_conv_execve_coll *execve_coll =
-                    (struct aushape_conv_execve_coll *)coll;
+    struct aushape_execve_coll *execve_coll =
+                    (struct aushape_execve_coll *)coll;
     enum aushape_rc rc;
     size_t l = level;
     const char *raw;
@@ -495,16 +493,16 @@ aushape_conv_execve_coll_add(struct aushape_conv_coll *coll,
         GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve_coll->raw, '\n'));
     }
     raw = auparse_get_record_text(au);
-    GUARD_BOOL(CONV_AUPARSE_FAILED, raw != NULL);
+    GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
     GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve_coll->raw, raw));
 
     /*
      * For each field in the record
      */
-    GUARD_BOOL(CONV_INVALID_EXECVE, auparse_first_field(au) != 0);
+    GUARD_BOOL(INVALID_EXECVE, auparse_first_field(au) != 0);
     do {
         field_name = auparse_get_field_name(au);
-        GUARD_BOOL(CONV_AUPARSE_FAILED, field_name != NULL);
+        GUARD_BOOL(AUPARSE_FAILED, field_name != NULL);
         /* If it's the "type" pseudo-field */
         if (strcmp(field_name, "type") == 0) {
             continue;
@@ -513,27 +511,27 @@ aushape_conv_execve_coll_add(struct aushape_conv_coll *coll,
             continue;
         /* If it's the number of arguments */
         } else if (strcmp(field_name, "argc") == 0) {
-            GUARD(aushape_conv_execve_coll_add_argc(coll, l, au));
+            GUARD(aushape_execve_coll_add_argc(coll, l, au));
         /* If it's a whole argument */
         } else if (end = 0,
                    sscanf(field_name, "a%zu%n", &arg_idx, &end) >= 1 &&
                    (size_t)end == strlen(field_name)) {
-            GUARD(aushape_conv_execve_coll_add_arg(coll, l, arg_idx, au));
+            GUARD(aushape_execve_coll_add_arg(coll, l, arg_idx, au));
         /* If it's the length of an argument */
         } else if (end = 0,
                    sscanf(field_name, "a%zu_len%n", &arg_idx, &end) >= 1 &&
                    (size_t)end == strlen(field_name)) {
-            GUARD(aushape_conv_execve_coll_add_arg_len(coll, l, arg_idx, au));
+            GUARD(aushape_execve_coll_add_arg_len(coll, l, arg_idx, au));
         /* If it's an argument slice */
         } else if (end = 0,
                    sscanf(field_name, "a%zu[%zu]%n",
                           &arg_idx, &slice_idx, &end) >= 2 &&
                    (size_t)end == strlen(field_name)) {
-            GUARD(aushape_conv_execve_coll_add_arg_slice(coll, l, arg_idx,
+            GUARD(aushape_execve_coll_add_arg_slice(coll, l, arg_idx,
                                                          slice_idx, au));
         /* If it's something else */
         } else {
-            rc = AUSHAPE_RC_CONV_INVALID_EXECVE;
+            rc = AUSHAPE_RC_INVALID_EXECVE;
             goto cleanup;
         }
     } while (auparse_next_field(au) > 0);
@@ -544,12 +542,12 @@ cleanup:
 }
 
 static enum aushape_rc
-aushape_conv_execve_coll_end(struct aushape_conv_coll *coll,
-                             size_t level,
-                             bool *pfirst)
+aushape_execve_coll_end(struct aushape_coll *coll,
+                        size_t level,
+                        bool *pfirst)
 {
-    struct aushape_conv_execve_coll *execve_coll =
-                    (struct aushape_conv_execve_coll *)coll;
+    struct aushape_execve_coll *execve_coll =
+                    (struct aushape_execve_coll *)coll;
     enum aushape_rc rc = AUSHAPE_RC_OK;
     struct aushape_gbuf *gbuf = coll->gbuf;
     size_t l = level;
@@ -582,7 +580,7 @@ aushape_conv_execve_coll_end(struct aushape_conv_coll *coll,
 
     /* Add skipped empty arguments */
     while (execve_coll->arg_idx < execve_coll->arg_num) {
-        rc = aushape_conv_execve_coll_add_arg_str(coll, l, "");
+        rc = aushape_execve_coll_add_arg_str(coll, l, "");
         if (rc != AUSHAPE_RC_OK) {
             goto cleanup;
         }
@@ -615,13 +613,13 @@ cleanup:
     return rc;
 }
 
-const struct aushape_conv_coll_type aushape_conv_execve_coll_type = {
-    .size       = sizeof(struct aushape_conv_execve_coll),
-    .init       = aushape_conv_execve_coll_init,
-    .is_valid   = aushape_conv_execve_coll_is_valid,
-    .cleanup    = aushape_conv_execve_coll_cleanup,
-    .is_empty   = aushape_conv_execve_coll_is_empty,
-    .empty      = aushape_conv_execve_coll_empty,
-    .add        = aushape_conv_execve_coll_add,
-    .end        = aushape_conv_execve_coll_end,
+const struct aushape_coll_type aushape_execve_coll_type = {
+    .size       = sizeof(struct aushape_execve_coll),
+    .init       = aushape_execve_coll_init,
+    .is_valid   = aushape_execve_coll_is_valid,
+    .cleanup    = aushape_execve_coll_cleanup,
+    .is_empty   = aushape_execve_coll_is_empty,
+    .empty      = aushape_execve_coll_empty,
+    .add        = aushape_execve_coll_add,
+    .end        = aushape_execve_coll_end,
 };

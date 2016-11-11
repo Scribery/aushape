@@ -18,25 +18,25 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _AUSHAPE_CONV_DISP_COLL_H
-#define _AUSHAPE_CONV_DISP_COLL_H
+#ifndef _AUSHAPE_DISP_COLL_H
+#define _AUSHAPE_DISP_COLL_H
 
-#include <aushape/conv/coll_type.h>
+#include <aushape/coll_type.h>
 
 /** Record type name -> collector type link */
-struct aushape_conv_disp_coll_type_link {
+struct aushape_disp_coll_type_link {
     /** Record type name */
-    const char                             *name;
+    const char                     *name;
     /** Collector type */
-    const struct aushape_conv_coll_type    *type;
+    const struct aushape_coll_type *type;
     /** Collector creation arguments */
-    const void                             *args;
+    const void                     *args;
 };
 
 /**
  * Dispatching record collector type.
  *
- * Expects an array of struct aushape_conv_disp_coll_type_link as the creation
+ * Expects an array of struct aushape_disp_coll_type_link as the creation
  * argument. The array is terminated by an entry with NULL name, but valid
  * type and args. The array is used to match added record names to specific
  * collectors, the collector in the terminating entry is supplied with records
@@ -46,19 +46,19 @@ struct aushape_conv_disp_coll_type_link {
  *  {
  *      {
  *          .name = NULL,
- *          .type = &aushape_conv_single_coll_type,
+ *          .type = &aushape_single_coll_type,
  *          .args = {.unique = false}
  *       }
  *  }
  *
  * Collector-specific return codes:
  *
- * aushape_conv_coll_create:
- * aushape_conv_coll_add:
- * aushape_conv_coll_end:
+ * aushape_coll_create:
+ * aushape_coll_add:
+ * aushape_coll_end:
  *      Any of the return codes specified collectors can return for the
  *      corresponding calls.
  */
-extern const struct aushape_conv_coll_type aushape_conv_disp_coll_type;
+extern const struct aushape_coll_type aushape_disp_coll_type;
 
-#endif /* _AUSHAPE_CONV_DISP_COLL_H */
+#endif /* _AUSHAPE_DISP_COLL_H */

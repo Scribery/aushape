@@ -32,7 +32,12 @@ aushape_HEADERS = \
     syslog_output.h
 
 noinst_HEADERS = \
+    coll.h          \
+    coll_type.h     \
     conf.h          \
+    disp_coll.h     \
+    execve_coll.h   \
     gbuf.h          \
     misc.h          \
+    single_coll.h   \
     syslog_misc.h

@@ -20,9 +20,4 @@
 aushape_convdir = $(includedir)/aushape/conv
 
 noinst_HEADERS = \
-    buf.h           \
-    coll.h          \
-    coll_type.h     \
-    disp_coll.h     \
-    execve_coll.h   \
-    single_coll.h
+    buf.h

@@ -31,12 +31,12 @@ enum aushape_rc {
     AUSHAPE_RC_INVALID_STATE,
     /** Memory allocation failed */
     AUSHAPE_RC_NOMEM,
-    /** A converter's call to auparse failed */
-    AUSHAPE_RC_CONV_AUPARSE_FAILED,
-    /** Invalid execve record sequence encountered by converter */
-    AUSHAPE_RC_CONV_INVALID_EXECVE,
+    /** A call to auparse failed */
+    AUSHAPE_RC_AUPARSE_FAILED,
+    /** Invalid execve record sequence encountered */
+    AUSHAPE_RC_INVALID_EXECVE,
     /** An unexpected repeated record type encountered */
-    AUSHAPE_RC_CONV_REPEATED_RECORD,
+    AUSHAPE_RC_REPEATED_RECORD,
     /** Output initialization failed */
     AUSHAPE_RC_OUTPUT_INIT_FAILED,
     /** Output write failed */

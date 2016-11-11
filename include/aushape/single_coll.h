@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _AUSHAPE_CONV_SINGLE_COLL_H
-#define _AUSHAPE_CONV_SINGLE_COLL_H
+#ifndef _AUSHAPE_SINGLE_COLL_H
+#define _AUSHAPE_SINGLE_COLL_H
 
-#include <aushape/conv/single_coll.h>
+#include <aushape/single_coll.h>
 #include <stdbool.h>
 
-struct aushape_conv_single_coll_args {
+struct aushape_single_coll_args {
     /** Do not allow adding duplicate record types, if true */
     bool    unique;
 };
@@ -32,15 +32,15 @@ struct aushape_conv_single_coll_args {
 /**
  * Single (non-aggregated) record collector type.
  *
- * Expects a pointer to struct aushape_conv_single_coll_args as the creation
+ * Expects a pointer to struct aushape_single_coll_args as the creation
  * argument. If passed NULL, assumes the default value of {.unique = true}.
  *
  * Collector-specific return codes:
  *
- * aushape_conv_coll_add:
- *      AUSHAPE_RC_CONV_REPEATED_RECORD     - an unexpected repeated record
- *                                            type encountered
+ * aushape_coll_add:
+ *      AUSHAPE_RC_REPEATED_RECORD  - an unexpected repeated record
+ *                                    type encountered
  */
-extern const struct aushape_conv_coll_type aushape_conv_single_coll_type;
+extern const struct aushape_coll_type aushape_single_coll_type;
 
-#endif /* _AUSHAPE_CONV_SINGLE_COLL_H */
+#endif /* _AUSHAPE_SINGLE_COLL_H */

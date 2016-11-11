@@ -190,7 +190,7 @@ aushape_conv_create(struct aushape_conv **pconv,
 
     conv->au = auparse_init(AUSOURCE_FEED, NULL);
     if (conv->au == NULL) {
-        rc = AUSHAPE_RC_CONV_AUPARSE_FAILED;
+        rc = AUSHAPE_RC_AUPARSE_FAILED;
         goto cleanup;
     }
     auparse_set_escape_mode(conv->au, AUPARSE_ESC_RAW);
@@ -310,7 +310,7 @@ aushape_conv_input(struct aushape_conv *conv,
 
     if (conv->rc == AUSHAPE_RC_OK) {
         if (auparse_feed(conv->au, ptr, len) < 0) {
-            conv->rc = AUSHAPE_RC_CONV_AUPARSE_FAILED;
+            conv->rc = AUSHAPE_RC_AUPARSE_FAILED;
         }
     }
 
@@ -329,7 +329,7 @@ aushape_conv_flush(struct aushape_conv *conv)
 
     if (conv->rc == AUSHAPE_RC_OK) {
         if (auparse_flush_feed(conv->au) < 0) {
-            conv->rc = AUSHAPE_RC_CONV_AUPARSE_FAILED;
+            conv->rc = AUSHAPE_RC_AUPARSE_FAILED;
         }
     }
 

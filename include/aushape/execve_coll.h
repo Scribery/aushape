@@ -18,10 +18,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _AUSHAPE_CONV_EXECVE_COLL_H
-#define _AUSHAPE_CONV_EXECVE_COLL_H
+#ifndef _AUSHAPE_EXECVE_COLL_H
+#define _AUSHAPE_EXECVE_COLL_H
 
-#include <aushape/conv/coll_type.h>
+#include <aushape/coll_type.h>
 
 /**
  * Execve record collector type.
@@ -30,10 +30,10 @@
  *
  * Collector-specific return codes:
  *
- * aushape_conv_coll_add:
- *      AUSHAPE_RC_CONV_INVALID_EXECVE      - invalid execve record sequence
- *                                            encountered
+ * aushape_coll_add:
+ *      AUSHAPE_RC_INVALID_EXECVE   - invalid execve record sequence
+ *                                    encountered
  */
-extern const struct aushape_conv_coll_type aushape_conv_execve_coll_type;
+extern const struct aushape_coll_type aushape_execve_coll_type;
 
-#endif /* _AUSHAPE_CONV_EXECVE_COLL_H */
+#endif /* _AUSHAPE_EXECVE_COLL_H */

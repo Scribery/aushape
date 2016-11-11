@@ -18,18 +18,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <aushape/conv/single_coll.h>
-#include <aushape/conv/coll.h>
+#include <aushape/single_coll.h>
+#include <aushape/coll.h>
 #include <string.h>
 
-static const struct aushape_conv_single_coll_args
-                        aushape_conv_single_coll_args_default = {
+static const struct aushape_single_coll_args
+                        aushape_single_coll_args_default = {
     .unique = true
 };
 
-struct aushape_conv_single_coll {
+struct aushape_single_coll {
     /** Abstract base collector */
-    struct aushape_conv_coll    coll;
+    struct aushape_coll    coll;
     /** Do not allow adding duplicate record types, if true */
     bool    unique;
     /** Names of the record types seen, zero-terminated, one after another */
@@ -37,23 +37,23 @@ struct aushape_conv_single_coll {
 };
 
 static bool
-aushape_conv_single_coll_is_valid(const struct aushape_conv_coll *coll)
+aushape_single_coll_is_valid(const struct aushape_coll *coll)
 {
-    struct aushape_conv_single_coll *single_coll =
-                    (struct aushape_conv_single_coll *)coll;
+    struct aushape_single_coll *single_coll =
+                    (struct aushape_single_coll *)coll;
     return aushape_gbuf_is_valid(&single_coll->seen);
 }
 
 static enum aushape_rc
-aushape_conv_single_coll_init(struct aushape_conv_coll *coll,
-                              const void *args)
+aushape_single_coll_init(struct aushape_coll *coll,
+                         const void *args)
 {
-    struct aushape_conv_single_coll *single_coll =
-                    (struct aushape_conv_single_coll *)coll;
-    const struct aushape_conv_single_coll_args *single_args =
-                    (const struct aushape_conv_single_coll_args *)args;
+    struct aushape_single_coll *single_coll =
+                    (struct aushape_single_coll *)coll;
+    const struct aushape_single_coll_args *single_args =
+                    (const struct aushape_single_coll_args *)args;
     if (single_args == NULL) {
-        single_args = &aushape_conv_single_coll_args_default;
+        single_args = &aushape_single_coll_args_default;
     }
     single_coll->unique = single_args->unique;
     aushape_gbuf_init(&single_coll->seen);
@@ -61,26 +61,26 @@ aushape_conv_single_coll_init(struct aushape_conv_coll *coll,
 }
 
 static void
-aushape_conv_single_coll_cleanup(struct aushape_conv_coll *coll)
+aushape_single_coll_cleanup(struct aushape_coll *coll)
 {
-    struct aushape_conv_single_coll *single_coll =
-                    (struct aushape_conv_single_coll *)coll;
+    struct aushape_single_coll *single_coll =
+                    (struct aushape_single_coll *)coll;
     aushape_gbuf_cleanup(&single_coll->seen);
 }
 
 static bool
-aushape_conv_single_coll_is_empty(const struct aushape_conv_coll *coll)
+aushape_single_coll_is_empty(const struct aushape_coll *coll)
 {
-    struct aushape_conv_single_coll *single_coll =
-                    (struct aushape_conv_single_coll *)coll;
+    struct aushape_single_coll *single_coll =
+                    (struct aushape_single_coll *)coll;
     return aushape_gbuf_is_empty(&single_coll->seen);
 }
 
 static void
-aushape_conv_single_coll_empty(struct aushape_conv_coll *coll)
+aushape_single_coll_empty(struct aushape_coll *coll)
 {
-    struct aushape_conv_single_coll *single_coll =
-                    (struct aushape_conv_single_coll *)coll;
+    struct aushape_single_coll *single_coll =
+                    (struct aushape_single_coll *)coll;
     aushape_gbuf_empty(&single_coll->seen);
 }
 
@@ -94,16 +94,16 @@ aushape_conv_single_coll_empty(struct aushape_conv_coll *coll)
  * @return True if the record type was seen, false otherwise.
  */
 static bool
-aushape_conv_single_coll_seen_has(struct aushape_conv_coll *coll,
-                                  const char *name)
+aushape_single_coll_seen_has(struct aushape_coll *coll,
+                             const char *name)
 {
-    struct aushape_conv_single_coll *single_coll =
-                    (struct aushape_conv_single_coll *)coll;
+    struct aushape_single_coll *single_coll =
+                    (struct aushape_single_coll *)coll;
     struct aushape_gbuf *gbuf;
     const char *p;
 
-    assert(aushape_conv_coll_is_valid(coll));
-    assert(coll->type == &aushape_conv_single_coll_type);
+    assert(aushape_coll_is_valid(coll));
+    assert(coll->type == &aushape_single_coll_type);
     assert(name != NULL);
 
     gbuf = &single_coll->seen;
@@ -128,13 +128,13 @@ aushape_conv_single_coll_seen_has(struct aushape_conv_coll *coll,
  * @return True if added succesfully, false if memory allocation failed.
  */
 static bool
-aushape_conv_single_coll_seen_add(struct aushape_conv_coll *coll,
-                                  const char *name)
+aushape_single_coll_seen_add(struct aushape_coll *coll,
+                             const char *name)
 {
-    struct aushape_conv_single_coll *single_coll =
-                    (struct aushape_conv_single_coll *)coll;
-    assert(aushape_conv_coll_is_valid(coll));
-    assert(coll->type == &aushape_conv_single_coll_type);
+    struct aushape_single_coll *single_coll =
+                    (struct aushape_single_coll *)coll;
+    assert(aushape_coll_is_valid(coll));
+    assert(coll->type == &aushape_single_coll_type);
     assert(name != NULL);
     return aushape_gbuf_add_buf(&single_coll->seen, name, strlen(name) + 1);
 }
@@ -178,12 +178,12 @@ aushape_conv_single_coll_seen_add(struct aushape_conv_coll *coll,
  * @return True if added succesfully, false if memory allocation failed.
  */
 static bool
-aushape_conv_single_coll_add_field(struct aushape_gbuf *gbuf,
-                                   const struct aushape_format *format,
-                                   size_t level,
-                                   bool first,
-                                   const char *name,
-                                   auparse_state_t *au)
+aushape_single_coll_add_field(struct aushape_gbuf *gbuf,
+                              const struct aushape_format *format,
+                              size_t level,
+                              bool first,
+                              const char *name,
+                              auparse_state_t *au)
 {
     size_t l = level;
     const char *value_r;
@@ -269,12 +269,12 @@ aushape_conv_single_coll_add_field(struct aushape_gbuf *gbuf,
  * @return True if added succesfully, false if memory allocation failed.
  */
 static bool
-aushape_conv_single_coll_add_record(struct aushape_gbuf *gbuf,
-                                    const struct aushape_format *format,
-                                    size_t level,
-                                    bool first,
-                                    const char *name,
-                                    auparse_state_t *au)
+aushape_single_coll_add_record(struct aushape_gbuf *gbuf,
+                               const struct aushape_format *format,
+                               size_t level,
+                               bool first,
+                               const char *name,
+                               auparse_state_t *au)
 {
     size_t l = level;
     bool first_field;
@@ -289,7 +289,7 @@ aushape_conv_single_coll_add_record(struct aushape_gbuf *gbuf,
         GUARD_BOOL(aushape_gbuf_add_char(gbuf, '<'));
         GUARD_BOOL(aushape_gbuf_add_str_lowercase(gbuf, name));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, " raw=\""));
-        /* TODO: Return AUSHAPE_RC_CONV_AUPARSE_FAILED on failure */
+        /* TODO: Return AUSHAPE_RC_AUPARSE_FAILED on failure */
         GUARD_BOOL(aushape_gbuf_add_str_xml(
                                         gbuf, auparse_get_record_text(au)));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\">"));
@@ -304,7 +304,7 @@ aushape_conv_single_coll_add_record(struct aushape_gbuf *gbuf,
         l++;
         GUARD_BOOL(aushape_gbuf_space_opening(gbuf, format, l));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\"raw\":\""));
-        /* TODO: Return AUSHAPE_RC_CONV_AUPARSE_FAILED on failure */
+        /* TODO: Return AUSHAPE_RC_AUPARSE_FAILED on failure */
         GUARD_BOOL(aushape_gbuf_add_str_json(
                                         gbuf, auparse_get_record_text(au)));
         GUARD_BOOL(aushape_gbuf_add_str(gbuf, "\","));
@@ -319,9 +319,9 @@ aushape_conv_single_coll_add_record(struct aushape_gbuf *gbuf,
         field_name = auparse_get_field_name(au);
         if (strcmp(field_name, "type") != 0 &&
             strcmp(field_name, "node") != 0) {
-            GUARD_BOOL(aushape_conv_single_coll_add_field(gbuf, format, l,
-                                                          first_field,
-                                                          field_name, au));
+            GUARD_BOOL(aushape_single_coll_add_field(gbuf, format, l,
+                                                     first_field,
+                                                     field_name, au));
             first_field = false;
         }
     } while (auparse_next_field(au) > 0);
@@ -347,42 +347,42 @@ aushape_conv_single_coll_add_record(struct aushape_gbuf *gbuf,
 }
 
 static enum aushape_rc
-aushape_conv_single_coll_add(struct aushape_conv_coll *coll,
-                             size_t level,
-                             bool *pfirst,
-                             auparse_state_t *au)
+aushape_single_coll_add(struct aushape_coll *coll,
+                        size_t level,
+                        bool *pfirst,
+                        auparse_state_t *au)
 {
-    struct aushape_conv_single_coll *single_coll =
-                    (struct aushape_conv_single_coll *)coll;
+    struct aushape_single_coll *single_coll =
+                    (struct aushape_single_coll *)coll;
     const char *name;
 
-    assert(aushape_conv_coll_is_valid(coll));
+    assert(aushape_coll_is_valid(coll));
     assert(pfirst != NULL);
     assert(au != NULL);
 
     name = auparse_get_type_name(au);
     if (name == NULL) {
-        return AUSHAPE_RC_CONV_AUPARSE_FAILED;
+        return AUSHAPE_RC_AUPARSE_FAILED;
     }
-    if (aushape_conv_single_coll_seen_has(coll, name)) {
+    if (aushape_single_coll_seen_has(coll, name)) {
         if (single_coll->unique) {
-            return AUSHAPE_RC_CONV_REPEATED_RECORD;
+            return AUSHAPE_RC_REPEATED_RECORD;
         }
     } else {
-        GUARD_BOOL(aushape_conv_single_coll_seen_add(coll, name));
+        GUARD_BOOL(aushape_single_coll_seen_add(coll, name));
     }
-    GUARD_BOOL(aushape_conv_single_coll_add_record(coll->gbuf, &coll->format,
-                                                   level, *pfirst, name, au));
+    GUARD_BOOL(aushape_single_coll_add_record(coll->gbuf, &coll->format,
+                                              level, *pfirst, name, au));
     *pfirst = false;
     return AUSHAPE_RC_OK;
 }
 
-const struct aushape_conv_coll_type aushape_conv_single_coll_type = {
-    .size       = sizeof(struct aushape_conv_single_coll),
-    .init       = aushape_conv_single_coll_init,
-    .is_valid   = aushape_conv_single_coll_is_valid,
-    .cleanup    = aushape_conv_single_coll_cleanup,
-    .is_empty   = aushape_conv_single_coll_is_empty,
-    .empty      = aushape_conv_single_coll_empty,
-    .add        = aushape_conv_single_coll_add,
+const struct aushape_coll_type aushape_single_coll_type = {
+    .size       = sizeof(struct aushape_single_coll),
+    .init       = aushape_single_coll_init,
+    .is_valid   = aushape_single_coll_is_valid,
+    .cleanup    = aushape_single_coll_cleanup,
+    .is_empty   = aushape_single_coll_is_empty,
+    .empty      = aushape_single_coll_empty,
+    .add        = aushape_single_coll_add,
 };

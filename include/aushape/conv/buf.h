@@ -21,7 +21,7 @@
 #ifndef _AUSHAPE_CONV_BUF_H
 #define _AUSHAPE_CONV_BUF_H
 
-#include <aushape/conv/coll.h>
+#include <aushape/coll.h>
 #include <aushape/format.h>
 #include <aushape/gbuf.h>
 #include <aushape/rc.h>
@@ -30,11 +30,11 @@
 /** Converter's output buffer */
 struct aushape_conv_buf {
     /** The output format to use */
-    struct aushape_format       format;
+    struct aushape_format   format;
     /** Growing buffer for an output piece */
-    struct aushape_gbuf         gbuf;
+    struct aushape_gbuf     gbuf;
     /** Record collector */
-    struct aushape_conv_coll   *coll;
+    struct aushape_coll    *coll;
 };
 
 /**
@@ -97,11 +97,11 @@ extern enum aushape_rc aushape_conv_buf_add_prologue(
  *                  output.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK                   - added succesfully,
- *          AUSHAPE_RC_NOMEM                - memory allocation failed,
- *          AUSHAPE_RC_CONV_AUPARSE_FAILED  - an auparse call failed,
- *          AUSHAPE_RC_CONV_INVALID_EXECVE  - invalid execve record sequence
- *                                            encountered.
+ *          AUSHAPE_RC_OK               - added succesfully,
+ *          AUSHAPE_RC_NOMEM            - memory allocation failed,
+ *          AUSHAPE_RC_AUPARSE_FAILED   - an auparse call failed,
+ *          AUSHAPE_RC_INVALID_EXECVE   - invalid execve record sequence
+ *                                        encountered.
  */
 extern enum aushape_rc aushape_conv_buf_add_event(
                                     struct aushape_conv_buf *buf,
