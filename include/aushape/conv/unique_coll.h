@@ -22,9 +22,18 @@
 #define _AUSHAPE_CONV_UNIQUE_COLL_H
 
 #include <aushape/conv/unique_coll.h>
+#include <stdbool.h>
+
+struct aushape_conv_unique_coll_args {
+    /** Do not allow adding duplicate record types, if true */
+    bool    unique;
+};
 
 /**
  * Unique (non-repeated) record collector type.
+ *
+ * Expects a pointer to struct aushape_conv_unique_coll_args as the creation
+ * argument. If passed NULL, assumes the default value of {.unique = true}.
  *
  * Collector-specific return codes:
  *

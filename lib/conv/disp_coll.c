@@ -25,14 +25,6 @@
 #include <aushape/misc.h>
 #include <string.h>
 
-/** Record type name -> collector type link */
-struct aushape_conv_disp_coll_type_link {
-    /** Record type name */
-    const char                             *name;
-    /** Collector type */
-    const struct aushape_conv_coll_type    *type;
-};
-
 /** Record type name -> collector instance link */
 struct aushape_conv_disp_coll_inst_link {
     /** Record type name */
@@ -51,10 +43,18 @@ struct aushape_conv_disp_coll {
     struct aushape_conv_disp_coll_inst_link    *map;
 };
 
-static struct aushape_conv_disp_coll_type_link
-                            aushape_conv_disp_coll_type_map[] = {
-    {"EXECVE",      &aushape_conv_execve_coll_type},
-    {NULL,          &aushape_conv_unique_coll_type}
+static const struct aushape_conv_unique_coll_args
+                            aushape_conv_disp_coll_args_default_unique = {
+    .unique = false
+};
+
+static const struct aushape_conv_disp_coll_type_link
+                            aushape_conv_disp_coll_args_default[] = {
+    {
+        .name  = NULL,
+        .type  = &aushape_conv_unique_coll_type,
+        .args  = &aushape_conv_disp_coll_args_default_unique
+    }
 };
 
 static bool
@@ -79,28 +79,43 @@ aushape_conv_disp_coll_is_valid(const struct aushape_conv_coll *coll)
 }
 
 static enum aushape_rc
-aushape_conv_disp_coll_init(struct aushape_conv_coll *coll)
+aushape_conv_disp_coll_init(struct aushape_conv_coll *coll,
+                            const void *args)
 {
     struct aushape_conv_disp_coll *disp_coll =
                     (struct aushape_conv_disp_coll *)coll;
     enum aushape_rc rc;
-    struct aushape_conv_disp_coll_inst_link    *map;
-    struct aushape_conv_disp_coll_type_link    *type_link;
+    const struct aushape_conv_disp_coll_type_link  *type_map = 
+                (const struct aushape_conv_disp_coll_type_link *)args;
+    const struct aushape_conv_disp_coll_type_link  *type_link;
+    size_t map_size;
+    struct aushape_conv_disp_coll_inst_link    *inst_map;
     struct aushape_conv_disp_coll_inst_link    *inst_link;
 
-    map = malloc(sizeof(*disp_coll->map) *
-                 AUSHAPE_ARRAY_SIZE(aushape_conv_disp_coll_type_map));
-    if (map == NULL) {
+    if (type_map == NULL) {
+        type_map = aushape_conv_disp_coll_args_default;
+    }
+
+    /* Count entries in type map */
+    for (map_size = 1, type_link = type_map;
+         type_link->name != NULL;
+         map_size++, type_link++);
+
+    /* Create instance link array */
+    inst_map = malloc(sizeof(*inst_map) * map_size);
+    if (inst_map == NULL) {
         rc = AUSHAPE_RC_NOMEM;
         goto cleanup;
     }
 
-    type_link = aushape_conv_disp_coll_type_map;
-    inst_link = map;
+    /* Initialize instance links */
+    type_link = type_map;
+    inst_link = inst_map;
     while (true) {
         inst_link->name = type_link->name;
         rc = aushape_conv_coll_create(&inst_link->inst, type_link->type,
-                                      &coll->format, coll->gbuf);
+                                      &coll->format, coll->gbuf,
+                                      type_link->args);
         if (rc != AUSHAPE_RC_OK) {
             assert(rc != AUSHAPE_RC_INVALID_ARGS);
             goto cleanup;
@@ -112,13 +127,14 @@ aushape_conv_disp_coll_init(struct aushape_conv_coll *coll)
         type_link++;
     }
 
-    disp_coll->map = map;
-    map = NULL;
+    /* Store created instance link array */
+    disp_coll->map = inst_map;
+    inst_map = NULL;
     rc = AUSHAPE_RC_OK;
 
 cleanup:
-    if (map != NULL) {
-        inst_link = map;
+    if (inst_map != NULL) {
+        inst_link = inst_map;
         while (true) {
             if (inst_link->inst == NULL) {
                 break;
@@ -130,7 +146,7 @@ cleanup:
             }
             inst_link++;
         }
-        free(map);
+        free(inst_map);
     }
     return rc;
 }

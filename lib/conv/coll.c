@@ -25,7 +25,8 @@ enum aushape_rc
 aushape_conv_coll_create(struct aushape_conv_coll **pcoll,
                          const struct aushape_conv_coll_type *type,
                          const struct aushape_format *format,
-                         struct aushape_gbuf *gbuf)
+                         struct aushape_gbuf *gbuf,
+                         const void *args)
 {
     enum aushape_rc rc;
     struct aushape_conv_coll *coll;
@@ -45,7 +46,7 @@ aushape_conv_coll_create(struct aushape_conv_coll **pcoll,
         coll->format = *format;
         coll->gbuf = gbuf;
 
-        rc = (type->init != NULL) ? type->init(coll) : AUSHAPE_RC_OK;
+        rc = (type->init != NULL) ? type->init(coll, args) : AUSHAPE_RC_OK;
         if (rc == AUSHAPE_RC_OK) {
             assert(aushape_conv_coll_is_valid(coll));
             *pcoll = coll;

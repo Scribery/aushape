@@ -58,10 +58,12 @@ aushape_conv_execve_coll_is_valid(const struct aushape_conv_coll *coll)
 }
 
 static enum aushape_rc
-aushape_conv_execve_coll_init(struct aushape_conv_coll *coll)
+aushape_conv_execve_coll_init(struct aushape_conv_coll *coll,
+                              const void *args)
 {
     struct aushape_conv_execve_coll *execve_coll =
                     (struct aushape_conv_execve_coll *)coll;
+    (void)args;
     aushape_gbuf_init(&execve_coll->raw);
     aushape_gbuf_init(&execve_coll->args);
     return AUSHAPE_RC_OK;

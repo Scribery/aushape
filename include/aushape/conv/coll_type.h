@@ -35,16 +35,19 @@ struct aushape_conv_coll;
  * @param coll      The collector to initialize, must be cleared to zero,
  *                  and have the base abstract instance initialized.
  *                  Assumed to be valid on return.
+ * @param args      Initialization arguments, type-specific.
  *
  * @return Return code:
  *          AUSHAPE_RC_OK           - initialized successfully,
+ *          AUSHAPE_RC_INVALID_ARGS - invalid arguments supplied,
  *          AUSHAPE_RC_NOMEM        - memory allocation failed,
  *          other                   - collector-specific return code,
  *                                    see corresponding collector type
  *                                    documentation.
  */
 typedef enum aushape_rc (*aushape_conv_coll_type_init_fn)(
-                                struct aushape_conv_coll *coll);
+                                struct aushape_conv_coll *coll,
+                                const void *params);
 
 /**
  * Collector validation function prototype. Called e.g. to verify arguments.

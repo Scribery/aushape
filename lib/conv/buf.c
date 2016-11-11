@@ -20,6 +20,8 @@
 
 #include <aushape/conv/buf.h>
 #include <aushape/conv/disp_coll.h>
+#include <aushape/conv/unique_coll.h>
+#include <aushape/conv/execve_coll.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -60,7 +62,32 @@ enum aushape_rc
 aushape_conv_buf_init(struct aushape_conv_buf *buf,
                       const struct aushape_format *format)
 {
+    static const struct aushape_conv_unique_coll_args unique_args_true = {
+        .unique = true
+    };
+    static const struct aushape_conv_unique_coll_args unique_args_false = {
+        .unique = false
+    };
+    static const struct aushape_conv_disp_coll_type_link map[] = {
+        {
+            .name   = "EXECVE",
+            .type   = &aushape_conv_execve_coll_type,
+            .args   = NULL,
+        },
+        {
+            .name   = "PATH",
+            .type   = &aushape_conv_unique_coll_type,
+            .args   = &unique_args_false,
+        },
+        {
+            .name   = NULL,
+            .type   = &aushape_conv_unique_coll_type,
+            .args   = &unique_args_true,
+        },
+    };
+
     enum aushape_rc rc;
+
     if (buf == NULL || !aushape_format_is_valid(format)) {
         return AUSHAPE_RC_INVALID_ARGS;
     }
@@ -70,7 +97,8 @@ aushape_conv_buf_init(struct aushape_conv_buf *buf,
     rc = aushape_conv_coll_create(&buf->coll,
                                   &aushape_conv_disp_coll_type,
                                   &buf->format,
-                                  &buf->gbuf);
+                                  &buf->gbuf,
+                                  &map);
     if (rc != AUSHAPE_RC_OK) {
         assert(rc != AUSHAPE_RC_INVALID_ARGS);
         return rc;

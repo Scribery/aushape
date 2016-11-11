@@ -44,6 +44,8 @@ struct aushape_conv_coll {
  * @param gbuf      The growing buffer to add collected output records to.
  *                  Never emptied by the collector. Must stay valid for the
  *                  existence of the collector.
+ * @param args      Initialization arguments, type-specific. See description
+ *                  of the corresponding type for the expected values.
  *
  * @return Return code:
  *          AUSHAPE_RC_OK                   - initialized successfully,
@@ -57,7 +59,8 @@ extern enum aushape_rc aushape_conv_coll_create(
                                 struct aushape_conv_coll **pcoll,
                                 const struct aushape_conv_coll_type *type,
                                 const struct aushape_format *format,
-                                struct aushape_gbuf *gbuf);
+                                struct aushape_gbuf *gbuf,
+                                const void *args);
 
 /**
  * Check if a collector is valid. Called e.g. to verify arguments.

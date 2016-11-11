@@ -23,16 +23,41 @@
 
 #include <aushape/conv/coll_type.h>
 
+/** Record type name -> collector type link */
+struct aushape_conv_disp_coll_type_link {
+    /** Record type name */
+    const char                             *name;
+    /** Collector type */
+    const struct aushape_conv_coll_type    *type;
+    /** Collector creation arguments */
+    const void                             *args;
+};
+
 /**
  * Dispatching record collector type.
  *
+ * Expects an array of struct aushape_conv_disp_coll_type_link as the creation
+ * argument. The array is terminated by an entry with NULL name, but valid
+ * type and args. The array is used to match added record names to specific
+ * collectors, the collector in the terminating entry is supplied with records
+ * that didn't match any other collector. If the supplied argument is NULL,
+ * then assumes it was supplied with a pointer to the following instead:
+ *
+ *  {
+ *      {
+ *          .name = NULL,
+ *          .type = &aushape_conv_unique_coll_type,
+ *          .args = {.unique = false}
+ *       }
+ *  }
+ *
  * Collector-specific return codes:
  *
+ * aushape_conv_coll_create:
  * aushape_conv_coll_add:
- *      AUSHAPE_RC_CONV_INVALID_EXECVE      - invalid execve record sequence
- *                                            encountered
- *      AUSHAPE_RC_CONV_REPEATED_RECORD     - an unexpected repeated record
- *                                            type encountered
+ * aushape_conv_coll_end:
+ *      Any of the return codes specified collectors can return for the
+ *      corresponding calls.
  */
 extern const struct aushape_conv_coll_type aushape_conv_disp_coll_type;
 

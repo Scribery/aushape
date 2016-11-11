@@ -26,6 +26,8 @@
 /**
  * Execve record collector type.
  *
+ * Doesn't require creation arguments.
+ *
  * Collector-specific return codes:
  *
  * aushape_conv_coll_add:

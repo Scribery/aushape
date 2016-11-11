@@ -22,9 +22,16 @@
 #include <aushape/conv/coll.h>
 #include <string.h>
 
+static const struct aushape_conv_unique_coll_args
+                        aushape_conv_unique_coll_args_default = {
+    .unique = true
+};
+
 struct aushape_conv_unique_coll {
     /** Abstract base collector */
     struct aushape_conv_coll    coll;
+    /** Do not allow adding duplicate record types, if true */
+    bool    unique;
     /** Names of the record types seen, zero-terminated, one after another */
     struct aushape_gbuf seen;
 };
@@ -38,10 +45,17 @@ aushape_conv_unique_coll_is_valid(const struct aushape_conv_coll *coll)
 }
 
 static enum aushape_rc
-aushape_conv_unique_coll_init(struct aushape_conv_coll *coll)
+aushape_conv_unique_coll_init(struct aushape_conv_coll *coll,
+                              const void *args)
 {
     struct aushape_conv_unique_coll *unique_coll =
                     (struct aushape_conv_unique_coll *)coll;
+    const struct aushape_conv_unique_coll_args *unique_args =
+                    (const struct aushape_conv_unique_coll_args *)args;
+    if (unique_args == NULL) {
+        unique_args = &aushape_conv_unique_coll_args_default;
+    }
+    unique_coll->unique = unique_args->unique;
     aushape_gbuf_init(&unique_coll->seen);
     return AUSHAPE_RC_OK;
 }
@@ -338,6 +352,8 @@ aushape_conv_unique_coll_add(struct aushape_conv_coll *coll,
                              bool *pfirst,
                              auparse_state_t *au)
 {
+    struct aushape_conv_unique_coll *unique_coll =
+                    (struct aushape_conv_unique_coll *)coll;
     const char *name;
 
     assert(aushape_conv_coll_is_valid(coll));
@@ -348,10 +364,12 @@ aushape_conv_unique_coll_add(struct aushape_conv_coll *coll,
     if (name == NULL) {
         return AUSHAPE_RC_CONV_AUPARSE_FAILED;
     }
-    if (aushape_conv_unique_coll_seen_has(coll, name)) {
-        return AUSHAPE_RC_CONV_REPEATED_RECORD;
-    } else {
-        GUARD_BOOL(aushape_conv_unique_coll_seen_add(coll, name));
+    if (unique_coll->unique) {
+        if (aushape_conv_unique_coll_seen_has(coll, name)) {
+            return AUSHAPE_RC_CONV_REPEATED_RECORD;
+        } else {
+            GUARD_BOOL(aushape_conv_unique_coll_seen_add(coll, name));
+        }
     }
     GUARD_BOOL(aushape_conv_unique_coll_add_record(coll->gbuf, &coll->format,
                                                    level, *pfirst, name, au));
