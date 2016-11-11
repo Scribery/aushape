@@ -19,8 +19,7 @@
  */
 
 #include <aushape/conv/buf.h>
-#include <aushape/conv/execve_coll.h>
-#include <aushape/conv/unique_coll.h>
+#include <aushape/conv/disp_coll.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -54,7 +53,7 @@ aushape_conv_buf_is_valid(const struct aushape_conv_buf *buf)
     return buf != NULL &&
            aushape_format_is_valid(&buf->format) &&
            aushape_gbuf_is_valid(&buf->gbuf) &&
-           aushape_conv_coll_is_valid(buf->execve_coll);
+           aushape_conv_coll_is_valid(buf->coll);
 }
 
 enum aushape_rc
@@ -68,16 +67,8 @@ aushape_conv_buf_init(struct aushape_conv_buf *buf,
     memset(buf, 0, sizeof(*buf));
     buf->format = *format;
     aushape_gbuf_init(&buf->gbuf);
-    rc = aushape_conv_coll_create(&buf->execve_coll,
-                                  &aushape_conv_execve_coll_type,
-                                  &buf->format,
-                                  &buf->gbuf);
-    if (rc != AUSHAPE_RC_OK) {
-        assert(rc != AUSHAPE_RC_INVALID_ARGS);
-        return rc;
-    }
-    rc = aushape_conv_coll_create(&buf->unique_coll,
-                                  &aushape_conv_unique_coll_type,
+    rc = aushape_conv_coll_create(&buf->coll,
+                                  &aushape_conv_disp_coll_type,
                                   &buf->format,
                                   &buf->gbuf);
     if (rc != AUSHAPE_RC_OK) {
@@ -93,8 +84,7 @@ aushape_conv_buf_cleanup(struct aushape_conv_buf *buf)
 {
     assert(aushape_conv_buf_is_valid(buf));
     aushape_gbuf_cleanup(&buf->gbuf);
-    aushape_conv_coll_destroy(buf->execve_coll);
-    aushape_conv_coll_destroy(buf->unique_coll);
+    aushape_conv_coll_destroy(buf->coll);
     memset(buf, 0, sizeof(*buf));
 }
 
@@ -103,8 +93,7 @@ aushape_conv_buf_empty(struct aushape_conv_buf *buf)
 {
     assert(aushape_conv_buf_is_valid(buf));
     aushape_gbuf_empty(&buf->gbuf);
-    aushape_conv_coll_empty(buf->execve_coll);
-    aushape_conv_coll_empty(buf->unique_coll);
+    aushape_conv_coll_empty(buf->coll);
     assert(aushape_conv_buf_is_valid(buf));
 }
 
@@ -122,7 +111,6 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     char zone_buf[16];
     char timestamp_buf[64];
     bool first_record;
-    const char *record_name;
 
     assert(aushape_conv_buf_is_valid(buf));
     assert(au != NULL);
@@ -184,38 +172,18 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     }
     first_record = true;
     do {
-        record_name = auparse_get_type_name(au);
-        /* If this is an "execve" record */
-        if (strcmp(record_name, "EXECVE") == 0) {
-            /* Add the record */
-            rc = aushape_conv_coll_add(buf->execve_coll, l, &first_record, au);
-            if (rc != AUSHAPE_RC_OK) {
-                assert(rc != AUSHAPE_RC_INVALID_ARGS);
-                assert(rc != AUSHAPE_RC_INVALID_STATE);
-                assert(aushape_conv_buf_is_valid(buf));
-                return rc;
-            }
-        } else {
-            /* Add the record */
-            rc = aushape_conv_coll_add(buf->unique_coll, l, &first_record, au);
-            if (rc != AUSHAPE_RC_OK) {
-                assert(rc != AUSHAPE_RC_INVALID_ARGS);
-                assert(rc != AUSHAPE_RC_INVALID_STATE);
-                assert(aushape_conv_buf_is_valid(buf));
-                return rc;
-            }
+        /* Add the record to the collector */
+        rc = aushape_conv_coll_add(buf->coll, l, &first_record, au);
+        if (rc != AUSHAPE_RC_OK) {
+            assert(rc != AUSHAPE_RC_INVALID_ARGS);
+            assert(rc != AUSHAPE_RC_INVALID_STATE);
+            assert(aushape_conv_buf_is_valid(buf));
+            return rc;
         }
     } while(auparse_next_record(au) > 0);
 
-    /* Make sure the execve record is complete and added, if any */
-    rc = aushape_conv_coll_end(buf->execve_coll, l, &first_record);
-    if (rc != AUSHAPE_RC_OK) {
-        assert(rc != AUSHAPE_RC_INVALID_ARGS);
-        assert(aushape_conv_buf_is_valid(buf));
-        return rc;
-    }
-    /* Make sure the unique record is complete and added, if any */
-    rc = aushape_conv_coll_end(buf->unique_coll, l, &first_record);
+    /* Make sure the record sequence is complete and added, if any */
+    rc = aushape_conv_coll_end(buf->coll, l, &first_record);
     if (rc != AUSHAPE_RC_OK) {
         assert(rc != AUSHAPE_RC_INVALID_ARGS);
         assert(aushape_conv_buf_is_valid(buf));

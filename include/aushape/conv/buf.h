@@ -33,10 +33,8 @@ struct aushape_conv_buf {
     struct aushape_format       format;
     /** Growing buffer for an output piece */
     struct aushape_gbuf         gbuf;
-    /** Execve record collector */
-    struct aushape_conv_coll   *execve_coll;
-    /** Unique record collector */
-    struct aushape_conv_coll   *unique_coll;
+    /** Record collector */
+    struct aushape_conv_coll   *coll;
 };
 
 /**
