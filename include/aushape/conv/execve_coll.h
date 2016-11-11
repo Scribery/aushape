@@ -21,7 +21,7 @@
 #ifndef _AUSHAPE_CONV_EXECVE_COLL_H
 #define _AUSHAPE_CONV_EXECVE_COLL_H
 
-#include <aushape/conv/coll.h>
+#include <aushape/conv/coll_type.h>
 
 /**
  * Execve record collector type.

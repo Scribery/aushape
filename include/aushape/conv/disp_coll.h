@@ -21,7 +21,7 @@
 #ifndef _AUSHAPE_CONV_DISP_COLL_H
 #define _AUSHAPE_CONV_DISP_COLL_H
 
-#include <aushape/conv/coll.h>
+#include <aushape/conv/coll_type.h>
 
 /**
  * Dispatching record collector type.

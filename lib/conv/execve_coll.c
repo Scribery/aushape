@@ -19,6 +19,7 @@
  */
 
 #include <aushape/conv/execve_coll.h>
+#include <aushape/conv/coll.h>
 #include <stdio.h>
 #include <string.h>
 

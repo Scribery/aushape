@@ -21,7 +21,7 @@
 #ifndef _AUSHAPE_CONV_UNIQUE_COLL_H
 #define _AUSHAPE_CONV_UNIQUE_COLL_H
 
-#include <aushape/conv/coll.h>
+#include <aushape/conv/unique_coll.h>
 
 /**
  * Unique (non-repeated) record collector type.

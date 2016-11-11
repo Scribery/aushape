@@ -21,6 +21,7 @@
 #include <aushape/conv/disp_coll.h>
 #include <aushape/conv/execve_coll.h>
 #include <aushape/conv/unique_coll.h>
+#include <aushape/conv/coll.h>
 #include <aushape/misc.h>
 #include <string.h>
 

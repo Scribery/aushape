@@ -19,6 +19,7 @@
  */
 
 #include <aushape/conv/unique_coll.h>
+#include <aushape/conv/coll.h>
 #include <string.h>
 
 struct aushape_conv_unique_coll {
