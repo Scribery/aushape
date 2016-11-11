@@ -364,12 +364,12 @@ aushape_conv_single_coll_add(struct aushape_conv_coll *coll,
     if (name == NULL) {
         return AUSHAPE_RC_CONV_AUPARSE_FAILED;
     }
-    if (single_coll->unique) {
-        if (aushape_conv_single_coll_seen_has(coll, name)) {
+    if (aushape_conv_single_coll_seen_has(coll, name)) {
+        if (single_coll->unique) {
             return AUSHAPE_RC_CONV_REPEATED_RECORD;
-        } else {
-            GUARD_BOOL(aushape_conv_single_coll_seen_add(coll, name));
         }
+    } else {
+        GUARD_BOOL(aushape_conv_single_coll_seen_add(coll, name));
     }
     GUARD_BOOL(aushape_conv_single_coll_add_record(coll->gbuf, &coll->format,
                                                    level, *pfirst, name, au));
