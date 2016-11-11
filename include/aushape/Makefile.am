@@ -38,6 +38,7 @@ noinst_HEADERS = \
     disp_coll.h     \
     execve_coll.h   \
     gbuf.h          \
+    guard.h         \
     misc.h          \
     single_coll.h   \
     syslog_misc.h
