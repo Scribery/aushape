@@ -142,30 +142,6 @@ aushape_single_coll_seen_add(struct aushape_coll *coll,
 }
 
 /**
- * Evaluate an expression and return false if it is false.
- *
- * @param _expr The expression to evaluate.
- */
-#define GUARD_BOOL(_expr) \
-    do {                            \
-        if (!(_expr)) {             \
-            return false;           \
-        }                           \
-    } while (0)
-
-/**
- * Evaluate an expression and return AUSHAPE_RC_NOMEM if it is false.
- *
- * @param _expr The expression to evaluate.
- */
-#define GUARD_RC(_expr) \
-    do {                                \
-        if (!(_expr)) {                 \
-            return AUSHAPE_RC_NOMEM;    \
-        }                               \
-    } while (0)
-
-/**
  * Add a formatted fragment for an auparse record to a growing buffer.
  *
  * @param gbuf      The growing buffer to add the fragment to.
@@ -301,24 +277,26 @@ aushape_single_coll_add(struct aushape_coll *coll,
     assert(au != NULL);
 
     name = auparse_get_type_name(au);
-    if (name == NULL) {
-        return AUSHAPE_RC_AUPARSE_FAILED;
-    }
+    AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, name != NULL);
     if (aushape_single_coll_seen_has(coll, name)) {
         if (single_coll->unique) {
-            return AUSHAPE_RC_REPEATED_RECORD;
+            rc = AUSHAPE_RC_REPEATED_RECORD;
+            goto cleanup;
         }
     } else {
-        GUARD_BOOL(aushape_single_coll_seen_add(coll, name));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_single_coll_seen_add(coll, name));
     }
     rc = aushape_single_coll_add_record(coll->gbuf, &coll->format,
                                         level, *pfirst, name, au);
     if (rc != AUSHAPE_RC_OK) {
         assert(rc != AUSHAPE_RC_INVALID_ARGS);
-        return rc;
+        goto cleanup;
     }
     *pfirst = false;
-    return AUSHAPE_RC_OK;
+    rc = AUSHAPE_RC_OK;
+cleanup:
+    return rc;
 }
 
 const struct aushape_coll_type aushape_single_coll_type = {

@@ -22,32 +22,9 @@
 #include <aushape/disp_coll.h>
 #include <aushape/single_coll.h>
 #include <aushape/execve_coll.h>
+#include <aushape/guard.h>
 #include <stdio.h>
 #include <string.h>
-
-/**
- * Evaluate an expression and return false if it is false.
- *
- * @param _expr The expression to evaluate.
- */
-#define GUARD_BOOL(_expr) \
-    do {                            \
-        if (!(_expr)) {             \
-            return false;           \
-        }                           \
-    } while (0)
-
-/**
- * Evaluate an expression and return AUSHAPE_RC_NOMEM if it is false.
- *
- * @param _expr The expression to evaluate.
- */
-#define GUARD_RC(_expr) \
-    do {                                \
-        if (!(_expr)) {                 \
-            return AUSHAPE_RC_NOMEM;    \
-        }                               \
-    } while (0)
 
 bool
 aushape_conv_buf_is_valid(const struct aushape_conv_buf *buf)
@@ -147,9 +124,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     l = level;
 
     e = auparse_get_timestamp(au);
-    if (e == NULL) {
-        return AUSHAPE_RC_AUPARSE_FAILED;
-    }
+    AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, e != NULL);
 
     /* Format timestamp */
     tm = localtime(&e->sec);
@@ -160,44 +135,68 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
 
     /* Output event header */
     if (buf->format.lang == AUSHAPE_LANG_XML) {
-        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, &buf->format, l));
-        GUARD_RC(aushape_gbuf_add_fmt(
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_opening(&buf->gbuf, &buf->format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_fmt(
                             &buf->gbuf, "<event serial=\"%lu\" time=\"%s\"",
                             e->serial, timestamp_buf));
         if (e->host != NULL) {
-            GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, " host=\""));
-            GUARD_RC(aushape_gbuf_add_str_xml(&buf->gbuf, e->host));
-            GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "\""));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_add_str(&buf->gbuf, " host=\""));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_add_str_xml(&buf->gbuf, e->host));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_add_str(&buf->gbuf, "\""));
         }
-        GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, ">"));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_str(&buf->gbuf, ">"));
     } else {
         if (!first) {
-            GUARD_BOOL(aushape_gbuf_add_char(&buf->gbuf, ','));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_add_char(&buf->gbuf, ','));
         }
-        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, &buf->format, l));
-        GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, '{'));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_opening(&buf->gbuf,
+                                                      &buf->format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_char(&buf->gbuf, '{'));
         l++;
-        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, &buf->format, l));
-        GUARD_RC(aushape_gbuf_add_fmt(&buf->gbuf,
-                                      "\"serial\":%lu,", e->serial));
-        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, &buf->format, l));
-        GUARD_RC(aushape_gbuf_add_fmt(&buf->gbuf,
-                                      "\"time\":\"%s\",", timestamp_buf));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_opening(&buf->gbuf,
+                                                      &buf->format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_fmt(&buf->gbuf,
+                                                "\"serial\":%lu,", e->serial));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_opening(&buf->gbuf,
+                                                      &buf->format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_fmt(&buf->gbuf,
+                                                "\"time\":\"%s\",",
+                                                timestamp_buf));
         if (e->host != NULL) {
-            GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, &buf->format, l));
-            GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "\"host\":\""));
-            GUARD_RC(aushape_gbuf_add_str_json(&buf->gbuf, e->host));
-            GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "\","));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_space_opening(&buf->gbuf, &buf->format, l));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_add_str(&buf->gbuf, "\"host\":\""));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_add_str_json(&buf->gbuf, e->host));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_add_str(&buf->gbuf, "\","));
         }
-        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, &buf->format, l));
-        GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "\"records\":{"));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_opening(&buf->gbuf,
+                                                      &buf->format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_str(&buf->gbuf,
+                                                "\"records\":{"));
     }
 
     /* Output records */
     l++;
-    if (auparse_first_record(au) <= 0) {
-        return AUSHAPE_RC_AUPARSE_FAILED;
-    }
+    AUSHAPE_GUARD_BOOL(AUPARSE_FAILED,
+                       auparse_first_record(au) >= 0);
     first_record = true;
     do {
         /* Add the record to the collector */
@@ -206,7 +205,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
             assert(rc != AUSHAPE_RC_INVALID_ARGS);
             assert(rc != AUSHAPE_RC_INVALID_STATE);
             assert(aushape_conv_buf_is_valid(buf));
-            return rc;
+            goto cleanup;
         }
     } while(auparse_next_record(au) > 0);
 
@@ -215,64 +214,95 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     if (rc != AUSHAPE_RC_OK) {
         assert(rc != AUSHAPE_RC_INVALID_ARGS);
         assert(aushape_conv_buf_is_valid(buf));
-        return rc;
+        goto cleanup;
     }
 
     /* Terminate event */
     l--;
     if (buf->format.lang == AUSHAPE_LANG_XML) {
-        GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, &buf->format, l));
-        GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "</event>"));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_closing(&buf->gbuf,
+                                                      &buf->format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_str(&buf->gbuf, "</event>"));
     } else {
         if (!first_record) {
-            GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, &buf->format, l));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_space_closing(&buf->gbuf,
+                                                          &buf->format, l));
         }
-        GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, '}'));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_char(&buf->gbuf, '}'));
         l--;
-        GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, &buf->format, l));
-        GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, '}'));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_closing(&buf->gbuf,
+                                                      &buf->format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_char(&buf->gbuf, '}'));
     }
 
     assert(l == level);
+    rc = AUSHAPE_RC_OK;
+cleanup:
     assert(aushape_conv_buf_is_valid(buf));
-    return AUSHAPE_RC_OK;
+    return rc;
 }
 
 enum aushape_rc
 aushape_conv_buf_add_prologue(struct aushape_conv_buf *buf)
 {
+    enum aushape_rc rc;
     assert(aushape_conv_buf_is_valid(buf));
 
-    GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, &buf->format, 0));
+    AUSHAPE_GUARD_BOOL(NOMEM,
+                       aushape_gbuf_space_opening(&buf->gbuf,
+                                                  &buf->format, 0));
     if (buf->format.lang == AUSHAPE_LANG_XML) {
-        GUARD_RC(aushape_gbuf_add_str(&buf->gbuf,
-                                      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
+        AUSHAPE_GUARD_BOOL(
+            NOMEM,
+            aushape_gbuf_add_str(
+                &buf->gbuf,
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
         /* If level zero is unfolded, which is special for XML */
         if (buf->format.fold_level > 0) {
-            GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, '\n'));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_add_char(&buf->gbuf, '\n'));
         }
-        GUARD_RC(aushape_gbuf_space_opening(&buf->gbuf, &buf->format, 0));
-        GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "<log>"));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_opening(&buf->gbuf,
+                                                      &buf->format, 0));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_str(&buf->gbuf, "<log>"));
     } else if (buf->format.lang == AUSHAPE_LANG_JSON) {
-        GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, '['));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_char(&buf->gbuf, '['));
     }
 
+    rc = AUSHAPE_RC_OK;
+cleanup:
     assert(aushape_conv_buf_is_valid(buf));
-    return AUSHAPE_RC_OK;
+    return rc;
 }
 
 enum aushape_rc
 aushape_conv_buf_add_epilogue(struct aushape_conv_buf *buf)
 {
+    enum aushape_rc rc;
     assert(aushape_conv_buf_is_valid(buf));
 
-    GUARD_RC(aushape_gbuf_space_closing(&buf->gbuf, &buf->format, 0));
+    AUSHAPE_GUARD_BOOL(NOMEM,
+                       aushape_gbuf_space_closing(&buf->gbuf,
+                                                  &buf->format, 0));
     if (buf->format.lang == AUSHAPE_LANG_XML) {
-        GUARD_RC(aushape_gbuf_add_str(&buf->gbuf, "</log>"));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_str(&buf->gbuf, "</log>"));
     } else if (buf->format.lang == AUSHAPE_LANG_JSON) {
-        GUARD_RC(aushape_gbuf_add_char(&buf->gbuf, ']'));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_char(&buf->gbuf, ']'));
     }
 
+    rc = AUSHAPE_RC_OK;
+cleanup:
     assert(aushape_conv_buf_is_valid(buf));
-    return AUSHAPE_RC_OK;
+    return rc;
 }

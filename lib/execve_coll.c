@@ -20,6 +20,7 @@
 
 #include <aushape/execve_coll.h>
 #include <aushape/coll.h>
+#include <aushape/guard.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -100,37 +101,6 @@ aushape_execve_coll_empty(struct aushape_coll *coll)
 }
 
 /**
- * Exit with the specified return code if a bool expression is false.
- * To exit stores return code in "rc" variable and goes to "cleanup" label.
- *
- * @param _RC_TOKEN     The return code name without the AUSHAPE_RC_
- *                      prefix.
- * @param _bool_expr    The bool expression to evaluate.
- */
-#define GUARD_BOOL(_RC_TOKEN, _bool_expr) \
-    do {                                    \
-        if (!(_bool_expr)) {                \
-            rc = AUSHAPE_RC_##_RC_TOKEN;    \
-            goto cleanup;                   \
-        }                                   \
-    } while (0)
-
-/**
- * If an expression producing return code doesn't evaluate to AUSHAPE_RC_OK,
- * then exit with the evaluated return code. Stores the evaluated return code
- * in "rc" variable, goes to "cleanup" label to exit.
- *
- * @param _rc_expr  The return code expression to evaluate.
- */
-#define GUARD(_rc_expr) \
-    do {                            \
-        rc = (_rc_expr);            \
-        if (rc != AUSHAPE_RC_OK) {  \
-            goto cleanup;           \
-        }                           \
-    } while (0)
-
-/**
  * Process "argc" field for the execve record being collected.
  *
  * @param coll      The execve collector to process the field for.
@@ -161,13 +131,13 @@ aushape_execve_coll_add_argc(struct aushape_coll *coll,
     assert(au != NULL);
     (void)level;
 
-    GUARD_BOOL(INVALID_EXECVE, execve_coll->arg_num == 0);
+    AUSHAPE_GUARD_BOOL(INVALID_EXECVE, execve_coll->arg_num == 0);
     str = auparse_get_field_str(au);
-    GUARD_BOOL(AUPARSE_FAILED, str != NULL);
+    AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, str != NULL);
     end = 0;
-    GUARD_BOOL(INVALID_EXECVE,
-               sscanf(str, "%zu%n", &num, &end) >= 1 &&
-               (size_t)end == strlen(str));
+    AUSHAPE_GUARD_BOOL(INVALID_EXECVE,
+                       sscanf(str, "%zu%n", &num, &end) >= 1 &&
+                       (size_t)end == strlen(str));
     execve_coll->arg_num = num;
     rc = AUSHAPE_RC_OK;
 cleanup:
@@ -200,22 +170,33 @@ aushape_execve_coll_add_arg_str(struct aushape_coll *coll,
     assert(str != NULL);
 
     if (coll->format.lang == AUSHAPE_LANG_XML) {
-        GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(&execve_coll->args,
-                                                     &coll->format, level));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve_coll->args,
-                                               "<a i=\""));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str_xml(&execve_coll->args, str));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve_coll->args, "\"/>"));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_opening(&execve_coll->args,
+                                                      &coll->format, level));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_str(&execve_coll->args,
+                                                "<a i=\""));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_str_xml(&execve_coll->args, str));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_str(&execve_coll->args, "\"/>"));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
         /* If it's not the first argument in the record */
         if (execve_coll->arg_idx > 0) {
-            GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve_coll->args, ','));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_add_char(&execve_coll->args,
+                                                     ','));
         }
-        GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(&execve_coll->args,
-                                                     &coll->format, level));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve_coll->args, '"'));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str_json(&execve_coll->args, str));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve_coll->args, '"'));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_opening(&execve_coll->args,
+                                                      &coll->format, level));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_char(&execve_coll->args, '"'));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_str_json(&execve_coll->args,
+                                                     str));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_char(&execve_coll->args, '"'));
     }
 
     execve_coll->arg_idx++;
@@ -257,9 +238,9 @@ aushape_execve_coll_add_arg(struct aushape_coll *coll,
     assert(coll->type == &aushape_execve_coll_type);
     assert(au != NULL);
 
-    GUARD_BOOL(INVALID_EXECVE,
-               arg_idx >= execve_coll->arg_idx &&
-               arg_idx < execve_coll->arg_num);
+    AUSHAPE_GUARD_BOOL(INVALID_EXECVE,
+                       arg_idx >= execve_coll->arg_idx &&
+                       arg_idx < execve_coll->arg_num);
 
     /* Add skipped empty arguments */
     while (execve_coll->arg_idx < arg_idx) {
@@ -271,7 +252,7 @@ aushape_execve_coll_add_arg(struct aushape_coll *coll,
 
     /* Add the argument in question */
     str = auparse_interpret_field(au);
-    GUARD_BOOL(AUPARSE_FAILED, str != NULL);
+    AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, str != NULL);
     rc = aushape_execve_coll_add_arg_str(coll, level, str);
 
 cleanup:
@@ -311,10 +292,10 @@ aushape_execve_coll_add_arg_len(struct aushape_coll *coll,
     assert(coll->type == &aushape_execve_coll_type);
     assert(au != NULL);
 
-    GUARD_BOOL(INVALID_EXECVE,
-               arg_idx >= execve_coll->arg_idx &&
-               arg_idx < execve_coll->arg_num &&
-               !execve_coll->got_len);
+    AUSHAPE_GUARD_BOOL(INVALID_EXECVE,
+                       arg_idx >= execve_coll->arg_idx &&
+                       arg_idx < execve_coll->arg_num &&
+                       !execve_coll->got_len);
 
     /* Add skipped empty arguments */
     while (execve_coll->arg_idx < arg_idx) {
@@ -327,11 +308,11 @@ aushape_execve_coll_add_arg_len(struct aushape_coll *coll,
     execve_coll->got_len = true;
 
     str = auparse_get_field_str(au);
-    GUARD_BOOL(AUPARSE_FAILED, str != NULL);
+    AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, str != NULL);
     end = 0;
-    GUARD_BOOL(INVALID_EXECVE,
-               sscanf(str, "%zu%n", &num, &end) >= 1 &&
-               (size_t)end == strlen(str));
+    AUSHAPE_GUARD_BOOL(INVALID_EXECVE,
+                       sscanf(str, "%zu%n", &num, &end) >= 1 &&
+                       (size_t)end == strlen(str));
     execve_coll->len_total = num;
 
     rc = AUSHAPE_RC_OK;
@@ -376,18 +357,18 @@ aushape_execve_coll_add_arg_slice(struct aushape_coll *coll,
     assert(coll->type == &aushape_execve_coll_type);
     assert(au != NULL);
 
-    GUARD_BOOL(INVALID_EXECVE,
-               arg_idx == execve_coll->arg_idx &&
-               arg_idx < execve_coll->arg_num &&
-               execve_coll->got_len &&
-               slice_idx == execve_coll->slice_idx);
+    AUSHAPE_GUARD_BOOL(INVALID_EXECVE,
+                       arg_idx == execve_coll->arg_idx &&
+                       arg_idx < execve_coll->arg_num &&
+                       execve_coll->got_len &&
+                       slice_idx == execve_coll->slice_idx);
 
     raw_str = auparse_get_field_str(au);
-    GUARD_BOOL(AUPARSE_FAILED, raw_str != NULL);
+    AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw_str != NULL);
     raw_len = strlen(raw_str);
 
     int_str = auparse_interpret_field(au);
-    GUARD_BOOL(AUPARSE_FAILED, int_str != NULL);
+    AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, int_str != NULL);
     int_len = strlen(int_str);
 
     /*
@@ -404,47 +385,58 @@ aushape_execve_coll_add_arg_slice(struct aushape_coll *coll,
      * length when "interpreted".
      */
     len = (int_len == raw_len / 2) ? raw_len : int_len;
-    GUARD_BOOL(INVALID_EXECVE,
-               execve_coll->len_read + len <= execve_coll->len_total);
+    AUSHAPE_GUARD_BOOL(INVALID_EXECVE,
+                       execve_coll->len_read + len <= execve_coll->len_total);
 
     /* If we are starting a new argument */
     if (slice_idx == 0) {
         /* Begin argument markup */
         if (coll->format.lang == AUSHAPE_LANG_XML) {
-            GUARD_BOOL(NOMEM,
-                       aushape_gbuf_space_opening(&execve_coll->args,
-                                                  &coll->format, level));
-            GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve_coll->args,
-                                                   "<a i=\""));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_space_opening(&execve_coll->args,
+                                                          &coll->format,
+                                                          level));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_add_str(&execve_coll->args,
+                                                    "<a i=\""));
         } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
             /* If it's not the first argument in the record */
             if (execve_coll->arg_idx > 0) {
-                GUARD_BOOL(NOMEM,
-                           aushape_gbuf_add_char(&execve_coll->args, ','));
+                AUSHAPE_GUARD_BOOL(NOMEM,
+                                   aushape_gbuf_add_char(&execve_coll->args,
+                                                         ','));
             }
-            GUARD_BOOL(NOMEM,
-                       aushape_gbuf_space_opening(&execve_coll->args,
-                                                  &coll->format, level));
-            GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve_coll->args, '"'));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_space_opening(&execve_coll->args,
+                                                          &coll->format,
+                                                          level));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_add_char(&execve_coll->args,
+                                                     '"'));
         }
     }
     /* Add the slice */
     if (coll->format.lang == AUSHAPE_LANG_XML) {
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str_xml(&execve_coll->args,
-                                                   int_str));
-    } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str_json(&execve_coll->args,
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_str_xml(&execve_coll->args,
                                                     int_str));
+    } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_str_json(&execve_coll->args,
+                                                     int_str));
     }
     execve_coll->len_read += len;
     /* If we have finished the argument */
     if (execve_coll->len_read == execve_coll->len_total) {
         /* End argument markup */
         if (coll->format.lang == AUSHAPE_LANG_XML) {
-            GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve_coll->args,
-                                                   "\"/>"));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_add_str(&execve_coll->args,
+                                                    "\"/>"));
         } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-            GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve_coll->args, '"'));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_add_char(&execve_coll->args,
+                                                     '"'));
         }
         execve_coll->got_len = 0;
         execve_coll->slice_idx = 0;
@@ -490,19 +482,20 @@ aushape_execve_coll_add(struct aushape_coll *coll,
      * and so it's not the first record
      */
     if (execve_coll->arg_idx > 0) {
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_char(&execve_coll->raw, '\n'));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_char(&execve_coll->raw, '\n'));
     }
     raw = auparse_get_record_text(au);
-    GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
-    GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve_coll->raw, raw));
+    AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
+    AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&execve_coll->raw, raw));
 
     /*
      * For each field in the record
      */
-    GUARD_BOOL(INVALID_EXECVE, auparse_first_field(au) != 0);
+    AUSHAPE_GUARD_BOOL(INVALID_EXECVE, auparse_first_field(au) != 0);
     do {
         field_name = auparse_get_field_name(au);
-        GUARD_BOOL(AUPARSE_FAILED, field_name != NULL);
+        AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, field_name != NULL);
         /* If it's the "type" pseudo-field */
         if (strcmp(field_name, "type") == 0) {
             continue;
@@ -511,24 +504,28 @@ aushape_execve_coll_add(struct aushape_coll *coll,
             continue;
         /* If it's the number of arguments */
         } else if (strcmp(field_name, "argc") == 0) {
-            GUARD(aushape_execve_coll_add_argc(coll, l, au));
+            AUSHAPE_GUARD_RC(aushape_execve_coll_add_argc(coll, l, au));
         /* If it's a whole argument */
         } else if (end = 0,
                    sscanf(field_name, "a%zu%n", &arg_idx, &end) >= 1 &&
                    (size_t)end == strlen(field_name)) {
-            GUARD(aushape_execve_coll_add_arg(coll, l, arg_idx, au));
+            AUSHAPE_GUARD_RC(aushape_execve_coll_add_arg(coll, l,
+                                                         arg_idx, au));
         /* If it's the length of an argument */
         } else if (end = 0,
                    sscanf(field_name, "a%zu_len%n", &arg_idx, &end) >= 1 &&
                    (size_t)end == strlen(field_name)) {
-            GUARD(aushape_execve_coll_add_arg_len(coll, l, arg_idx, au));
+            AUSHAPE_GUARD_RC(aushape_execve_coll_add_arg_len(coll, l,
+                                                             arg_idx, au));
         /* If it's an argument slice */
         } else if (end = 0,
                    sscanf(field_name, "a%zu[%zu]%n",
                           &arg_idx, &slice_idx, &end) >= 2 &&
                    (size_t)end == strlen(field_name)) {
-            GUARD(aushape_execve_coll_add_arg_slice(coll, l, arg_idx,
-                                                         slice_idx, au));
+            AUSHAPE_GUARD_RC(aushape_execve_coll_add_arg_slice(coll, l,
+                                                               arg_idx,
+                                                               slice_idx,
+                                                               au));
         /* If it's something else */
         } else {
             rc = AUSHAPE_RC_INVALID_EXECVE;
@@ -554,27 +551,40 @@ aushape_execve_coll_end(struct aushape_coll *coll,
 
     /* Output prologue */
     if (coll->format.lang == AUSHAPE_LANG_XML) {
-        GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "<execve raw=\""));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_buf_xml(gbuf,
-                                                   execve_coll->raw.ptr,
-                                                   execve_coll->raw.len));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\">"));
-    } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        if (!*pfirst) {
-            GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, ','));
-        }
-        GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\"execve\":{"));
-        l++;
-        GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\"raw\":\""));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_buf_json(gbuf,
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_opening(gbuf,
+                                                      &coll->format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_str(gbuf, "<execve raw=\""));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_buf_xml(gbuf,
                                                     execve_coll->raw.ptr,
                                                     execve_coll->raw.len));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\","));
-        GUARD_BOOL(NOMEM, aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\"args\":["));
+        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\">"));
+    } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
+        if (!*pfirst) {
+            AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, ','));
+        }
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_opening(gbuf,
+                                                      &coll->format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_str(gbuf, "\"execve\":{"));
+        l++;
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_opening(gbuf,
+                                                      &coll->format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\"raw\":\""));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_buf_json(gbuf,
+                                                     execve_coll->raw.ptr,
+                                                     execve_coll->raw.len));
+        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\","));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_opening(gbuf,
+                                                      &coll->format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_str(gbuf, "\"args\":["));
     }
     l++;
 
@@ -587,23 +597,31 @@ aushape_execve_coll_end(struct aushape_coll *coll,
     }
 
     /* Output arguments */
-    GUARD_BOOL(NOMEM, aushape_gbuf_add_buf(gbuf,
-                                           execve_coll->args.ptr,
-                                           execve_coll->args.len));
+    AUSHAPE_GUARD_BOOL(NOMEM,
+                       aushape_gbuf_add_buf(gbuf,
+                                            execve_coll->args.ptr,
+                                            execve_coll->args.len));
 
     l--;
     /* Output epilogue */
     if (coll->format.lang == AUSHAPE_LANG_XML) {
-        GUARD_BOOL(NOMEM, aushape_gbuf_space_closing(gbuf, &coll->format, l));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "</execve>"));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_closing(gbuf,
+                                                      &coll->format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_add_str(gbuf, "</execve>"));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
         if (execve_coll->args.len > 0) {
-            GUARD_BOOL(NOMEM, aushape_gbuf_space_closing(gbuf, &coll->format, l));
+            AUSHAPE_GUARD_BOOL(NOMEM,
+                               aushape_gbuf_space_closing(gbuf,
+                                                          &coll->format, l));
         }
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, ']'));
+        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, ']'));
         l--;
-        GUARD_BOOL(NOMEM, aushape_gbuf_space_closing(gbuf, &coll->format, l));
-        GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, '}'));
+        AUSHAPE_GUARD_BOOL(NOMEM,
+                           aushape_gbuf_space_closing(gbuf,
+                                                      &coll->format, l));
+        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, '}'));
     }
 
     assert(l == level);

@@ -21,6 +21,7 @@
 #include <aushape/conv.h>
 #include <aushape/conv/buf.h>
 #include <aushape/gbuf.h>
+#include <aushape/guard.h>
 #include <auparse.h>
 #include <limits.h>
 #include <string.h>
@@ -189,10 +190,7 @@ aushape_conv_create(struct aushape_conv **pconv,
     }
 
     conv->au = auparse_init(AUSOURCE_FEED, NULL);
-    if (conv->au == NULL) {
-        rc = AUSHAPE_RC_AUPARSE_FAILED;
-        goto cleanup;
-    }
+    AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, conv->au != NULL);
     auparse_set_escape_mode(conv->au, AUPARSE_ESC_RAW);
     auparse_add_callback(conv->au, aushape_conv_cb, conv, NULL);
 
