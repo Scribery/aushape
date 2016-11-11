@@ -46,7 +46,7 @@ struct aushape_conv_disp_coll_type_link {
  *  {
  *      {
  *          .name = NULL,
- *          .type = &aushape_conv_unique_coll_type,
+ *          .type = &aushape_conv_single_coll_type,
  *          .args = {.unique = false}
  *       }
  *  }

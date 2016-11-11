@@ -26,7 +26,7 @@ libaushape_conv_la_SOURCES = \
     coll.c                      \
     disp_coll.c                 \
     execve_coll.c               \
-    unique_coll.c
+    single_coll.c
 
 libaushape_conv_la_LIBADD = \
     $(AUPARSE_LIBS)

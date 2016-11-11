@@ -20,7 +20,7 @@
 
 #include <aushape/conv/buf.h>
 #include <aushape/conv/disp_coll.h>
-#include <aushape/conv/unique_coll.h>
+#include <aushape/conv/single_coll.h>
 #include <aushape/conv/execve_coll.h>
 #include <stdio.h>
 #include <string.h>
@@ -62,10 +62,10 @@ enum aushape_rc
 aushape_conv_buf_init(struct aushape_conv_buf *buf,
                       const struct aushape_format *format)
 {
-    static const struct aushape_conv_unique_coll_args unique_args_true = {
+    static const struct aushape_conv_single_coll_args single_args_unique = {
         .unique = true
     };
-    static const struct aushape_conv_unique_coll_args unique_args_false = {
+    static const struct aushape_conv_single_coll_args single_args_repeated = {
         .unique = false
     };
     static const struct aushape_conv_disp_coll_type_link map[] = {
@@ -76,13 +76,13 @@ aushape_conv_buf_init(struct aushape_conv_buf *buf,
         },
         {
             .name   = "PATH",
-            .type   = &aushape_conv_unique_coll_type,
-            .args   = &unique_args_false,
+            .type   = &aushape_conv_single_coll_type,
+            .args   = &single_args_repeated,
         },
         {
             .name   = NULL,
-            .type   = &aushape_conv_unique_coll_type,
-            .args   = &unique_args_true,
+            .type   = &aushape_conv_single_coll_type,
+            .args   = &single_args_unique,
         },
     };
 

@@ -25,4 +25,4 @@ noinst_HEADERS = \
     coll_type.h     \
     disp_coll.h     \
     execve_coll.h   \
-    unique_coll.h
+    single_coll.h

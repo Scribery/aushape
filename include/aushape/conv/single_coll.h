@@ -1,5 +1,5 @@
 /**
- * @brief Unique (non-repeated) record collector
+ * @brief Single (non-aggregated) record collector
  *
  * Copyright (C) 2016 Red Hat
  *
@@ -18,21 +18,21 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _AUSHAPE_CONV_UNIQUE_COLL_H
-#define _AUSHAPE_CONV_UNIQUE_COLL_H
+#ifndef _AUSHAPE_CONV_SINGLE_COLL_H
+#define _AUSHAPE_CONV_SINGLE_COLL_H
 
-#include <aushape/conv/unique_coll.h>
+#include <aushape/conv/single_coll.h>
 #include <stdbool.h>
 
-struct aushape_conv_unique_coll_args {
+struct aushape_conv_single_coll_args {
     /** Do not allow adding duplicate record types, if true */
     bool    unique;
 };
 
 /**
- * Unique (non-repeated) record collector type.
+ * Single (non-aggregated) record collector type.
  *
- * Expects a pointer to struct aushape_conv_unique_coll_args as the creation
+ * Expects a pointer to struct aushape_conv_single_coll_args as the creation
  * argument. If passed NULL, assumes the default value of {.unique = true}.
  *
  * Collector-specific return codes:
@@ -41,6 +41,6 @@ struct aushape_conv_unique_coll_args {
  *      AUSHAPE_RC_CONV_REPEATED_RECORD     - an unexpected repeated record
  *                                            type encountered
  */
-extern const struct aushape_conv_coll_type aushape_conv_unique_coll_type;
+extern const struct aushape_conv_coll_type aushape_conv_single_coll_type;
 
-#endif /* _AUSHAPE_CONV_UNIQUE_COLL_H */
+#endif /* _AUSHAPE_CONV_SINGLE_COLL_H */

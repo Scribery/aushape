@@ -20,7 +20,7 @@
 
 #include <aushape/conv/disp_coll.h>
 #include <aushape/conv/execve_coll.h>
-#include <aushape/conv/unique_coll.h>
+#include <aushape/conv/single_coll.h>
 #include <aushape/conv/coll.h>
 #include <aushape/misc.h>
 #include <string.h>
@@ -43,8 +43,8 @@ struct aushape_conv_disp_coll {
     struct aushape_conv_disp_coll_inst_link    *map;
 };
 
-static const struct aushape_conv_unique_coll_args
-                            aushape_conv_disp_coll_args_default_unique = {
+static const struct aushape_conv_single_coll_args
+                            aushape_conv_disp_coll_args_default_single = {
     .unique = false
 };
 
@@ -52,8 +52,8 @@ static const struct aushape_conv_disp_coll_type_link
                             aushape_conv_disp_coll_args_default[] = {
     {
         .name  = NULL,
-        .type  = &aushape_conv_unique_coll_type,
-        .args  = &aushape_conv_disp_coll_args_default_unique
+        .type  = &aushape_conv_single_coll_type,
+        .args  = &aushape_conv_disp_coll_args_default_single
     }
 };
 
