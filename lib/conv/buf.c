@@ -22,6 +22,7 @@
 #include <aushape/disp_coll.h>
 #include <aushape/single_coll.h>
 #include <aushape/execve_coll.h>
+#include <aushape/path_coll.h>
 #include <aushape/guard.h>
 #include <stdio.h>
 #include <string.h>
@@ -39,9 +40,6 @@ enum aushape_rc
 aushape_conv_buf_init(struct aushape_conv_buf *buf,
                       const struct aushape_format *format)
 {
-    static const struct aushape_single_coll_args single_args_unique = {
-        .unique = true
-    };
     static const struct aushape_single_coll_args single_args_repeated = {
         .unique = false
     };
@@ -53,13 +51,13 @@ aushape_conv_buf_init(struct aushape_conv_buf *buf,
         },
         {
             .name   = "PATH",
-            .type   = &aushape_single_coll_type,
-            .args   = &single_args_repeated,
+            .type   = &aushape_path_coll_type,
+            .args   = NULL,
         },
         {
             .name   = NULL,
             .type   = &aushape_single_coll_type,
-            .args   = &single_args_unique,
+            .args   = &single_args_repeated,
         },
     };
 

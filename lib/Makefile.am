@@ -33,6 +33,7 @@ libaushape_la_SOURCES = \
     field.c             \
     gbuf.c              \
     output.c            \
+    path_coll.c         \
     rc.c                \
     single_coll.c       \
     syslog_misc.c       \

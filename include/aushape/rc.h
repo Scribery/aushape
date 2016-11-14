@@ -35,6 +35,8 @@ enum aushape_rc {
     AUSHAPE_RC_AUPARSE_FAILED,
     /** Invalid execve record sequence encountered */
     AUSHAPE_RC_INVALID_EXECVE,
+    /** Invalid path record sequence encountered */
+    AUSHAPE_RC_INVALID_PATH,
     /** An unexpected repeated record type encountered */
     AUSHAPE_RC_REPEATED_RECORD,
     /** Output initialization failed */

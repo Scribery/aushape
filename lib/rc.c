@@ -43,6 +43,8 @@ static const struct aushape_rc_info \
        "A call to auparse failed"),
     RC(INVALID_EXECVE,
        "Invalid execve record sequence encountered"),
+    RC(INVALID_PATH,
+       "Invalid path record sequence encountered"),
     RC(REPEATED_RECORD,
        "An unexpected repeated record type encountered"),
     RC(OUTPUT_INIT_FAILED,
