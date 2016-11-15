@@ -92,7 +92,7 @@ aushape_gbuf_add_char(struct aushape_gbuf *gbuf, char c)
     size_t new_len;
     assert(aushape_gbuf_is_valid(gbuf));
     new_len = gbuf->len + 1;
-    AUSHAPE_GUARD_RC(aushape_gbuf_accomodate(gbuf, new_len));
+    AUSHAPE_GUARD(aushape_gbuf_accomodate(gbuf, new_len));
     gbuf->ptr[gbuf->len] = c;
     gbuf->len = new_len;
     rc = AUSHAPE_RC_OK;
@@ -107,7 +107,7 @@ aushape_gbuf_add_span(struct aushape_gbuf *gbuf, int c, size_t l)
     size_t new_len;
     assert(aushape_gbuf_is_valid(gbuf));
     new_len = gbuf->len + l;
-    AUSHAPE_GUARD_RC(aushape_gbuf_accomodate(gbuf, new_len));
+    AUSHAPE_GUARD(aushape_gbuf_accomodate(gbuf, new_len));
     memset(gbuf->ptr + gbuf->len, c, l);
     gbuf->len = new_len;
     rc = AUSHAPE_RC_OK;
@@ -129,7 +129,7 @@ aushape_gbuf_add_buf(struct aushape_gbuf *gbuf, const void *ptr, size_t len)
     }
 
     new_len = gbuf->len + len;
-    AUSHAPE_GUARD_RC(aushape_gbuf_accomodate(gbuf, new_len));
+    AUSHAPE_GUARD(aushape_gbuf_accomodate(gbuf, new_len));
 
     memcpy(gbuf->ptr + gbuf->len, ptr, len);
     gbuf->len = new_len;
@@ -157,7 +157,7 @@ aushape_gbuf_add_buf_lowercase(struct aushape_gbuf *gbuf,
     }
 
     new_len = gbuf->len + len;
-    AUSHAPE_GUARD_RC(aushape_gbuf_accomodate(gbuf, new_len));
+    AUSHAPE_GUARD(aushape_gbuf_accomodate(gbuf, new_len));
 
     for (src = (const char *)ptr, dst = gbuf->ptr + gbuf->len;
          len > 0;
@@ -210,7 +210,7 @@ aushape_gbuf_add_vfmt(struct aushape_gbuf *gbuf, const char *fmt, va_list ap)
     len = (size_t)printf_rc;
     new_len = gbuf->len + len;
     /* NOTE: leaving space for terminating zero */
-    AUSHAPE_GUARD_RC(aushape_gbuf_accomodate(gbuf, new_len + 1));
+    AUSHAPE_GUARD(aushape_gbuf_accomodate(gbuf, new_len + 1));
     /* NOTE: leaving space for terminating zero */
     printf_rc = vsnprintf(gbuf->ptr + gbuf->len, len + 1, fmt, ap);
     assert(printf_rc >= 0);
@@ -243,11 +243,11 @@ aushape_gbuf_space_opening(struct aushape_gbuf *gbuf,
     assert(aushape_format_is_valid(format));
     if (level <= format->fold_level) {
         if (level > 0) {
-            AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, '\n'));
+            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '\n'));
         }
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_span(gbuf, ' ',
-                                               format->init_indent +
-                                               format->nest_indent * level));
+        AUSHAPE_GUARD(aushape_gbuf_add_span(gbuf, ' ',
+                                            format->init_indent +
+                                            format->nest_indent * level));
     }
     rc = AUSHAPE_RC_OK;
 cleanup:
@@ -263,10 +263,10 @@ aushape_gbuf_space_closing(struct aushape_gbuf *gbuf,
     assert(aushape_gbuf_is_valid(gbuf));
     assert(aushape_format_is_valid(format));
     if ((level + 1) <= format->fold_level) {
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, '\n'));
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_span(gbuf, ' ',
-                                               format->init_indent +
-                                               format->nest_indent * level));
+        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '\n'));
+        AUSHAPE_GUARD(aushape_gbuf_add_span(gbuf, ' ',
+                                            format->init_indent +
+                                            format->nest_indent * level));
     }
     rc = AUSHAPE_RC_OK;
 cleanup:
@@ -314,12 +314,12 @@ aushape_gbuf_add_buf_xml(struct aushape_gbuf *gbuf,
                 continue;
             }
         }
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_buf(gbuf, esc_ptr, esc_len));
+        AUSHAPE_GUARD(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
+        AUSHAPE_GUARD(aushape_gbuf_add_buf(gbuf, esc_ptr, esc_len));
         p++;
         last_p = p;
     }
-    AUSHAPE_GUARD_RC(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
+    AUSHAPE_GUARD(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
     rc = AUSHAPE_RC_OK;
 cleanup:
     return rc;
@@ -385,12 +385,12 @@ aushape_gbuf_add_buf_json(struct aushape_gbuf *gbuf,
             }
             break;
         }
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_buf(gbuf, esc_ptr, esc_len));
+        AUSHAPE_GUARD(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
+        AUSHAPE_GUARD(aushape_gbuf_add_buf(gbuf, esc_ptr, esc_len));
         p++;
         last_p = p;
     }
-    AUSHAPE_GUARD_RC(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
+    AUSHAPE_GUARD(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
     rc = AUSHAPE_RC_OK;
 cleanup:
     return rc;

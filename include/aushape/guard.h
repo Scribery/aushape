@@ -44,13 +44,13 @@
     } while (0)
 
 /**
- * If an expression producing return code doesn't evaluate to AUSHAPE_RC_OK,
+ * If an expression producing a return code doesn't evaluate to AUSHAPE_RC_OK,
  * then exit with the evaluated return code. Stores the evaluated return code
  * in "rc" variable, goes to "cleanup" label to exit.
  *
  * @param _rc_expr  The return code expression to evaluate.
  */
-#define AUSHAPE_GUARD_RC(_rc_expr) \
+#define AUSHAPE_GUARD(_rc_expr) \
     do {                            \
         rc = (_rc_expr);            \
         if (rc != AUSHAPE_RC_OK) {  \

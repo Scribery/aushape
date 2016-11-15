@@ -64,40 +64,40 @@ aushape_field_format(struct aushape_gbuf *gbuf,
 
     switch (format->lang) {
     case AUSHAPE_LANG_XML:
-        AUSHAPE_GUARD_RC(aushape_gbuf_space_opening(gbuf, format, l));
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, '<'));
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, name));
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, " i=\""));
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_str_xml(gbuf, value_i));
+        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '<'));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, name));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, " i=\""));
+        AUSHAPE_GUARD(aushape_gbuf_add_str_xml(gbuf, value_i));
         if (value_r != NULL) {
-            AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, "\" r=\""));
-            AUSHAPE_GUARD_RC(aushape_gbuf_add_str_xml(gbuf, value_r));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\" r=\""));
+            AUSHAPE_GUARD(aushape_gbuf_add_str_xml(gbuf, value_r));
         }
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, "\"/>"));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"/>"));
         break;
     case AUSHAPE_LANG_JSON:
         if (!first) {
-            AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, ','));
+            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
         }
-        AUSHAPE_GUARD_RC(aushape_gbuf_space_opening(gbuf, format, l));
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, '"'));
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, name));
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, "\":["));
+        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, name));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\":["));
         l++;
-        AUSHAPE_GUARD_RC(aushape_gbuf_space_opening(gbuf, format, l));
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, '"'));
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_str_json(gbuf, value_i));
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, '"'));
+        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
+        AUSHAPE_GUARD(aushape_gbuf_add_str_json(gbuf, value_i));
+        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
         if (value_r != NULL) {
-            AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, ','));
-            AUSHAPE_GUARD_RC(aushape_gbuf_space_opening(gbuf, format, l));
-            AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, '"'));
-            AUSHAPE_GUARD_RC(aushape_gbuf_add_str_json(gbuf, value_r));
-            AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, '"'));
+            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, format, l));
+            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
+            AUSHAPE_GUARD(aushape_gbuf_add_str_json(gbuf, value_r));
+            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
         }
         l--;
-        AUSHAPE_GUARD_RC(aushape_gbuf_space_closing(gbuf, format, l));
-        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, ']'));
+        AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ']'));
         break;
     default:
         break;

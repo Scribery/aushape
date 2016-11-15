@@ -166,7 +166,7 @@ aushape_single_coll_add(struct aushape_coll *coll,
             goto cleanup;
         }
     } else {
-        AUSHAPE_GUARD_RC(aushape_single_coll_seen_add(coll, name));
+        AUSHAPE_GUARD(aushape_single_coll_seen_add(coll, name));
     }
     rc = aushape_record_format(coll->gbuf, &coll->format,
                                level, *pfirst, name, au);
