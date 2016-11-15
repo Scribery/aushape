@@ -42,5 +42,6 @@ noinst_HEADERS = \
     guard.h         \
     misc.h          \
     path_coll.h     \
+    record.h        \
     single_coll.h   \
     syslog_misc.h
