@@ -18,6 +18,7 @@
     <xsd:element type="field" name="action"/>
     <xsd:element type="field" name="added"/>
     <xsd:element type="field" name="addr"/>
+    <xsd:element type="field" name="algo"/>
     <xsd:element type="field" name="apparmor"/>
     <xsd:element type="field" name="arch"/>
     <xsd:element type="field" name="argc"/>
@@ -50,6 +51,7 @@
     <xsd:element type="field" name="daddr"/>
     <xsd:element type="field" name="data"/>
     <xsd:element type="field" name="default-context"/>
+    <xsd:element type="field" name="dest"/>
     <xsd:element type="field" name="dev"/>
     <xsd:element type="field" name="device"/>
     <xsd:element type="field" name="dir"/>
@@ -210,6 +212,7 @@
     <xsd:element type="field" name="sgid"/>
     <xsd:element type="field" name="sig"/>
     <xsd:element type="field" name="sigev_signo"/>
+    <xsd:element type="field" name="size"/>
     <xsd:element type="field" name="smac"/>
     <xsd:element type="field" name="spid"/>
     <xsd:element type="field" name="sport"/>
@@ -249,6 +252,7 @@
             <xsd:element ref="action"/>
             <xsd:element ref="added"/>
             <xsd:element ref="addr"/>
+            <xsd:element ref="algo"/>
             <xsd:element ref="apparmor"/>
             <xsd:element ref="arch"/>
             <xsd:element ref="argc"/>
@@ -281,6 +285,7 @@
             <xsd:element ref="daddr"/>
             <xsd:element ref="data"/>
             <xsd:element ref="default-context"/>
+            <xsd:element ref="dest"/>
             <xsd:element ref="dev"/>
             <xsd:element ref="device"/>
             <xsd:element ref="dir"/>
@@ -441,6 +446,7 @@
             <xsd:element ref="sgid"/>
             <xsd:element ref="sig"/>
             <xsd:element ref="sigev_signo"/>
+            <xsd:element ref="size"/>
             <xsd:element ref="smac"/>
             <xsd:element ref="spid"/>
             <xsd:element ref="sport"/>
