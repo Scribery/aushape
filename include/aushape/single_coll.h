@@ -21,8 +21,7 @@
 #ifndef _AUSHAPE_SINGLE_COLL_H
 #define _AUSHAPE_SINGLE_COLL_H
 
-#include <aushape/single_coll.h>
-#include <stdbool.h>
+#include <aushape/coll_type.h>
 
 struct aushape_single_coll_args {
     /** Do not allow adding duplicate record types, if true */
