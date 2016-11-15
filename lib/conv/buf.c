@@ -23,6 +23,7 @@
 #include <aushape/single_coll.h>
 #include <aushape/execve_coll.h>
 #include <aushape/path_coll.h>
+#include <aushape/rep_coll.h>
 #include <aushape/guard.h>
 #include <stdio.h>
 #include <string.h>
@@ -43,6 +44,9 @@ aushape_conv_buf_init(struct aushape_conv_buf *buf,
     static const struct aushape_single_coll_args single_args_repeated = {
         .unique = false
     };
+    static const struct aushape_rep_coll_args obj_pid_args = {
+        .name = "obj_pid",
+    };
     static const struct aushape_disp_coll_type_link map[] = {
         {
             .name   = "EXECVE",
@@ -53,6 +57,11 @@ aushape_conv_buf_init(struct aushape_conv_buf *buf,
             .name   = "PATH",
             .type   = &aushape_path_coll_type,
             .args   = NULL,
+        },
+        {
+            .name   = "OBJ_PID",
+            .type   = &aushape_rep_coll_type,
+            .args   = &obj_pid_args,
         },
         {
             .name   = NULL,

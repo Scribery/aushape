@@ -36,6 +36,7 @@ libaushape_la_SOURCES = \
     path_coll.c         \
     rc.c                \
     record.c            \
+    rep_coll.c          \
     single_coll.c       \
     syslog_misc.c       \
     syslog_output.c
