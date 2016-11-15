@@ -110,7 +110,6 @@
                         "ip":                           { "$ref": "#/definitions/field" },
                         "ipid":                         { "$ref": "#/definitions/field" },
                         "ipx-net":                      { "$ref": "#/definitions/field" },
-                        "item":                         { "$ref": "#/definitions/field" },
                         "items":                        { "$ref": "#/definitions/field" },
                         "iuid":                         { "$ref": "#/definitions/field" },
                         "kernel":                       { "$ref": "#/definitions/field" },

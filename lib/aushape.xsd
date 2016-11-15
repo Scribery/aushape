@@ -96,7 +96,6 @@
     <xsd:element type="field" name="ip"/>
     <xsd:element type="field" name="ipid"/>
     <xsd:element type="field" name="ipx-net"/>
-    <xsd:element type="field" name="item"/>
     <xsd:element type="field" name="items"/>
     <xsd:element type="field" name="iuid"/>
     <xsd:element type="field" name="kernel"/>
@@ -330,7 +329,6 @@
             <xsd:element ref="ip"/>
             <xsd:element ref="ipid"/>
             <xsd:element ref="ipx-net"/>
-            <xsd:element ref="item"/>
             <xsd:element ref="items"/>
             <xsd:element ref="iuid"/>
             <xsd:element ref="kernel"/>
