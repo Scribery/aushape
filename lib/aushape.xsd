@@ -239,7 +239,7 @@
     <xsd:element type="field" name="vm-pid"/>
     <xsd:element type="field" name="watch"/>
 
-    <!-- Generic record fields -->
+    <!-- Generic fields -->
     <xsd:group name="generic_fields">
         <xsd:choice>
             <xsd:element ref="a0"/>
@@ -474,10 +474,25 @@
         </xsd:choice>
     </xsd:group>
 
-    <!-- Generic record type -->
-    <xsd:complexType name="generic_record">
+    <!-- Single record type -->
+    <xsd:complexType name="single_record">
         <xsd:sequence>
             <xsd:group ref="generic_fields" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="raw" type="xsd:string"/>
+    </xsd:complexType>
+
+    <!-- Repeated record type -->
+    <xsd:complexType name="repeated_record">
+        <xsd:sequence>
+            <xsd:element name="item" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:group ref="generic_fields"
+                                   minOccurs="0" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
         </xsd:sequence>
         <xsd:attribute name="raw" type="xsd:string"/>
     </xsd:complexType>
@@ -493,172 +508,172 @@
     <!-- All records -->
     <xsd:group name="records">
         <xsd:choice>
-            <xsd:element type="generic_record" name="user"/>
-            <xsd:element type="generic_record" name="login"/>
-            <xsd:element type="generic_record" name="user_auth"/>
-            <xsd:element type="generic_record" name="user_acct"/>
-            <xsd:element type="generic_record" name="user_mgmt"/>
-            <xsd:element type="generic_record" name="cred_acq"/>
-            <xsd:element type="generic_record" name="cred_disp"/>
-            <xsd:element type="generic_record" name="user_start"/>
-            <xsd:element type="generic_record" name="user_end"/>
-            <xsd:element type="generic_record" name="user_avc"/>
-            <xsd:element type="generic_record" name="user_chauthtok"/>
-            <xsd:element type="generic_record" name="user_err"/>
-            <xsd:element type="generic_record" name="cred_refr"/>
-            <xsd:element type="generic_record" name="usys_config"/>
-            <xsd:element type="generic_record" name="user_login"/>
-            <xsd:element type="generic_record" name="user_logout"/>
-            <xsd:element type="generic_record" name="add_user"/>
-            <xsd:element type="generic_record" name="del_user"/>
-            <xsd:element type="generic_record" name="add_group"/>
-            <xsd:element type="generic_record" name="del_group"/>
-            <xsd:element type="generic_record" name="dac_check"/>
-            <xsd:element type="generic_record" name="chgrp_id"/>
-            <xsd:element type="generic_record" name="test"/>
-            <xsd:element type="generic_record" name="trusted_app"/>
-            <xsd:element type="generic_record" name="user_selinux_err"/>
-            <xsd:element type="generic_record" name="user_cmd"/>
-            <xsd:element type="generic_record" name="user_tty"/>
-            <xsd:element type="generic_record" name="chuser_id"/>
-            <xsd:element type="generic_record" name="grp_auth"/>
-            <xsd:element type="generic_record" name="mac_check"/>
-            <xsd:element type="generic_record" name="acct_lock"/>
-            <xsd:element type="generic_record" name="acct_unlock"/>
-            <xsd:element type="generic_record" name="system_boot"/>
-            <xsd:element type="generic_record" name="system_shutdown"/>
-            <xsd:element type="generic_record" name="system_runlevel"/>
-            <xsd:element type="generic_record" name="service_start"/>
-            <xsd:element type="generic_record" name="service_stop"/>
-            <xsd:element type="generic_record" name="grp_mgmt"/>
-            <xsd:element type="generic_record" name="grp_chauthtok"/>
-            <xsd:element type="generic_record" name="daemon_start"/>
-            <xsd:element type="generic_record" name="daemon_end"/>
-            <xsd:element type="generic_record" name="daemon_abort"/>
-            <xsd:element type="generic_record" name="daemon_config"/>
-            <xsd:element type="generic_record" name="daemon_rotate"/>
-            <xsd:element type="generic_record" name="daemon_resume"/>
-            <xsd:element type="generic_record" name="daemon_accept"/>
-            <xsd:element type="generic_record" name="daemon_close"/>
-            <xsd:element type="generic_record" name="daemon_err"/>
-            <xsd:element type="generic_record" name="syscall"/>
-            <xsd:element type="generic_record" name="path"/>
-            <xsd:element type="generic_record" name="ipc"/>
-            <xsd:element type="generic_record" name="socketcall"/>
-            <xsd:element type="generic_record" name="config_change"/>
-            <xsd:element type="generic_record" name="sockaddr"/>
-            <xsd:element type="generic_record" name="cwd"/>
-            <xsd:element type="execve_record" name="execve"/>
-            <xsd:element type="generic_record" name="ipc_set_perm"/>
-            <xsd:element type="generic_record" name="mq_open"/>
-            <xsd:element type="generic_record" name="mq_sendrecv"/>
-            <xsd:element type="generic_record" name="mq_notify"/>
-            <xsd:element type="generic_record" name="mq_getsetattr"/>
-            <xsd:element type="generic_record" name="kernel_other"/>
-            <xsd:element type="generic_record" name="fd_pair"/>
-            <xsd:element type="generic_record" name="obj_pid"/>
-            <xsd:element type="generic_record" name="tty"/>
-            <xsd:element type="generic_record" name="eoe"/>
-            <xsd:element type="generic_record" name="bprm_fcaps"/>
-            <xsd:element type="generic_record" name="capset"/>
-            <xsd:element type="generic_record" name="mmap"/>
-            <xsd:element type="generic_record" name="netfilter_pkt"/>
-            <xsd:element type="generic_record" name="netfilter_cfg"/>
-            <xsd:element type="generic_record" name="seccomp"/>
-            <xsd:element type="generic_record" name="proctitle"/>
-            <xsd:element type="generic_record" name="feature_change"/>
-            <xsd:element type="generic_record" name="avc"/>
-            <xsd:element type="generic_record" name="selinux_err"/>
-            <xsd:element type="generic_record" name="avc_path"/>
-            <xsd:element type="generic_record" name="mac_policy_load"/>
-            <xsd:element type="generic_record" name="mac_status"/>
-            <xsd:element type="generic_record" name="mac_config_change"/>
-            <xsd:element type="generic_record" name="mac_unlbl_allow"/>
-            <xsd:element type="generic_record" name="mac_cipsov4_add"/>
-            <xsd:element type="generic_record" name="mac_cipsov4_del"/>
-            <xsd:element type="generic_record" name="mac_map_add"/>
-            <xsd:element type="generic_record" name="mac_map_del"/>
-            <xsd:element type="generic_record" name="mac_ipsec_addsa"/>
-            <xsd:element type="generic_record" name="mac_ipsec_delsa"/>
-            <xsd:element type="generic_record" name="mac_ipsec_addspd"/>
-            <xsd:element type="generic_record" name="mac_ipsec_delspd"/>
-            <xsd:element type="generic_record" name="mac_ipsec_event"/>
-            <xsd:element type="generic_record" name="mac_unlbl_stcadd"/>
-            <xsd:element type="generic_record" name="mac_unlbl_stcdel"/>
-            <xsd:element type="generic_record" name="anom_promiscuous"/>
-            <xsd:element type="generic_record" name="anom_abend"/>
-            <xsd:element type="generic_record" name="anom_link"/>
-            <xsd:element type="generic_record" name="integrity_data"/>
-            <xsd:element type="generic_record" name="integrity_metadata"/>
-            <xsd:element type="generic_record" name="integrity_status"/>
-            <xsd:element type="generic_record" name="integrity_hash"/>
-            <xsd:element type="generic_record" name="integrity_pcr"/>
-            <xsd:element type="generic_record" name="integrity_rule"/>
-            <xsd:element type="generic_record" name="apparmor"/>
-            <xsd:element type="generic_record" name="apparmor_audit"/>
-            <xsd:element type="generic_record" name="apparmor_allowed"/>
-            <xsd:element type="generic_record" name="apparmor_denied"/>
-            <xsd:element type="generic_record" name="apparmor_hint"/>
-            <xsd:element type="generic_record" name="apparmor_status"/>
-            <xsd:element type="generic_record" name="apparmor_error"/>
-            <xsd:element type="generic_record" name="kernel"/>
-            <xsd:element type="generic_record" name="anom_login_failures"/>
-            <xsd:element type="generic_record" name="anom_login_time"/>
-            <xsd:element type="generic_record" name="anom_login_sessions"/>
-            <xsd:element type="generic_record" name="anom_login_acct"/>
-            <xsd:element type="generic_record" name="anom_login_location"/>
-            <xsd:element type="generic_record" name="anom_max_dac"/>
-            <xsd:element type="generic_record" name="anom_max_mac"/>
-            <xsd:element type="generic_record" name="anom_amtu_fail"/>
-            <xsd:element type="generic_record" name="anom_rbac_fail"/>
-            <xsd:element type="generic_record" name="anom_rbac_integrity_fail"/>
-            <xsd:element type="generic_record" name="anom_crypto_fail"/>
-            <xsd:element type="generic_record" name="anom_access_fs"/>
-            <xsd:element type="generic_record" name="anom_exec"/>
-            <xsd:element type="generic_record" name="anom_mk_exec"/>
-            <xsd:element type="generic_record" name="anom_add_acct"/>
-            <xsd:element type="generic_record" name="anom_del_acct"/>
-            <xsd:element type="generic_record" name="anom_mod_acct"/>
-            <xsd:element type="generic_record" name="anom_root_trans"/>
-            <xsd:element type="generic_record" name="resp_anomaly"/>
-            <xsd:element type="generic_record" name="resp_alert"/>
-            <xsd:element type="generic_record" name="resp_kill_proc"/>
-            <xsd:element type="generic_record" name="resp_term_access"/>
-            <xsd:element type="generic_record" name="resp_acct_remote"/>
-            <xsd:element type="generic_record" name="resp_acct_lock_timed"/>
-            <xsd:element type="generic_record" name="resp_acct_unlock_timed"/>
-            <xsd:element type="generic_record" name="resp_acct_lock"/>
-            <xsd:element type="generic_record" name="resp_term_lock"/>
-            <xsd:element type="generic_record" name="resp_sebool"/>
-            <xsd:element type="generic_record" name="resp_exec"/>
-            <xsd:element type="generic_record" name="resp_single"/>
-            <xsd:element type="generic_record" name="resp_halt"/>
-            <xsd:element type="generic_record" name="user_role_change"/>
-            <xsd:element type="generic_record" name="role_assign"/>
-            <xsd:element type="generic_record" name="role_remove"/>
-            <xsd:element type="generic_record" name="label_override"/>
-            <xsd:element type="generic_record" name="label_level_change"/>
-            <xsd:element type="generic_record" name="user_labeled_export"/>
-            <xsd:element type="generic_record" name="user_unlabeled_export"/>
-            <xsd:element type="generic_record" name="dev_alloc"/>
-            <xsd:element type="generic_record" name="dev_dealloc"/>
-            <xsd:element type="generic_record" name="fs_relabel"/>
-            <xsd:element type="generic_record" name="user_mac_policy_load"/>
-            <xsd:element type="generic_record" name="role_modify"/>
-            <xsd:element type="generic_record" name="user_mac_config_change"/>
-            <xsd:element type="generic_record" name="crypto_test_user"/>
-            <xsd:element type="generic_record" name="crypto_param_change_user"/>
-            <xsd:element type="generic_record" name="crypto_login"/>
-            <xsd:element type="generic_record" name="crypto_logout"/>
-            <xsd:element type="generic_record" name="crypto_key_user"/>
-            <xsd:element type="generic_record" name="crypto_failure_user"/>
-            <xsd:element type="generic_record" name="crypto_replay_user"/>
-            <xsd:element type="generic_record" name="crypto_session"/>
-            <xsd:element type="generic_record" name="crypto_ike_sa"/>
-            <xsd:element type="generic_record" name="crypto_ipsec_sa"/>
-            <xsd:element type="generic_record" name="virt_control"/>
-            <xsd:element type="generic_record" name="virt_resource"/>
-            <xsd:element type="generic_record" name="virt_machine_id"/>
+            <xsd:element type="single_record"       name="user"/>
+            <xsd:element type="single_record"       name="login"/>
+            <xsd:element type="single_record"       name="user_auth"/>
+            <xsd:element type="single_record"       name="user_acct"/>
+            <xsd:element type="single_record"       name="user_mgmt"/>
+            <xsd:element type="single_record"       name="cred_acq"/>
+            <xsd:element type="single_record"       name="cred_disp"/>
+            <xsd:element type="single_record"       name="user_start"/>
+            <xsd:element type="single_record"       name="user_end"/>
+            <xsd:element type="single_record"       name="user_avc"/>
+            <xsd:element type="single_record"       name="user_chauthtok"/>
+            <xsd:element type="single_record"       name="user_err"/>
+            <xsd:element type="single_record"       name="cred_refr"/>
+            <xsd:element type="single_record"       name="usys_config"/>
+            <xsd:element type="single_record"       name="user_login"/>
+            <xsd:element type="single_record"       name="user_logout"/>
+            <xsd:element type="single_record"       name="add_user"/>
+            <xsd:element type="single_record"       name="del_user"/>
+            <xsd:element type="single_record"       name="add_group"/>
+            <xsd:element type="single_record"       name="del_group"/>
+            <xsd:element type="single_record"       name="dac_check"/>
+            <xsd:element type="single_record"       name="chgrp_id"/>
+            <xsd:element type="single_record"       name="test"/>
+            <xsd:element type="single_record"       name="trusted_app"/>
+            <xsd:element type="single_record"       name="user_selinux_err"/>
+            <xsd:element type="single_record"       name="user_cmd"/>
+            <xsd:element type="single_record"       name="user_tty"/>
+            <xsd:element type="single_record"       name="chuser_id"/>
+            <xsd:element type="single_record"       name="grp_auth"/>
+            <xsd:element type="single_record"       name="mac_check"/>
+            <xsd:element type="single_record"       name="acct_lock"/>
+            <xsd:element type="single_record"       name="acct_unlock"/>
+            <xsd:element type="single_record"       name="system_boot"/>
+            <xsd:element type="single_record"       name="system_shutdown"/>
+            <xsd:element type="single_record"       name="system_runlevel"/>
+            <xsd:element type="single_record"       name="service_start"/>
+            <xsd:element type="single_record"       name="service_stop"/>
+            <xsd:element type="single_record"       name="grp_mgmt"/>
+            <xsd:element type="single_record"       name="grp_chauthtok"/>
+            <xsd:element type="single_record"       name="daemon_start"/>
+            <xsd:element type="single_record"       name="daemon_end"/>
+            <xsd:element type="single_record"       name="daemon_abort"/>
+            <xsd:element type="single_record"       name="daemon_config"/>
+            <xsd:element type="single_record"       name="daemon_rotate"/>
+            <xsd:element type="single_record"       name="daemon_resume"/>
+            <xsd:element type="single_record"       name="daemon_accept"/>
+            <xsd:element type="single_record"       name="daemon_close"/>
+            <xsd:element type="single_record"       name="daemon_err"/>
+            <xsd:element type="single_record"       name="syscall"/>
+            <xsd:element type="repeated_record"     name="path"/>
+            <xsd:element type="single_record"       name="ipc"/>
+            <xsd:element type="single_record"       name="socketcall"/>
+            <xsd:element type="single_record"       name="config_change"/>
+            <xsd:element type="single_record"       name="sockaddr"/>
+            <xsd:element type="single_record"       name="cwd"/>
+            <xsd:element type="execve_record"       name="execve"/>
+            <xsd:element type="single_record"       name="ipc_set_perm"/>
+            <xsd:element type="single_record"       name="mq_open"/>
+            <xsd:element type="single_record"       name="mq_sendrecv"/>
+            <xsd:element type="single_record"       name="mq_notify"/>
+            <xsd:element type="single_record"       name="mq_getsetattr"/>
+            <xsd:element type="single_record"       name="kernel_other"/>
+            <xsd:element type="single_record"       name="fd_pair"/>
+            <xsd:element type="repeated_record"     name="obj_pid"/>
+            <xsd:element type="single_record"       name="tty"/>
+            <xsd:element type="single_record"       name="eoe"/>
+            <xsd:element type="single_record"       name="bprm_fcaps"/>
+            <xsd:element type="single_record"       name="capset"/>
+            <xsd:element type="single_record"       name="mmap"/>
+            <xsd:element type="single_record"       name="netfilter_pkt"/>
+            <xsd:element type="single_record"       name="netfilter_cfg"/>
+            <xsd:element type="single_record"       name="seccomp"/>
+            <xsd:element type="single_record"       name="proctitle"/>
+            <xsd:element type="single_record"       name="feature_change"/>
+            <xsd:element type="single_record"       name="avc"/>
+            <xsd:element type="single_record"       name="selinux_err"/>
+            <xsd:element type="single_record"       name="avc_path"/>
+            <xsd:element type="single_record"       name="mac_policy_load"/>
+            <xsd:element type="single_record"       name="mac_status"/>
+            <xsd:element type="single_record"       name="mac_config_change"/>
+            <xsd:element type="single_record"       name="mac_unlbl_allow"/>
+            <xsd:element type="single_record"       name="mac_cipsov4_add"/>
+            <xsd:element type="single_record"       name="mac_cipsov4_del"/>
+            <xsd:element type="single_record"       name="mac_map_add"/>
+            <xsd:element type="single_record"       name="mac_map_del"/>
+            <xsd:element type="single_record"       name="mac_ipsec_addsa"/>
+            <xsd:element type="single_record"       name="mac_ipsec_delsa"/>
+            <xsd:element type="single_record"       name="mac_ipsec_addspd"/>
+            <xsd:element type="single_record"       name="mac_ipsec_delspd"/>
+            <xsd:element type="single_record"       name="mac_ipsec_event"/>
+            <xsd:element type="single_record"       name="mac_unlbl_stcadd"/>
+            <xsd:element type="single_record"       name="mac_unlbl_stcdel"/>
+            <xsd:element type="single_record"       name="anom_promiscuous"/>
+            <xsd:element type="single_record"       name="anom_abend"/>
+            <xsd:element type="single_record"       name="anom_link"/>
+            <xsd:element type="single_record"       name="integrity_data"/>
+            <xsd:element type="single_record"       name="integrity_metadata"/>
+            <xsd:element type="single_record"       name="integrity_status"/>
+            <xsd:element type="single_record"       name="integrity_hash"/>
+            <xsd:element type="single_record"       name="integrity_pcr"/>
+            <xsd:element type="single_record"       name="integrity_rule"/>
+            <xsd:element type="single_record"       name="apparmor"/>
+            <xsd:element type="single_record"       name="apparmor_audit"/>
+            <xsd:element type="single_record"       name="apparmor_allowed"/>
+            <xsd:element type="single_record"       name="apparmor_denied"/>
+            <xsd:element type="single_record"       name="apparmor_hint"/>
+            <xsd:element type="single_record"       name="apparmor_status"/>
+            <xsd:element type="single_record"       name="apparmor_error"/>
+            <xsd:element type="single_record"       name="kernel"/>
+            <xsd:element type="single_record"       name="anom_login_failures"/>
+            <xsd:element type="single_record"       name="anom_login_time"/>
+            <xsd:element type="single_record"       name="anom_login_sessions"/>
+            <xsd:element type="single_record"       name="anom_login_acct"/>
+            <xsd:element type="single_record"       name="anom_login_location"/>
+            <xsd:element type="single_record"       name="anom_max_dac"/>
+            <xsd:element type="single_record"       name="anom_max_mac"/>
+            <xsd:element type="single_record"       name="anom_amtu_fail"/>
+            <xsd:element type="single_record"       name="anom_rbac_fail"/>
+            <xsd:element type="single_record"       name="anom_rbac_integrity_fail"/>
+            <xsd:element type="single_record"       name="anom_crypto_fail"/>
+            <xsd:element type="single_record"       name="anom_access_fs"/>
+            <xsd:element type="single_record"       name="anom_exec"/>
+            <xsd:element type="single_record"       name="anom_mk_exec"/>
+            <xsd:element type="single_record"       name="anom_add_acct"/>
+            <xsd:element type="single_record"       name="anom_del_acct"/>
+            <xsd:element type="single_record"       name="anom_mod_acct"/>
+            <xsd:element type="single_record"       name="anom_root_trans"/>
+            <xsd:element type="single_record"       name="resp_anomaly"/>
+            <xsd:element type="single_record"       name="resp_alert"/>
+            <xsd:element type="single_record"       name="resp_kill_proc"/>
+            <xsd:element type="single_record"       name="resp_term_access"/>
+            <xsd:element type="single_record"       name="resp_acct_remote"/>
+            <xsd:element type="single_record"       name="resp_acct_lock_timed"/>
+            <xsd:element type="single_record"       name="resp_acct_unlock_timed"/>
+            <xsd:element type="single_record"       name="resp_acct_lock"/>
+            <xsd:element type="single_record"       name="resp_term_lock"/>
+            <xsd:element type="single_record"       name="resp_sebool"/>
+            <xsd:element type="single_record"       name="resp_exec"/>
+            <xsd:element type="single_record"       name="resp_single"/>
+            <xsd:element type="single_record"       name="resp_halt"/>
+            <xsd:element type="single_record"       name="user_role_change"/>
+            <xsd:element type="single_record"       name="role_assign"/>
+            <xsd:element type="single_record"       name="role_remove"/>
+            <xsd:element type="single_record"       name="label_override"/>
+            <xsd:element type="single_record"       name="label_level_change"/>
+            <xsd:element type="single_record"       name="user_labeled_export"/>
+            <xsd:element type="single_record"       name="user_unlabeled_export"/>
+            <xsd:element type="single_record"       name="dev_alloc"/>
+            <xsd:element type="single_record"       name="dev_dealloc"/>
+            <xsd:element type="single_record"       name="fs_relabel"/>
+            <xsd:element type="single_record"       name="user_mac_policy_load"/>
+            <xsd:element type="single_record"       name="role_modify"/>
+            <xsd:element type="single_record"       name="user_mac_config_change"/>
+            <xsd:element type="single_record"       name="crypto_test_user"/>
+            <xsd:element type="single_record"       name="crypto_param_change_user"/>
+            <xsd:element type="single_record"       name="crypto_login"/>
+            <xsd:element type="single_record"       name="crypto_logout"/>
+            <xsd:element type="single_record"       name="crypto_key_user"/>
+            <xsd:element type="single_record"       name="crypto_failure_user"/>
+            <xsd:element type="single_record"       name="crypto_replay_user"/>
+            <xsd:element type="single_record"       name="crypto_session"/>
+            <xsd:element type="single_record"       name="crypto_ike_sa"/>
+            <xsd:element type="single_record"       name="crypto_ipsec_sa"/>
+            <xsd:element type="single_record"       name="virt_control"/>
+            <xsd:element type="single_record"       name="virt_resource"/>
+            <xsd:element type="single_record"       name="virt_machine_id"/>
         </xsd:choice>
     </xsd:group>
 
