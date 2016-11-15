@@ -143,30 +143,23 @@ aushape_path_coll_add(struct aushape_coll *coll,
      * Add raw record
      */
     if (!aushape_gbuf_is_empty(&path_coll->raw)) {
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_add_char(&path_coll->raw, '\n'));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(&path_coll->raw, '\n'));
     }
     raw = auparse_get_record_text(au);
     AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
-    AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(&path_coll->raw, raw));
+    AUSHAPE_GUARD_RC(aushape_gbuf_add_str(&path_coll->raw, raw));
 
     /*
      * Begin the item
      */
     if (coll->format.lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_space_opening(&path_coll->items,
-                                                      &coll->format, l));
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_add_str(&path_coll->items,
-                                                "<item>"));
+        AUSHAPE_GUARD_RC(aushape_gbuf_space_opening(&path_coll->items,
+                                                    &coll->format, l));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(&path_coll->items, "<item>"));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_space_opening(&path_coll->items,
-                                                      &coll->format, l));
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_add_char(&path_coll->items,
-                                                 '{'));
+        AUSHAPE_GUARD_RC(aushape_gbuf_space_opening(&path_coll->items,
+                                                    &coll->format, l));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(&path_coll->items, '{'));
     }
     l++;
 
@@ -247,19 +240,14 @@ aushape_path_coll_add(struct aushape_coll *coll,
      */
     l--;
     if (coll->format.lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_space_closing(&path_coll->items,
-                                                      &coll->format, l));
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_add_str(&path_coll->items,
-                                                "</item>"));
+        AUSHAPE_GUARD_RC(aushape_gbuf_space_closing(&path_coll->items,
+                                                    &coll->format, l));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(&path_coll->items,
+                                              "</item>"));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_space_closing(&path_coll->items,
-                                                      &coll->format, l));
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_add_char(&path_coll->items,
-                                                 '}'));
+        AUSHAPE_GUARD_RC(aushape_gbuf_space_closing(&path_coll->items,
+                                                    &coll->format, l));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(&path_coll->items, '}'));
     }
 
     /* Account for the record markup */
@@ -295,40 +283,27 @@ aushape_path_coll_end(struct aushape_coll *coll,
 
     /* Output prologue */
     if (coll->format.lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_space_opening(gbuf,
-                                                      &coll->format, l));
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_add_str(gbuf, "<path raw=\""));
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_add_buf_xml(gbuf,
-                                                    path_coll->raw.ptr,
-                                                    path_coll->raw.len));
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\">"));
+        AUSHAPE_GUARD_RC(aushape_gbuf_space_opening(gbuf, &coll->format, l));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, "<path raw=\""));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_buf_xml(gbuf,
+                                                  path_coll->raw.ptr,
+                                                  path_coll->raw.len));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, "\">"));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
         if (!*pfirst) {
-            AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, ','));
+            AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, ','));
         }
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_space_opening(gbuf,
-                                                      &coll->format, l));
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_add_str(gbuf, "\"path\":{"));
+        AUSHAPE_GUARD_RC(aushape_gbuf_space_opening(gbuf, &coll->format, l));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, "\"path\":{"));
         l++;
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_space_opening(gbuf,
-                                                      &coll->format, l));
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\"raw\":\""));
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_add_buf_json(gbuf,
-                                                     path_coll->raw.ptr,
-                                                     path_coll->raw.len));
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\","));
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_space_opening(gbuf,
-                                                      &coll->format, l));
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_add_str(gbuf, "\"items\":["));
+        AUSHAPE_GUARD_RC(aushape_gbuf_space_opening(gbuf, &coll->format, l));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, "\"raw\":\""));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_buf_json(gbuf,
+                                                   path_coll->raw.ptr,
+                                                   path_coll->raw.len));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, "\","));
+        AUSHAPE_GUARD_RC(aushape_gbuf_space_opening(gbuf, &coll->format, l));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, "\"items\":["));
     }
     l++;
 
@@ -338,7 +313,7 @@ aushape_path_coll_end(struct aushape_coll *coll,
         if (coll->format.lang == AUSHAPE_LANG_JSON) {
             /* If it's not the first item */
             if (idx > 0) {
-                AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, ','));
+                AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, ','));
             }
         }
         /* Get the item location and length */
@@ -347,29 +322,23 @@ aushape_path_coll_end(struct aushape_coll *coll,
         /* Check that the item is not missing */
         AUSHAPE_GUARD_BOOL(INVALID_PATH, len != 0);
         /* Add the item */
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_buf(gbuf, ptr, len));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_buf(gbuf, ptr, len));
     }
 
     l--;
     /* Output epilogue */
     if (coll->format.lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_space_closing(gbuf,
-                                                      &coll->format, l));
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_add_str(gbuf, "</path>"));
+        AUSHAPE_GUARD_RC(aushape_gbuf_space_closing(gbuf, &coll->format, l));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, "</path>"));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
         if (path_coll->loc_num > 0) {
-            AUSHAPE_GUARD_BOOL(NOMEM,
-                               aushape_gbuf_space_closing(gbuf,
-                                                          &coll->format, l));
+            AUSHAPE_GUARD_RC(aushape_gbuf_space_closing(gbuf,
+                                                        &coll->format, l));
         }
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, ']'));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, ']'));
         l--;
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_space_closing(gbuf,
-                                                      &coll->format, l));
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, '}'));
+        AUSHAPE_GUARD_RC(aushape_gbuf_space_closing(gbuf, &coll->format, l));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, '}'));
     }
 
     assert(l == level);

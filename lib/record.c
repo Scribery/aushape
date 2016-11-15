@@ -79,38 +79,33 @@ aushape_record_format(struct aushape_gbuf *gbuf,
                        au != NULL);
 
     if (format->lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_space_opening(gbuf, format, l));
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, '<'));
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str_lowercase(gbuf, name));
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, " raw=\""));
+        AUSHAPE_GUARD_RC(aushape_gbuf_space_opening(gbuf, format, l));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, '<'));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str_lowercase(gbuf, name));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, " raw=\""));
         raw = auparse_get_record_text(au);
         AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str_xml(gbuf, raw));
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, '"'));
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, '>'));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str_xml(gbuf, raw));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, '"'));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, '>'));
     } else if (format->lang == AUSHAPE_LANG_JSON) {
         if (!first) {
-            AUSHAPE_GUARD_BOOL(NOMEM,
-                               aushape_gbuf_add_char(gbuf, ','));
+            AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, ','));
         }
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_space_opening(gbuf, format, l));
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, '"'));
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str_lowercase(gbuf, name));
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\":"));
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, '{'));
+        AUSHAPE_GUARD_RC(aushape_gbuf_space_opening(gbuf, format, l));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, '"'));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str_lowercase(gbuf, name));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, "\":"));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, '{'));
         l++;
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_space_opening(gbuf, format, l));
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\"raw\":\""));
+        AUSHAPE_GUARD_RC(aushape_gbuf_space_opening(gbuf, format, l));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, "\"raw\":\""));
         raw = auparse_get_record_text(au);
         AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str_json(gbuf, raw));
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\","));
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_space_opening(gbuf, format, l));
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_str(gbuf, "\"fields\":{"));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str_json(gbuf, raw));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, "\","));
+        AUSHAPE_GUARD_RC(aushape_gbuf_space_opening(gbuf, format, l));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, "\"fields\":{"));
     }
 
     l++;
@@ -125,24 +120,18 @@ aushape_record_format(struct aushape_gbuf *gbuf,
     l--;
 
     if (format->lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_space_closing(gbuf, format, l));
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_add_str(gbuf, "</"));
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_add_str_lowercase(gbuf, name));
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_add_str(gbuf, ">"));
+        AUSHAPE_GUARD_RC(aushape_gbuf_space_closing(gbuf, format, l));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, "</"));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str_lowercase(gbuf, name));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_str(gbuf, ">"));
     } else if (format->lang == AUSHAPE_LANG_JSON) {
         if (gbuf->len > len) {
-            AUSHAPE_GUARD_BOOL(NOMEM,
-                               aushape_gbuf_space_closing(gbuf, format, l));
+            AUSHAPE_GUARD_RC(aushape_gbuf_space_closing(gbuf, format, l));
         }
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, '}'));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, '}'));
         l--;
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_gbuf_space_closing(gbuf, format, l));
-        AUSHAPE_GUARD_BOOL(NOMEM, aushape_gbuf_add_char(gbuf, '}'));
+        AUSHAPE_GUARD_RC(aushape_gbuf_space_closing(gbuf, format, l));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, '}'));
     }
 
     assert(l == level);

@@ -74,16 +74,19 @@ extern void aushape_gbuf_empty(struct aushape_gbuf *gbuf);
 extern bool aushape_gbuf_is_empty(const struct aushape_gbuf *gbuf);
 
 /**
- * Make sure a growing buffer can accomodate contents of the specified size in
- * bytes. If the allocated buffer memory wasn't enough to accomodate the
+ * Make sure a growing buffer can accommodate contents of the specified size in
+ * bytes. If the allocated buffer memory wasn't enough to accommodate the
  * specified size, then the memory is reallocated appropriately.
  *
- * @param gbuf  The growing buffer to accomodate the contents in.
+ * @param gbuf  The growing buffer to accommodate the contents in.
  * @param len   The size of the contents in bytes.
  *
- * @return True if accomodated successfully, false otherwise.
+ * @return Return code:
+ *          AUSHAPE_RC_OK       - accommodated successfully,
+ *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
-extern bool aushape_gbuf_accomodate(struct aushape_gbuf *gbuf, size_t len);
+extern enum aushape_rc aushape_gbuf_accomodate(struct aushape_gbuf *gbuf,
+                                               size_t len);
 
 /**
  * Add a character to a growing buffer.
@@ -91,9 +94,12 @@ extern bool aushape_gbuf_accomodate(struct aushape_gbuf *gbuf, size_t len);
  * @param gbuf  The growing buffer to add the character to.
  * @param c     The character to add.
  *
- * @return True if added successfully, false if memory allocation failed.
+ * @return Return code:
+ *          AUSHAPE_RC_OK       - added successfully,
+ *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
-extern bool aushape_gbuf_add_char(struct aushape_gbuf *gbuf, char c);
+extern enum aushape_rc aushape_gbuf_add_char(struct aushape_gbuf *gbuf,
+                                             char c);
 
 /**
  * Add a span filled with a character to a growing buffer.
@@ -102,10 +108,12 @@ extern bool aushape_gbuf_add_char(struct aushape_gbuf *gbuf, char c);
  * @param c     The character to fill the span with.
  * @param l     The length of the span to fill.
  *
- * @return True if added successfully, false if memory allocation failed.
+ * @return Return code:
+ *          AUSHAPE_RC_OK       - added successfully,
+ *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
-extern bool aushape_gbuf_add_span(struct aushape_gbuf *gbuf,
-                                  int c, size_t l);
+extern enum aushape_rc aushape_gbuf_add_span(struct aushape_gbuf *gbuf,
+                                             int c, size_t l);
 
 /**
  * Add the contents of an abstract buffer to a growing buffer.
@@ -114,10 +122,12 @@ extern bool aushape_gbuf_add_span(struct aushape_gbuf *gbuf,
  * @param ptr   The pointer to the buffer to add.
  * @param len   The length of the buffer to add.
  *
- * @return True if added successfully, false if memory allocation failed.
+ * @return Return code:
+ *          AUSHAPE_RC_OK       - added successfully,
+ *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
-extern bool aushape_gbuf_add_buf(struct aushape_gbuf *gbuf,
-                                 const void *ptr, size_t len);
+extern enum aushape_rc aushape_gbuf_add_buf(struct aushape_gbuf *gbuf,
+                                            const void *ptr, size_t len);
 
 /**
  * Add the contents of an abstract buffer to a growing buffer, lowercasing all
@@ -127,10 +137,13 @@ extern bool aushape_gbuf_add_buf(struct aushape_gbuf *gbuf,
  * @param ptr   The pointer to the buffer to add.
  * @param len   The length of the buffer to add.
  *
- * @return True if added successfully, false if memory allocation failed.
+ * @return Return code:
+ *          AUSHAPE_RC_OK       - added successfully,
+ *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
-extern bool aushape_gbuf_add_buf_lowercase(struct aushape_gbuf *gbuf,
-                                           const void *ptr, size_t len);
+extern enum aushape_rc aushape_gbuf_add_buf_lowercase(struct aushape_gbuf *gbuf,
+                                                      const void *ptr,
+                                                      size_t len);
 
 /**
  * Add a string to a growing buffer.
@@ -138,9 +151,12 @@ extern bool aushape_gbuf_add_buf_lowercase(struct aushape_gbuf *gbuf,
  * @param gbuf  The growing buffer to add the string to.
  * @param str   The string to add.
  *
- * @return True if added successfully, false if memory allocation failed.
+ * @return Return code:
+ *          AUSHAPE_RC_OK       - added successfully,
+ *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
-extern bool aushape_gbuf_add_str(struct aushape_gbuf *gbuf, const char *str);
+extern enum aushape_rc aushape_gbuf_add_str(struct aushape_gbuf *gbuf,
+                                            const char *str);
 
 /**
  * Add a string to a growing buffer, lowercasing all characters.
@@ -148,10 +164,13 @@ extern bool aushape_gbuf_add_str(struct aushape_gbuf *gbuf, const char *str);
  * @param gbuf  The growing buffer to add the string to.
  * @param str   The string to lowercase and add.
  *
- * @return True if added successfully, false if memory allocation failed.
+ * @return Return code:
+ *          AUSHAPE_RC_OK       - added successfully,
+ *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
-extern bool aushape_gbuf_add_str_lowercase(struct aushape_gbuf *gbuf,
-                                           const char *str);
+extern enum aushape_rc aushape_gbuf_add_str_lowercase(
+                                            struct aushape_gbuf *gbuf,
+                                            const char *str);
 
 /**
  * Add a printf-formatted string to a growing buffer,
@@ -161,10 +180,12 @@ extern bool aushape_gbuf_add_str_lowercase(struct aushape_gbuf *gbuf,
  * @param fmt   The format string.
  * @param ap    The format arguments.
  *
- * @return True if added successfully, false if memory allocation failed.
+ * @return Return code:
+ *          AUSHAPE_RC_OK       - added successfully,
+ *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
-extern bool aushape_gbuf_add_vfmt(struct aushape_gbuf *gbuf,
-                                  const char *fmt, va_list ap);
+extern enum aushape_rc aushape_gbuf_add_vfmt(struct aushape_gbuf *gbuf,
+                                             const char *fmt, va_list ap);
 
 /**
  * Add a printf-formatted string to a growing buffer.
@@ -173,10 +194,12 @@ extern bool aushape_gbuf_add_vfmt(struct aushape_gbuf *gbuf,
  * @param fmt   The format string.
  * @param ...   The format arguments.
  *
- * @return True if added successfully, false if memory allocation failed.
+ * @return Return code:
+ *          AUSHAPE_RC_OK       - added successfully,
+ *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
-extern bool aushape_gbuf_add_fmt(struct aushape_gbuf *gbuf,
-                                 const char *fmt, ...)
+extern enum aushape_rc aushape_gbuf_add_fmt(struct aushape_gbuf *gbuf,
+                                            const char *fmt, ...)
                                     __attribute__((format(printf, 2, 3)));
 
 /**
@@ -190,12 +213,14 @@ extern bool aushape_gbuf_add_fmt(struct aushape_gbuf *gbuf,
  *                  added.
  * @param level     The block's nesting level.
  *
- * @return True if the whitespace was added succesfully, false if memory
- *         allocation failed.
+ * @return Return code:
+ *          AUSHAPE_RC_OK       - added successfully,
+ *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
-extern bool aushape_gbuf_space_opening(struct aushape_gbuf *gbuf,
-                                       const struct aushape_format *format,
-                                       size_t level);
+extern enum aushape_rc aushape_gbuf_space_opening(
+                                        struct aushape_gbuf *gbuf,
+                                        const struct aushape_format *format,
+                                        size_t level);
 
 /**
  * Add leading whitespace for a closing of a nested block to a growing
@@ -208,12 +233,14 @@ extern bool aushape_gbuf_space_opening(struct aushape_gbuf *gbuf,
  *                  added.
  * @param level     The block's nesting level.
  *
- * @return True if the whitespace was added succesfully, false if memory
- *         allocation failed.
+ * @return Return code:
+ *          AUSHAPE_RC_OK       - added successfully,
+ *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
-extern bool aushape_gbuf_space_closing(struct aushape_gbuf *gbuf,
-                                       const struct aushape_format *format,
-                                       size_t level);
+extern enum aushape_rc aushape_gbuf_space_closing(
+                                        struct aushape_gbuf *gbuf,
+                                        const struct aushape_format *format,
+                                        size_t level);
 
 /**
  * Add the contents of an abstract buffer to a growing buffer, escaped as a
@@ -223,10 +250,12 @@ extern bool aushape_gbuf_space_closing(struct aushape_gbuf *gbuf,
  * @param ptr       The pointer to the buffer to escape and add.
  * @param len       The length of the buffer to escape and add.
  *
- * @return True if added successfully, false if memory allocation failed.
+ * @return Return code:
+ *          AUSHAPE_RC_OK       - added successfully,
+ *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
-extern bool aushape_gbuf_add_buf_xml(struct aushape_gbuf *gbuf,
-                                     const void *ptr, size_t len);
+extern enum aushape_rc aushape_gbuf_add_buf_xml(struct aushape_gbuf *gbuf,
+                                                const void *ptr, size_t len);
 
 /**
  * Add a string to a growing buffer, escaped as a double-quoted XML attribute
@@ -235,10 +264,12 @@ extern bool aushape_gbuf_add_buf_xml(struct aushape_gbuf *gbuf,
  * @param gbuf      The growing buffer to add the escaped string to.
  * @param str       The string to escape and add.
  *
- * @return True if added successfully, false if memory allocation failed.
+ * @return Return code:
+ *          AUSHAPE_RC_OK       - added successfully,
+ *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
-extern bool aushape_gbuf_add_str_xml(struct aushape_gbuf *gbuf,
-                                     const char *str);
+extern enum aushape_rc aushape_gbuf_add_str_xml(struct aushape_gbuf *gbuf,
+                                                const char *str);
 
 /**
  * Add the contents of an abstract buffer to a growing buffer, escaped as a
@@ -248,10 +279,12 @@ extern bool aushape_gbuf_add_str_xml(struct aushape_gbuf *gbuf,
  * @param ptr       The pointer to the buffer to escape and add.
  * @param len       The length of the buffer to escape and add.
  *
- * @return True if added successfully, false if memory allocation failed.
+ * @return Return code:
+ *          AUSHAPE_RC_OK       - added successfully,
+ *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
-extern bool aushape_gbuf_add_buf_json(struct aushape_gbuf *gbuf,
-                                      const void *ptr, size_t len);
+extern enum aushape_rc aushape_gbuf_add_buf_json(struct aushape_gbuf *gbuf,
+                                                 const void *ptr, size_t len);
 
 /**
  * Add a string to a growing buffer, escaped as a JSON string value.
@@ -259,9 +292,11 @@ extern bool aushape_gbuf_add_buf_json(struct aushape_gbuf *gbuf,
  * @param gbuf      The growing buffer to add the escaped string to.
  * @param str       The string to escape and add.
  *
- * @return True if added successfully, false if memory allocation failed.
+ * @return Return code:
+ *          AUSHAPE_RC_OK       - added successfully,
+ *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
-extern bool aushape_gbuf_add_str_json(struct aushape_gbuf *gbuf,
-                                      const char *str);
+extern enum aushape_rc aushape_gbuf_add_str_json(struct aushape_gbuf *gbuf,
+                                                 const char *str);
 
 #endif /* _AUSHAPE_GBUF_H */

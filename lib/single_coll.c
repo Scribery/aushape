@@ -127,9 +127,11 @@ aushape_single_coll_seen_has(struct aushape_coll *coll,
  * @param coll  The collector to add the type to.
  * @param name  The name of the record type to add.
  *
- * @return True if added succesfully, false if memory allocation failed.
+ * @return Return code:
+ *          AUSHAPE_RC_OK       - added successfully,
+ *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
-static bool
+static enum aushape_rc
 aushape_single_coll_seen_add(struct aushape_coll *coll,
                              const char *name)
 {
@@ -164,8 +166,7 @@ aushape_single_coll_add(struct aushape_coll *coll,
             goto cleanup;
         }
     } else {
-        AUSHAPE_GUARD_BOOL(NOMEM,
-                           aushape_single_coll_seen_add(coll, name));
+        AUSHAPE_GUARD_RC(aushape_single_coll_seen_add(coll, name));
     }
     rc = aushape_record_format(coll->gbuf, &coll->format,
                                level, *pfirst, name, au);

@@ -17,21 +17,10 @@
  */
 
 #include <aushape/gbuf.h>
+#include <aushape/guard.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-
-/**
- * Evaluate an expression and return false if it is false.
- *
- * @param _expr The expression to evaluate.
- */
-#define GUARD(_expr) \
-    do {                    \
-        if (!(_expr)) {     \
-            return false;   \
-        }                   \
-    } while (0)
 
 bool
 aushape_gbuf_is_valid(const struct aushape_gbuf *gbuf)
@@ -71,9 +60,10 @@ aushape_gbuf_is_empty(const struct aushape_gbuf *gbuf)
     return gbuf->len == 0;
 }
 
-bool
+enum aushape_rc
 aushape_gbuf_accomodate(struct aushape_gbuf *gbuf, size_t len)
 {
+    enum aushape_rc rc;
     assert(aushape_gbuf_is_valid(gbuf));
 
     if (len > gbuf->size) {
@@ -85,63 +75,75 @@ aushape_gbuf_accomodate(struct aushape_gbuf *gbuf, size_t len)
             new_size *= 2;
         }
         new_ptr = realloc(gbuf->ptr, new_size);
-        GUARD(new_ptr != NULL);
+        AUSHAPE_GUARD_BOOL(NOMEM, new_ptr != NULL);
         gbuf->ptr = new_ptr;
         gbuf->size = new_size;
     }
 
-    return true;
+    rc = AUSHAPE_RC_OK;
+cleanup:
+    return rc;
 }
 
-bool
+enum aushape_rc
 aushape_gbuf_add_char(struct aushape_gbuf *gbuf, char c)
 {
+    enum aushape_rc rc;
     size_t new_len;
     assert(aushape_gbuf_is_valid(gbuf));
     new_len = gbuf->len + 1;
-    GUARD(aushape_gbuf_accomodate(gbuf, new_len));
+    AUSHAPE_GUARD_RC(aushape_gbuf_accomodate(gbuf, new_len));
     gbuf->ptr[gbuf->len] = c;
     gbuf->len = new_len;
-    return true;
+    rc = AUSHAPE_RC_OK;
+cleanup:
+    return rc;
 }
 
-bool
+enum aushape_rc
 aushape_gbuf_add_span(struct aushape_gbuf *gbuf, int c, size_t l)
 {
+    enum aushape_rc rc;
     size_t new_len;
     assert(aushape_gbuf_is_valid(gbuf));
     new_len = gbuf->len + l;
-    GUARD(aushape_gbuf_accomodate(gbuf, new_len));
+    AUSHAPE_GUARD_RC(aushape_gbuf_accomodate(gbuf, new_len));
     memset(gbuf->ptr + gbuf->len, c, l);
     gbuf->len = new_len;
-    return true;
+    rc = AUSHAPE_RC_OK;
+cleanup:
+    return rc;
 }
 
-bool
+enum aushape_rc
 aushape_gbuf_add_buf(struct aushape_gbuf *gbuf, const void *ptr, size_t len)
 {
+    enum aushape_rc rc;
     size_t new_len;
 
     assert(aushape_gbuf_is_valid(gbuf));
     assert(ptr != NULL);
 
     if (len == 0) {
-        return true;
+        return AUSHAPE_RC_OK;
     }
 
     new_len = gbuf->len + len;
-    GUARD(aushape_gbuf_accomodate(gbuf, new_len));
+    AUSHAPE_GUARD_RC(aushape_gbuf_accomodate(gbuf, new_len));
 
     memcpy(gbuf->ptr + gbuf->len, ptr, len);
     gbuf->len = new_len;
 
-    return true;
+    rc = AUSHAPE_RC_OK;
+cleanup:
+    return rc;
 }
 
-bool
+enum aushape_rc
 aushape_gbuf_add_buf_lowercase(struct aushape_gbuf *gbuf,
                                const void *ptr, size_t len)
 {
+    enum aushape_rc rc;
     size_t new_len;
     const char *src;
     char *dst;
@@ -151,11 +153,11 @@ aushape_gbuf_add_buf_lowercase(struct aushape_gbuf *gbuf,
     assert(ptr != NULL);
 
     if (len == 0) {
-        return true;
+        return AUSHAPE_RC_OK;
     }
 
     new_len = gbuf->len + len;
-    GUARD(aushape_gbuf_accomodate(gbuf, new_len));
+    AUSHAPE_GUARD_RC(aushape_gbuf_accomodate(gbuf, new_len));
 
     for (src = (const char *)ptr, dst = gbuf->ptr + gbuf->len;
          len > 0;
@@ -170,10 +172,12 @@ aushape_gbuf_add_buf_lowercase(struct aushape_gbuf *gbuf,
 
     gbuf->len = new_len;
 
-    return true;
+    rc = AUSHAPE_RC_OK;
+cleanup:
+    return rc;
 }
 
-bool
+enum aushape_rc
 aushape_gbuf_add_str(struct aushape_gbuf *gbuf, const char *str)
 {
     assert(aushape_gbuf_is_valid(gbuf));
@@ -181,7 +185,7 @@ aushape_gbuf_add_str(struct aushape_gbuf *gbuf, const char *str)
     return aushape_gbuf_add_buf(gbuf, str, strlen(str));
 }
 
-bool
+enum aushape_rc
 aushape_gbuf_add_str_lowercase(struct aushape_gbuf *gbuf, const char *str)
 {
     assert(aushape_gbuf_is_valid(gbuf));
@@ -189,81 +193,91 @@ aushape_gbuf_add_str_lowercase(struct aushape_gbuf *gbuf, const char *str)
     return aushape_gbuf_add_buf_lowercase(gbuf, str, strlen(str));
 }
 
-bool
+enum aushape_rc
 aushape_gbuf_add_vfmt(struct aushape_gbuf *gbuf, const char *fmt, va_list ap)
 {
+    enum aushape_rc rc;
     va_list ap_copy;
-    int rc;
+    int printf_rc;
     size_t len;
     size_t new_len;
 
     va_copy(ap_copy, ap);
-    rc = vsnprintf(NULL, 0, fmt, ap_copy);
+    printf_rc = vsnprintf(NULL, 0, fmt, ap_copy);
     va_end(ap_copy);
-    GUARD(rc >= 0);
+    assert(printf_rc >= 0);
 
-    len = (size_t)rc;
+    len = (size_t)printf_rc;
     new_len = gbuf->len + len;
     /* NOTE: leaving space for terminating zero */
-    GUARD(aushape_gbuf_accomodate(gbuf, new_len + 1));
+    AUSHAPE_GUARD_RC(aushape_gbuf_accomodate(gbuf, new_len + 1));
     /* NOTE: leaving space for terminating zero */
-    rc = vsnprintf(gbuf->ptr + gbuf->len, len + 1, fmt, ap);
-    GUARD(rc >= 0);
+    printf_rc = vsnprintf(gbuf->ptr + gbuf->len, len + 1, fmt, ap);
+    assert(printf_rc >= 0);
     gbuf->len = new_len;
-    return true;
+    rc = AUSHAPE_RC_OK;
+cleanup:
+    return rc;
 }
 
-bool
+enum aushape_rc
 aushape_gbuf_add_fmt(struct aushape_gbuf *gbuf, const char *fmt, ...)
 {
+    enum aushape_rc rc;
     va_list ap;
-    bool result;
 
     va_start(ap, fmt);
-    result = aushape_gbuf_add_vfmt(gbuf, fmt, ap);
+    rc = aushape_gbuf_add_vfmt(gbuf, fmt, ap);
     va_end(ap);
 
-    return result;
+    return rc;
 }
 
-bool
+enum aushape_rc
 aushape_gbuf_space_opening(struct aushape_gbuf *gbuf,
                            const struct aushape_format *format,
                            size_t level)
 {
+    enum aushape_rc rc;
     assert(aushape_gbuf_is_valid(gbuf));
     assert(aushape_format_is_valid(format));
-    if (level > format->fold_level) {
-        return true;
-    } else {
-        return (level == 0 || aushape_gbuf_add_char(gbuf, '\n')) &&
-               aushape_gbuf_add_span(gbuf, ' ',
-                                     format->init_indent +
-                                     format->nest_indent * level);
+    if (level <= format->fold_level) {
+        if (level > 0) {
+            AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, '\n'));
+        }
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_span(gbuf, ' ',
+                                               format->init_indent +
+                                               format->nest_indent * level));
     }
+    rc = AUSHAPE_RC_OK;
+cleanup:
+    return rc;
 }
 
-bool
+enum aushape_rc
 aushape_gbuf_space_closing(struct aushape_gbuf *gbuf,
                            const struct aushape_format *format,
                            size_t level)
 {
+    enum aushape_rc rc;
     assert(aushape_gbuf_is_valid(gbuf));
     assert(aushape_format_is_valid(format));
-    if ((level + 1) > format->fold_level) {
-        return true;
-    } else {
-        return aushape_gbuf_add_char(gbuf, '\n') &&
-               aushape_gbuf_add_span(gbuf, ' ',
-                                     format->init_indent +
-                                     format->nest_indent * level);
+    if ((level + 1) <= format->fold_level) {
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_char(gbuf, '\n'));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_span(gbuf, ' ',
+                                               format->init_indent +
+                                               format->nest_indent * level));
     }
+    rc = AUSHAPE_RC_OK;
+cleanup:
+    return rc;
 }
 
-bool
+enum aushape_rc
 aushape_gbuf_add_buf_xml(struct aushape_gbuf *gbuf,
                          const void *ptr, size_t len)
 {
+    enum aushape_rc rc;
     const char *last_p;
     const char *p;
     unsigned char c;
@@ -300,16 +314,18 @@ aushape_gbuf_add_buf_xml(struct aushape_gbuf *gbuf,
                 continue;
             }
         }
-        GUARD(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
-        GUARD(aushape_gbuf_add_buf(gbuf, esc_ptr, esc_len));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_buf(gbuf, esc_ptr, esc_len));
         p++;
         last_p = p;
     }
-    GUARD(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
-    return true;
+    AUSHAPE_GUARD_RC(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
+    rc = AUSHAPE_RC_OK;
+cleanup:
+    return rc;
 }
 
-bool
+enum aushape_rc
 aushape_gbuf_add_str_xml(struct aushape_gbuf *gbuf, const char *str)
 {
     assert(aushape_gbuf_is_valid(gbuf));
@@ -317,10 +333,11 @@ aushape_gbuf_add_str_xml(struct aushape_gbuf *gbuf, const char *str)
     return aushape_gbuf_add_buf_xml(gbuf, str, strlen(str));
 }
 
-bool
+enum aushape_rc
 aushape_gbuf_add_buf_json(struct aushape_gbuf *gbuf,
                           const void *ptr, size_t len)
 {
+    enum aushape_rc rc;
     const char *last_p;
     const char *p;
     unsigned char c;
@@ -368,16 +385,18 @@ aushape_gbuf_add_buf_json(struct aushape_gbuf *gbuf,
             }
             break;
         }
-        GUARD(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
-        GUARD(aushape_gbuf_add_buf(gbuf, esc_ptr, esc_len));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
+        AUSHAPE_GUARD_RC(aushape_gbuf_add_buf(gbuf, esc_ptr, esc_len));
         p++;
         last_p = p;
     }
-    GUARD(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
-    return true;
+    AUSHAPE_GUARD_RC(aushape_gbuf_add_buf(gbuf, last_p, p - last_p));
+    rc = AUSHAPE_RC_OK;
+cleanup:
+    return rc;
 }
 
-bool
+enum aushape_rc
 aushape_gbuf_add_str_json(struct aushape_gbuf *gbuf, const char *str)
 {
     assert(aushape_gbuf_is_valid(gbuf));
