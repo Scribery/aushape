@@ -241,244 +241,242 @@
 
     <!-- Generic fields -->
     <xsd:group name="generic_fields">
-        <xsd:choice>
-            <xsd:element ref="a0"/>
-            <xsd:element ref="a1"/>
-            <xsd:element ref="a2"/>
-            <xsd:element ref="a3"/>
-            <xsd:element ref="acct"/>
-            <xsd:element ref="acl"/>
-            <xsd:element ref="action"/>
-            <xsd:element ref="added"/>
-            <xsd:element ref="addr"/>
-            <xsd:element ref="algo"/>
-            <xsd:element ref="apparmor"/>
-            <xsd:element ref="arch"/>
-            <xsd:element ref="argc"/>
-            <xsd:element ref="audit_backlog_limit"/>
-            <xsd:element ref="audit_backlog_wait_time"/>
-            <xsd:element ref="audit_enabled"/>
-            <xsd:element ref="audit_failure"/>
-            <xsd:element ref="auid"/>
-            <xsd:element ref="banners"/>
-            <xsd:element ref="bool"/>
-            <xsd:element ref="bus"/>
-            <xsd:element ref="capability"/>
-            <xsd:element ref="cap_fe"/>
-            <xsd:element ref="cap_fi"/>
-            <xsd:element ref="cap_fp"/>
-            <xsd:element ref="cap_fver"/>
-            <xsd:element ref="cap_pe"/>
-            <xsd:element ref="cap_pi"/>
-            <xsd:element ref="cap_pp"/>
-            <xsd:element ref="category"/>
-            <xsd:element ref="cgroup"/>
-            <xsd:element ref="changed"/>
-            <xsd:element ref="cipher"/>
-            <xsd:element ref="class"/>
-            <xsd:element ref="cmd"/>
-            <xsd:element ref="code"/>
-            <xsd:element ref="comm"/>
-            <xsd:element ref="compat"/>
-            <xsd:element ref="cwd"/>
-            <xsd:element ref="daddr"/>
-            <xsd:element ref="data"/>
-            <xsd:element ref="default-context"/>
-            <xsd:element ref="dest"/>
-            <xsd:element ref="dev"/>
-            <xsd:element ref="device"/>
-            <xsd:element ref="dir"/>
-            <xsd:element ref="direction"/>
-            <xsd:element ref="dmac"/>
-            <xsd:element ref="dport"/>
-            <xsd:element ref="egid"/>
-            <xsd:element ref="enforcing"/>
-            <xsd:element ref="entries"/>
-            <xsd:element ref="euid"/>
-            <xsd:element ref="exe"/>
-            <xsd:element ref="exit"/>
-            <xsd:element ref="fam"/>
-            <xsd:element ref="family"/>
-            <xsd:element ref="fd"/>
-            <xsd:element ref="fe"/>
-            <xsd:element ref="feature"/>
-            <xsd:element ref="fi"/>
-            <xsd:element ref="file"/>
-            <xsd:element ref="flags"/>
-            <xsd:element ref="format"/>
-            <xsd:element ref="fp"/>
-            <xsd:element ref="fsgid"/>
-            <xsd:element ref="fsuid"/>
-            <xsd:element ref="fver"/>
-            <xsd:element ref="gid"/>
-            <xsd:element ref="grantors"/>
-            <xsd:element ref="grp"/>
-            <xsd:element ref="hook"/>
-            <xsd:element ref="hostname"/>
-            <xsd:element ref="icmp_type"/>
-            <xsd:element ref="id"/>
-            <xsd:element ref="igid"/>
-            <xsd:element ref="img-ctx"/>
-            <xsd:element ref="inif"/>
-            <xsd:element ref="ino"/>
-            <xsd:element ref="inode"/>
-            <xsd:element ref="inode_gid"/>
-            <xsd:element ref="inode_uid"/>
-            <xsd:element ref="invalid_context"/>
-            <xsd:element ref="ioctlcmd"/>
-            <xsd:element ref="ip"/>
-            <xsd:element ref="ipid"/>
-            <xsd:element ref="ipx-net"/>
-            <xsd:element ref="items"/>
-            <xsd:element ref="iuid"/>
-            <xsd:element ref="kernel"/>
-            <xsd:element ref="key"/>
-            <xsd:element ref="kind"/>
-            <xsd:element ref="ksize"/>
-            <xsd:element ref="laddr"/>
-            <xsd:element ref="len"/>
-            <xsd:element ref="list"/>
-            <xsd:element ref="lport"/>
-            <xsd:element ref="mac"/>
-            <xsd:element ref="macproto"/>
-            <xsd:element ref="maj"/>
-            <xsd:element ref="major"/>
-            <xsd:element ref="minor"/>
-            <xsd:element ref="mode"/>
-            <xsd:element ref="model"/>
-            <xsd:element ref="msg"/>
-            <xsd:element ref="name"/>
-            <xsd:element ref="nametype"/>
-            <xsd:element ref="nargs"/>
-            <xsd:element ref="net"/>
-            <xsd:element ref="new"/>
-            <xsd:element ref="new-chardev"/>
-            <xsd:element ref="new-disk"/>
-            <xsd:element ref="new-enabled"/>
-            <xsd:element ref="new-fs"/>
-            <xsd:element ref="new_gid"/>
-            <xsd:element ref="new-level"/>
-            <xsd:element ref="new_lock"/>
-            <xsd:element ref="new-log_passwd"/>
-            <xsd:element ref="new-mem"/>
-            <xsd:element ref="new-net"/>
-            <xsd:element ref="new_pe"/>
-            <xsd:element ref="new_pi"/>
-            <xsd:element ref="new_pp"/>
-            <xsd:element ref="new-range"/>
-            <xsd:element ref="new-rng"/>
-            <xsd:element ref="new-role"/>
-            <xsd:element ref="new-seuser"/>
-            <xsd:element ref="new-vcpu"/>
-            <xsd:element ref="nlnk-fam"/>
-            <xsd:element ref="nlnk-grp"/>
-            <xsd:element ref="nlnk-pid"/>
-            <xsd:element ref="oauid"/>
-            <xsd:element ref="obj"/>
-            <xsd:element ref="obj_gid"/>
-            <xsd:element ref="obj_uid"/>
-            <xsd:element ref="ocomm"/>
-            <xsd:element ref="oflag"/>
-            <xsd:element ref="ogid"/>
-            <xsd:element ref="old"/>
-            <xsd:element ref="old-auid"/>
-            <xsd:element ref="old-chardev"/>
-            <xsd:element ref="old-disk"/>
-            <xsd:element ref="old-enabled"/>
-            <xsd:element ref="old_enforcing"/>
-            <xsd:element ref="old-fs"/>
-            <xsd:element ref="old-level"/>
-            <xsd:element ref="old_lock"/>
-            <xsd:element ref="old-log_passwd"/>
-            <xsd:element ref="old-mem"/>
-            <xsd:element ref="old-net"/>
-            <xsd:element ref="old_pe"/>
-            <xsd:element ref="old_pi"/>
-            <xsd:element ref="old_pp"/>
-            <xsd:element ref="old_prom"/>
-            <xsd:element ref="old-range"/>
-            <xsd:element ref="old-rng"/>
-            <xsd:element ref="old-role"/>
-            <xsd:element ref="old-ses"/>
-            <xsd:element ref="old-seuser"/>
-            <xsd:element ref="old_val"/>
-            <xsd:element ref="old-vcpu"/>
-            <xsd:element ref="op"/>
-            <xsd:element ref="opid"/>
-            <xsd:element ref="oses"/>
-            <xsd:element ref="ouid"/>
-            <xsd:element ref="outif"/>
-            <xsd:element ref="parent"/>
-            <xsd:element ref="path"/>
-            <xsd:element ref="per"/>
-            <xsd:element ref="perm"/>
-            <xsd:element ref="permissive"/>
-            <xsd:element ref="perm_mask"/>
-            <xsd:element ref="pfs"/>
-            <xsd:element ref="pid"/>
-            <xsd:element ref="ppid"/>
-            <xsd:element ref="printer"/>
-            <xsd:element ref="proctitle"/>
-            <xsd:element ref="prom"/>
-            <xsd:element ref="proto"/>
-            <xsd:element ref="qbytes"/>
-            <xsd:element ref="range"/>
-            <xsd:element ref="rdev"/>
-            <xsd:element ref="reason"/>
-            <xsd:element ref="removed"/>
-            <xsd:element ref="res"/>
-            <xsd:element ref="resrc"/>
-            <xsd:element ref="result"/>
-            <xsd:element ref="role"/>
-            <xsd:element ref="rport"/>
-            <xsd:element ref="saddr"/>
-            <xsd:element ref="sauid"/>
-            <xsd:element ref="scontext"/>
-            <xsd:element ref="selected-context"/>
-            <xsd:element ref="seperm"/>
-            <xsd:element ref="seperms"/>
-            <xsd:element ref="seqno"/>
-            <xsd:element ref="seresult"/>
-            <xsd:element ref="ses"/>
-            <xsd:element ref="seuser"/>
-            <xsd:element ref="sgid"/>
-            <xsd:element ref="sig"/>
-            <xsd:element ref="sigev_signo"/>
-            <xsd:element ref="size"/>
-            <xsd:element ref="smac"/>
-            <xsd:element ref="spid"/>
-            <xsd:element ref="sport"/>
-            <xsd:element ref="state"/>
-            <xsd:element ref="subj"/>
-            <xsd:element ref="success"/>
-            <xsd:element ref="suid"/>
-            <xsd:element ref="syscall"/>
-            <xsd:element ref="table"/>
-            <xsd:element ref="tclass"/>
-            <xsd:element ref="tcontext"/>
-            <xsd:element ref="terminal"/>
-            <xsd:element ref="tty"/>
-            <xsd:element ref="type"/>
-            <xsd:element ref="uid"/>
-            <xsd:element ref="unit"/>
-            <xsd:element ref="uri"/>
-            <xsd:element ref="user"/>
-            <xsd:element ref="uuid"/>
-            <xsd:element ref="val"/>
-            <xsd:element ref="ver"/>
-            <xsd:element ref="virt"/>
-            <xsd:element ref="vm"/>
-            <xsd:element ref="vm-ctx"/>
-            <xsd:element ref="vm-pid"/>
-            <xsd:element ref="watch"/>
-        </xsd:choice>
+        <xsd:all>
+            <xsd:element ref="a0" minOccurs="0"/>
+            <xsd:element ref="a1" minOccurs="0"/>
+            <xsd:element ref="a2" minOccurs="0"/>
+            <xsd:element ref="a3" minOccurs="0"/>
+            <xsd:element ref="acct" minOccurs="0"/>
+            <xsd:element ref="acl" minOccurs="0"/>
+            <xsd:element ref="action" minOccurs="0"/>
+            <xsd:element ref="added" minOccurs="0"/>
+            <xsd:element ref="addr" minOccurs="0"/>
+            <xsd:element ref="algo" minOccurs="0"/>
+            <xsd:element ref="apparmor" minOccurs="0"/>
+            <xsd:element ref="arch" minOccurs="0"/>
+            <xsd:element ref="argc" minOccurs="0"/>
+            <xsd:element ref="audit_backlog_limit" minOccurs="0"/>
+            <xsd:element ref="audit_backlog_wait_time" minOccurs="0"/>
+            <xsd:element ref="audit_enabled" minOccurs="0"/>
+            <xsd:element ref="audit_failure" minOccurs="0"/>
+            <xsd:element ref="auid" minOccurs="0"/>
+            <xsd:element ref="banners" minOccurs="0"/>
+            <xsd:element ref="bool" minOccurs="0"/>
+            <xsd:element ref="bus" minOccurs="0"/>
+            <xsd:element ref="capability" minOccurs="0"/>
+            <xsd:element ref="cap_fe" minOccurs="0"/>
+            <xsd:element ref="cap_fi" minOccurs="0"/>
+            <xsd:element ref="cap_fp" minOccurs="0"/>
+            <xsd:element ref="cap_fver" minOccurs="0"/>
+            <xsd:element ref="cap_pe" minOccurs="0"/>
+            <xsd:element ref="cap_pi" minOccurs="0"/>
+            <xsd:element ref="cap_pp" minOccurs="0"/>
+            <xsd:element ref="category" minOccurs="0"/>
+            <xsd:element ref="cgroup" minOccurs="0"/>
+            <xsd:element ref="changed" minOccurs="0"/>
+            <xsd:element ref="cipher" minOccurs="0"/>
+            <xsd:element ref="class" minOccurs="0"/>
+            <xsd:element ref="cmd" minOccurs="0"/>
+            <xsd:element ref="code" minOccurs="0"/>
+            <xsd:element ref="comm" minOccurs="0"/>
+            <xsd:element ref="compat" minOccurs="0"/>
+            <xsd:element ref="cwd" minOccurs="0"/>
+            <xsd:element ref="daddr" minOccurs="0"/>
+            <xsd:element ref="data" minOccurs="0"/>
+            <xsd:element ref="default-context" minOccurs="0"/>
+            <xsd:element ref="dest" minOccurs="0"/>
+            <xsd:element ref="dev" minOccurs="0"/>
+            <xsd:element ref="device" minOccurs="0"/>
+            <xsd:element ref="dir" minOccurs="0"/>
+            <xsd:element ref="direction" minOccurs="0"/>
+            <xsd:element ref="dmac" minOccurs="0"/>
+            <xsd:element ref="dport" minOccurs="0"/>
+            <xsd:element ref="egid" minOccurs="0"/>
+            <xsd:element ref="enforcing" minOccurs="0"/>
+            <xsd:element ref="entries" minOccurs="0"/>
+            <xsd:element ref="euid" minOccurs="0"/>
+            <xsd:element ref="exe" minOccurs="0"/>
+            <xsd:element ref="exit" minOccurs="0"/>
+            <xsd:element ref="fam" minOccurs="0"/>
+            <xsd:element ref="family" minOccurs="0"/>
+            <xsd:element ref="fd" minOccurs="0"/>
+            <xsd:element ref="fe" minOccurs="0"/>
+            <xsd:element ref="feature" minOccurs="0"/>
+            <xsd:element ref="fi" minOccurs="0"/>
+            <xsd:element ref="file" minOccurs="0"/>
+            <xsd:element ref="flags" minOccurs="0"/>
+            <xsd:element ref="format" minOccurs="0"/>
+            <xsd:element ref="fp" minOccurs="0"/>
+            <xsd:element ref="fsgid" minOccurs="0"/>
+            <xsd:element ref="fsuid" minOccurs="0"/>
+            <xsd:element ref="fver" minOccurs="0"/>
+            <xsd:element ref="gid" minOccurs="0"/>
+            <xsd:element ref="grantors" minOccurs="0"/>
+            <xsd:element ref="grp" minOccurs="0"/>
+            <xsd:element ref="hook" minOccurs="0"/>
+            <xsd:element ref="hostname" minOccurs="0"/>
+            <xsd:element ref="icmp_type" minOccurs="0"/>
+            <xsd:element ref="id" minOccurs="0"/>
+            <xsd:element ref="igid" minOccurs="0"/>
+            <xsd:element ref="img-ctx" minOccurs="0"/>
+            <xsd:element ref="inif" minOccurs="0"/>
+            <xsd:element ref="ino" minOccurs="0"/>
+            <xsd:element ref="inode" minOccurs="0"/>
+            <xsd:element ref="inode_gid" minOccurs="0"/>
+            <xsd:element ref="inode_uid" minOccurs="0"/>
+            <xsd:element ref="invalid_context" minOccurs="0"/>
+            <xsd:element ref="ioctlcmd" minOccurs="0"/>
+            <xsd:element ref="ip" minOccurs="0"/>
+            <xsd:element ref="ipid" minOccurs="0"/>
+            <xsd:element ref="ipx-net" minOccurs="0"/>
+            <xsd:element ref="items" minOccurs="0"/>
+            <xsd:element ref="iuid" minOccurs="0"/>
+            <xsd:element ref="kernel" minOccurs="0"/>
+            <xsd:element ref="key" minOccurs="0"/>
+            <xsd:element ref="kind" minOccurs="0"/>
+            <xsd:element ref="ksize" minOccurs="0"/>
+            <xsd:element ref="laddr" minOccurs="0"/>
+            <xsd:element ref="len" minOccurs="0"/>
+            <xsd:element ref="list" minOccurs="0"/>
+            <xsd:element ref="lport" minOccurs="0"/>
+            <xsd:element ref="mac" minOccurs="0"/>
+            <xsd:element ref="macproto" minOccurs="0"/>
+            <xsd:element ref="maj" minOccurs="0"/>
+            <xsd:element ref="major" minOccurs="0"/>
+            <xsd:element ref="minor" minOccurs="0"/>
+            <xsd:element ref="mode" minOccurs="0"/>
+            <xsd:element ref="model" minOccurs="0"/>
+            <xsd:element ref="msg" minOccurs="0"/>
+            <xsd:element ref="name" minOccurs="0"/>
+            <xsd:element ref="nametype" minOccurs="0"/>
+            <xsd:element ref="nargs" minOccurs="0"/>
+            <xsd:element ref="net" minOccurs="0"/>
+            <xsd:element ref="new" minOccurs="0"/>
+            <xsd:element ref="new-chardev" minOccurs="0"/>
+            <xsd:element ref="new-disk" minOccurs="0"/>
+            <xsd:element ref="new-enabled" minOccurs="0"/>
+            <xsd:element ref="new-fs" minOccurs="0"/>
+            <xsd:element ref="new_gid" minOccurs="0"/>
+            <xsd:element ref="new-level" minOccurs="0"/>
+            <xsd:element ref="new_lock" minOccurs="0"/>
+            <xsd:element ref="new-log_passwd" minOccurs="0"/>
+            <xsd:element ref="new-mem" minOccurs="0"/>
+            <xsd:element ref="new-net" minOccurs="0"/>
+            <xsd:element ref="new_pe" minOccurs="0"/>
+            <xsd:element ref="new_pi" minOccurs="0"/>
+            <xsd:element ref="new_pp" minOccurs="0"/>
+            <xsd:element ref="new-range" minOccurs="0"/>
+            <xsd:element ref="new-rng" minOccurs="0"/>
+            <xsd:element ref="new-role" minOccurs="0"/>
+            <xsd:element ref="new-seuser" minOccurs="0"/>
+            <xsd:element ref="new-vcpu" minOccurs="0"/>
+            <xsd:element ref="nlnk-fam" minOccurs="0"/>
+            <xsd:element ref="nlnk-grp" minOccurs="0"/>
+            <xsd:element ref="nlnk-pid" minOccurs="0"/>
+            <xsd:element ref="oauid" minOccurs="0"/>
+            <xsd:element ref="obj" minOccurs="0"/>
+            <xsd:element ref="obj_gid" minOccurs="0"/>
+            <xsd:element ref="obj_uid" minOccurs="0"/>
+            <xsd:element ref="ocomm" minOccurs="0"/>
+            <xsd:element ref="oflag" minOccurs="0"/>
+            <xsd:element ref="ogid" minOccurs="0"/>
+            <xsd:element ref="old" minOccurs="0"/>
+            <xsd:element ref="old-auid" minOccurs="0"/>
+            <xsd:element ref="old-chardev" minOccurs="0"/>
+            <xsd:element ref="old-disk" minOccurs="0"/>
+            <xsd:element ref="old-enabled" minOccurs="0"/>
+            <xsd:element ref="old_enforcing" minOccurs="0"/>
+            <xsd:element ref="old-fs" minOccurs="0"/>
+            <xsd:element ref="old-level" minOccurs="0"/>
+            <xsd:element ref="old_lock" minOccurs="0"/>
+            <xsd:element ref="old-log_passwd" minOccurs="0"/>
+            <xsd:element ref="old-mem" minOccurs="0"/>
+            <xsd:element ref="old-net" minOccurs="0"/>
+            <xsd:element ref="old_pe" minOccurs="0"/>
+            <xsd:element ref="old_pi" minOccurs="0"/>
+            <xsd:element ref="old_pp" minOccurs="0"/>
+            <xsd:element ref="old_prom" minOccurs="0"/>
+            <xsd:element ref="old-range" minOccurs="0"/>
+            <xsd:element ref="old-rng" minOccurs="0"/>
+            <xsd:element ref="old-role" minOccurs="0"/>
+            <xsd:element ref="old-ses" minOccurs="0"/>
+            <xsd:element ref="old-seuser" minOccurs="0"/>
+            <xsd:element ref="old_val" minOccurs="0"/>
+            <xsd:element ref="old-vcpu" minOccurs="0"/>
+            <xsd:element ref="op" minOccurs="0"/>
+            <xsd:element ref="opid" minOccurs="0"/>
+            <xsd:element ref="oses" minOccurs="0"/>
+            <xsd:element ref="ouid" minOccurs="0"/>
+            <xsd:element ref="outif" minOccurs="0"/>
+            <xsd:element ref="parent" minOccurs="0"/>
+            <xsd:element ref="path" minOccurs="0"/>
+            <xsd:element ref="per" minOccurs="0"/>
+            <xsd:element ref="perm" minOccurs="0"/>
+            <xsd:element ref="permissive" minOccurs="0"/>
+            <xsd:element ref="perm_mask" minOccurs="0"/>
+            <xsd:element ref="pfs" minOccurs="0"/>
+            <xsd:element ref="pid" minOccurs="0"/>
+            <xsd:element ref="ppid" minOccurs="0"/>
+            <xsd:element ref="printer" minOccurs="0"/>
+            <xsd:element ref="proctitle" minOccurs="0"/>
+            <xsd:element ref="prom" minOccurs="0"/>
+            <xsd:element ref="proto" minOccurs="0"/>
+            <xsd:element ref="qbytes" minOccurs="0"/>
+            <xsd:element ref="range" minOccurs="0"/>
+            <xsd:element ref="rdev" minOccurs="0"/>
+            <xsd:element ref="reason" minOccurs="0"/>
+            <xsd:element ref="removed" minOccurs="0"/>
+            <xsd:element ref="res" minOccurs="0"/>
+            <xsd:element ref="resrc" minOccurs="0"/>
+            <xsd:element ref="result" minOccurs="0"/>
+            <xsd:element ref="role" minOccurs="0"/>
+            <xsd:element ref="rport" minOccurs="0"/>
+            <xsd:element ref="saddr" minOccurs="0"/>
+            <xsd:element ref="sauid" minOccurs="0"/>
+            <xsd:element ref="scontext" minOccurs="0"/>
+            <xsd:element ref="selected-context" minOccurs="0"/>
+            <xsd:element ref="seperm" minOccurs="0"/>
+            <xsd:element ref="seperms" minOccurs="0"/>
+            <xsd:element ref="seqno" minOccurs="0"/>
+            <xsd:element ref="seresult" minOccurs="0"/>
+            <xsd:element ref="ses" minOccurs="0"/>
+            <xsd:element ref="seuser" minOccurs="0"/>
+            <xsd:element ref="sgid" minOccurs="0"/>
+            <xsd:element ref="sig" minOccurs="0"/>
+            <xsd:element ref="sigev_signo" minOccurs="0"/>
+            <xsd:element ref="size" minOccurs="0"/>
+            <xsd:element ref="smac" minOccurs="0"/>
+            <xsd:element ref="spid" minOccurs="0"/>
+            <xsd:element ref="sport" minOccurs="0"/>
+            <xsd:element ref="state" minOccurs="0"/>
+            <xsd:element ref="subj" minOccurs="0"/>
+            <xsd:element ref="success" minOccurs="0"/>
+            <xsd:element ref="suid" minOccurs="0"/>
+            <xsd:element ref="syscall" minOccurs="0"/>
+            <xsd:element ref="table" minOccurs="0"/>
+            <xsd:element ref="tclass" minOccurs="0"/>
+            <xsd:element ref="tcontext" minOccurs="0"/>
+            <xsd:element ref="terminal" minOccurs="0"/>
+            <xsd:element ref="tty" minOccurs="0"/>
+            <xsd:element ref="type" minOccurs="0"/>
+            <xsd:element ref="uid" minOccurs="0"/>
+            <xsd:element ref="unit" minOccurs="0"/>
+            <xsd:element ref="uri" minOccurs="0"/>
+            <xsd:element ref="user" minOccurs="0"/>
+            <xsd:element ref="uuid" minOccurs="0"/>
+            <xsd:element ref="val" minOccurs="0"/>
+            <xsd:element ref="ver" minOccurs="0"/>
+            <xsd:element ref="virt" minOccurs="0"/>
+            <xsd:element ref="vm" minOccurs="0"/>
+            <xsd:element ref="vm-ctx" minOccurs="0"/>
+            <xsd:element ref="vm-pid" minOccurs="0"/>
+            <xsd:element ref="watch" minOccurs="0"/>
+        </xsd:all>
     </xsd:group>
 
     <!-- Single record type -->
     <xsd:complexType name="single_record">
-        <xsd:sequence>
-            <xsd:group ref="generic_fields" minOccurs="0" maxOccurs="unbounded"/>
-        </xsd:sequence>
+        <xsd:group ref="generic_fields" minOccurs="0" maxOccurs="1"/>
         <xsd:attribute name="raw" type="xsd:string"/>
     </xsd:complexType>
 
@@ -487,10 +485,8 @@
         <xsd:sequence>
             <xsd:element name="item" minOccurs="0" maxOccurs="unbounded">
                 <xsd:complexType>
-                    <xsd:sequence>
-                        <xsd:group ref="generic_fields"
-                                   minOccurs="0" maxOccurs="unbounded"/>
-                    </xsd:sequence>
+                    <xsd:group ref="generic_fields"
+                               minOccurs="0" maxOccurs="1"/>
                 </xsd:complexType>
             </xsd:element>
         </xsd:sequence>
@@ -507,174 +503,174 @@
 
     <!-- All records -->
     <xsd:group name="records">
-        <xsd:choice>
-            <xsd:element type="single_record"       name="user"/>
-            <xsd:element type="single_record"       name="login"/>
-            <xsd:element type="single_record"       name="user_auth"/>
-            <xsd:element type="single_record"       name="user_acct"/>
-            <xsd:element type="single_record"       name="user_mgmt"/>
-            <xsd:element type="single_record"       name="cred_acq"/>
-            <xsd:element type="single_record"       name="cred_disp"/>
-            <xsd:element type="single_record"       name="user_start"/>
-            <xsd:element type="single_record"       name="user_end"/>
-            <xsd:element type="single_record"       name="user_avc"/>
-            <xsd:element type="single_record"       name="user_chauthtok"/>
-            <xsd:element type="single_record"       name="user_err"/>
-            <xsd:element type="single_record"       name="cred_refr"/>
-            <xsd:element type="single_record"       name="usys_config"/>
-            <xsd:element type="single_record"       name="user_login"/>
-            <xsd:element type="single_record"       name="user_logout"/>
-            <xsd:element type="single_record"       name="add_user"/>
-            <xsd:element type="single_record"       name="del_user"/>
-            <xsd:element type="single_record"       name="add_group"/>
-            <xsd:element type="single_record"       name="del_group"/>
-            <xsd:element type="single_record"       name="dac_check"/>
-            <xsd:element type="single_record"       name="chgrp_id"/>
-            <xsd:element type="single_record"       name="test"/>
-            <xsd:element type="single_record"       name="trusted_app"/>
-            <xsd:element type="single_record"       name="user_selinux_err"/>
-            <xsd:element type="single_record"       name="user_cmd"/>
-            <xsd:element type="single_record"       name="user_tty"/>
-            <xsd:element type="single_record"       name="chuser_id"/>
-            <xsd:element type="single_record"       name="grp_auth"/>
-            <xsd:element type="single_record"       name="mac_check"/>
-            <xsd:element type="single_record"       name="acct_lock"/>
-            <xsd:element type="single_record"       name="acct_unlock"/>
-            <xsd:element type="single_record"       name="system_boot"/>
-            <xsd:element type="single_record"       name="system_shutdown"/>
-            <xsd:element type="single_record"       name="system_runlevel"/>
-            <xsd:element type="single_record"       name="service_start"/>
-            <xsd:element type="single_record"       name="service_stop"/>
-            <xsd:element type="single_record"       name="grp_mgmt"/>
-            <xsd:element type="single_record"       name="grp_chauthtok"/>
-            <xsd:element type="single_record"       name="daemon_start"/>
-            <xsd:element type="single_record"       name="daemon_end"/>
-            <xsd:element type="single_record"       name="daemon_abort"/>
-            <xsd:element type="single_record"       name="daemon_config"/>
-            <xsd:element type="single_record"       name="daemon_rotate"/>
-            <xsd:element type="single_record"       name="daemon_resume"/>
-            <xsd:element type="single_record"       name="daemon_accept"/>
-            <xsd:element type="single_record"       name="daemon_close"/>
-            <xsd:element type="single_record"       name="daemon_err"/>
-            <xsd:element type="single_record"       name="syscall"/>
-            <xsd:element type="repeated_record"     name="path"/>
-            <xsd:element type="single_record"       name="ipc"/>
-            <xsd:element type="single_record"       name="socketcall"/>
-            <xsd:element type="single_record"       name="config_change"/>
-            <xsd:element type="single_record"       name="sockaddr"/>
-            <xsd:element type="single_record"       name="cwd"/>
-            <xsd:element type="execve_record"       name="execve"/>
-            <xsd:element type="single_record"       name="ipc_set_perm"/>
-            <xsd:element type="single_record"       name="mq_open"/>
-            <xsd:element type="single_record"       name="mq_sendrecv"/>
-            <xsd:element type="single_record"       name="mq_notify"/>
-            <xsd:element type="single_record"       name="mq_getsetattr"/>
-            <xsd:element type="single_record"       name="kernel_other"/>
-            <xsd:element type="single_record"       name="fd_pair"/>
-            <xsd:element type="repeated_record"     name="obj_pid"/>
-            <xsd:element type="single_record"       name="tty"/>
-            <xsd:element type="single_record"       name="eoe"/>
-            <xsd:element type="single_record"       name="bprm_fcaps"/>
-            <xsd:element type="single_record"       name="capset"/>
-            <xsd:element type="single_record"       name="mmap"/>
-            <xsd:element type="single_record"       name="netfilter_pkt"/>
-            <xsd:element type="single_record"       name="netfilter_cfg"/>
-            <xsd:element type="single_record"       name="seccomp"/>
-            <xsd:element type="single_record"       name="proctitle"/>
-            <xsd:element type="single_record"       name="feature_change"/>
-            <xsd:element type="single_record"       name="avc"/>
-            <xsd:element type="single_record"       name="selinux_err"/>
-            <xsd:element type="single_record"       name="avc_path"/>
-            <xsd:element type="single_record"       name="mac_policy_load"/>
-            <xsd:element type="single_record"       name="mac_status"/>
-            <xsd:element type="single_record"       name="mac_config_change"/>
-            <xsd:element type="single_record"       name="mac_unlbl_allow"/>
-            <xsd:element type="single_record"       name="mac_cipsov4_add"/>
-            <xsd:element type="single_record"       name="mac_cipsov4_del"/>
-            <xsd:element type="single_record"       name="mac_map_add"/>
-            <xsd:element type="single_record"       name="mac_map_del"/>
-            <xsd:element type="single_record"       name="mac_ipsec_addsa"/>
-            <xsd:element type="single_record"       name="mac_ipsec_delsa"/>
-            <xsd:element type="single_record"       name="mac_ipsec_addspd"/>
-            <xsd:element type="single_record"       name="mac_ipsec_delspd"/>
-            <xsd:element type="single_record"       name="mac_ipsec_event"/>
-            <xsd:element type="single_record"       name="mac_unlbl_stcadd"/>
-            <xsd:element type="single_record"       name="mac_unlbl_stcdel"/>
-            <xsd:element type="single_record"       name="anom_promiscuous"/>
-            <xsd:element type="single_record"       name="anom_abend"/>
-            <xsd:element type="single_record"       name="anom_link"/>
-            <xsd:element type="single_record"       name="integrity_data"/>
-            <xsd:element type="single_record"       name="integrity_metadata"/>
-            <xsd:element type="single_record"       name="integrity_status"/>
-            <xsd:element type="single_record"       name="integrity_hash"/>
-            <xsd:element type="single_record"       name="integrity_pcr"/>
-            <xsd:element type="single_record"       name="integrity_rule"/>
-            <xsd:element type="single_record"       name="apparmor"/>
-            <xsd:element type="single_record"       name="apparmor_audit"/>
-            <xsd:element type="single_record"       name="apparmor_allowed"/>
-            <xsd:element type="single_record"       name="apparmor_denied"/>
-            <xsd:element type="single_record"       name="apparmor_hint"/>
-            <xsd:element type="single_record"       name="apparmor_status"/>
-            <xsd:element type="single_record"       name="apparmor_error"/>
-            <xsd:element type="single_record"       name="kernel"/>
-            <xsd:element type="single_record"       name="anom_login_failures"/>
-            <xsd:element type="single_record"       name="anom_login_time"/>
-            <xsd:element type="single_record"       name="anom_login_sessions"/>
-            <xsd:element type="single_record"       name="anom_login_acct"/>
-            <xsd:element type="single_record"       name="anom_login_location"/>
-            <xsd:element type="single_record"       name="anom_max_dac"/>
-            <xsd:element type="single_record"       name="anom_max_mac"/>
-            <xsd:element type="single_record"       name="anom_amtu_fail"/>
-            <xsd:element type="single_record"       name="anom_rbac_fail"/>
-            <xsd:element type="single_record"       name="anom_rbac_integrity_fail"/>
-            <xsd:element type="single_record"       name="anom_crypto_fail"/>
-            <xsd:element type="single_record"       name="anom_access_fs"/>
-            <xsd:element type="single_record"       name="anom_exec"/>
-            <xsd:element type="single_record"       name="anom_mk_exec"/>
-            <xsd:element type="single_record"       name="anom_add_acct"/>
-            <xsd:element type="single_record"       name="anom_del_acct"/>
-            <xsd:element type="single_record"       name="anom_mod_acct"/>
-            <xsd:element type="single_record"       name="anom_root_trans"/>
-            <xsd:element type="single_record"       name="resp_anomaly"/>
-            <xsd:element type="single_record"       name="resp_alert"/>
-            <xsd:element type="single_record"       name="resp_kill_proc"/>
-            <xsd:element type="single_record"       name="resp_term_access"/>
-            <xsd:element type="single_record"       name="resp_acct_remote"/>
-            <xsd:element type="single_record"       name="resp_acct_lock_timed"/>
-            <xsd:element type="single_record"       name="resp_acct_unlock_timed"/>
-            <xsd:element type="single_record"       name="resp_acct_lock"/>
-            <xsd:element type="single_record"       name="resp_term_lock"/>
-            <xsd:element type="single_record"       name="resp_sebool"/>
-            <xsd:element type="single_record"       name="resp_exec"/>
-            <xsd:element type="single_record"       name="resp_single"/>
-            <xsd:element type="single_record"       name="resp_halt"/>
-            <xsd:element type="single_record"       name="user_role_change"/>
-            <xsd:element type="single_record"       name="role_assign"/>
-            <xsd:element type="single_record"       name="role_remove"/>
-            <xsd:element type="single_record"       name="label_override"/>
-            <xsd:element type="single_record"       name="label_level_change"/>
-            <xsd:element type="single_record"       name="user_labeled_export"/>
-            <xsd:element type="single_record"       name="user_unlabeled_export"/>
-            <xsd:element type="single_record"       name="dev_alloc"/>
-            <xsd:element type="single_record"       name="dev_dealloc"/>
-            <xsd:element type="single_record"       name="fs_relabel"/>
-            <xsd:element type="single_record"       name="user_mac_policy_load"/>
-            <xsd:element type="single_record"       name="role_modify"/>
-            <xsd:element type="single_record"       name="user_mac_config_change"/>
-            <xsd:element type="single_record"       name="crypto_test_user"/>
-            <xsd:element type="single_record"       name="crypto_param_change_user"/>
-            <xsd:element type="single_record"       name="crypto_login"/>
-            <xsd:element type="single_record"       name="crypto_logout"/>
-            <xsd:element type="single_record"       name="crypto_key_user"/>
-            <xsd:element type="single_record"       name="crypto_failure_user"/>
-            <xsd:element type="single_record"       name="crypto_replay_user"/>
-            <xsd:element type="single_record"       name="crypto_session"/>
-            <xsd:element type="single_record"       name="crypto_ike_sa"/>
-            <xsd:element type="single_record"       name="crypto_ipsec_sa"/>
-            <xsd:element type="single_record"       name="virt_control"/>
-            <xsd:element type="single_record"       name="virt_resource"/>
-            <xsd:element type="single_record"       name="virt_machine_id"/>
-        </xsd:choice>
+        <xsd:all>
+            <xsd:element type="single_record"       name="user" minOccurs="0"/>
+            <xsd:element type="single_record"       name="login" minOccurs="0"/>
+            <xsd:element type="single_record"       name="user_auth" minOccurs="0"/>
+            <xsd:element type="single_record"       name="user_acct" minOccurs="0"/>
+            <xsd:element type="single_record"       name="user_mgmt" minOccurs="0"/>
+            <xsd:element type="single_record"       name="cred_acq" minOccurs="0"/>
+            <xsd:element type="single_record"       name="cred_disp" minOccurs="0"/>
+            <xsd:element type="single_record"       name="user_start" minOccurs="0"/>
+            <xsd:element type="single_record"       name="user_end" minOccurs="0"/>
+            <xsd:element type="single_record"       name="user_avc" minOccurs="0"/>
+            <xsd:element type="single_record"       name="user_chauthtok" minOccurs="0"/>
+            <xsd:element type="single_record"       name="user_err" minOccurs="0"/>
+            <xsd:element type="single_record"       name="cred_refr" minOccurs="0"/>
+            <xsd:element type="single_record"       name="usys_config" minOccurs="0"/>
+            <xsd:element type="single_record"       name="user_login" minOccurs="0"/>
+            <xsd:element type="single_record"       name="user_logout" minOccurs="0"/>
+            <xsd:element type="single_record"       name="add_user" minOccurs="0"/>
+            <xsd:element type="single_record"       name="del_user" minOccurs="0"/>
+            <xsd:element type="single_record"       name="add_group" minOccurs="0"/>
+            <xsd:element type="single_record"       name="del_group" minOccurs="0"/>
+            <xsd:element type="single_record"       name="dac_check" minOccurs="0"/>
+            <xsd:element type="single_record"       name="chgrp_id" minOccurs="0"/>
+            <xsd:element type="single_record"       name="test" minOccurs="0"/>
+            <xsd:element type="single_record"       name="trusted_app" minOccurs="0"/>
+            <xsd:element type="single_record"       name="user_selinux_err" minOccurs="0"/>
+            <xsd:element type="single_record"       name="user_cmd" minOccurs="0"/>
+            <xsd:element type="single_record"       name="user_tty" minOccurs="0"/>
+            <xsd:element type="single_record"       name="chuser_id" minOccurs="0"/>
+            <xsd:element type="single_record"       name="grp_auth" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mac_check" minOccurs="0"/>
+            <xsd:element type="single_record"       name="acct_lock" minOccurs="0"/>
+            <xsd:element type="single_record"       name="acct_unlock" minOccurs="0"/>
+            <xsd:element type="single_record"       name="system_boot" minOccurs="0"/>
+            <xsd:element type="single_record"       name="system_shutdown" minOccurs="0"/>
+            <xsd:element type="single_record"       name="system_runlevel" minOccurs="0"/>
+            <xsd:element type="single_record"       name="service_start" minOccurs="0"/>
+            <xsd:element type="single_record"       name="service_stop" minOccurs="0"/>
+            <xsd:element type="single_record"       name="grp_mgmt" minOccurs="0"/>
+            <xsd:element type="single_record"       name="grp_chauthtok" minOccurs="0"/>
+            <xsd:element type="single_record"       name="daemon_start" minOccurs="0"/>
+            <xsd:element type="single_record"       name="daemon_end" minOccurs="0"/>
+            <xsd:element type="single_record"       name="daemon_abort" minOccurs="0"/>
+            <xsd:element type="single_record"       name="daemon_config" minOccurs="0"/>
+            <xsd:element type="single_record"       name="daemon_rotate" minOccurs="0"/>
+            <xsd:element type="single_record"       name="daemon_resume" minOccurs="0"/>
+            <xsd:element type="single_record"       name="daemon_accept" minOccurs="0"/>
+            <xsd:element type="single_record"       name="daemon_close" minOccurs="0"/>
+            <xsd:element type="single_record"       name="daemon_err" minOccurs="0"/>
+            <xsd:element type="single_record"       name="syscall" minOccurs="0"/>
+            <xsd:element type="repeated_record"     name="path" minOccurs="0"/>
+            <xsd:element type="single_record"       name="ipc" minOccurs="0"/>
+            <xsd:element type="single_record"       name="socketcall" minOccurs="0"/>
+            <xsd:element type="single_record"       name="config_change" minOccurs="0"/>
+            <xsd:element type="single_record"       name="sockaddr" minOccurs="0"/>
+            <xsd:element type="single_record"       name="cwd" minOccurs="0"/>
+            <xsd:element type="execve_record"       name="execve" minOccurs="0"/>
+            <xsd:element type="single_record"       name="ipc_set_perm" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mq_open" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mq_sendrecv" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mq_notify" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mq_getsetattr" minOccurs="0"/>
+            <xsd:element type="single_record"       name="kernel_other" minOccurs="0"/>
+            <xsd:element type="single_record"       name="fd_pair" minOccurs="0"/>
+            <xsd:element type="repeated_record"     name="obj_pid" minOccurs="0"/>
+            <xsd:element type="single_record"       name="tty" minOccurs="0"/>
+            <xsd:element type="single_record"       name="eoe" minOccurs="0"/>
+            <xsd:element type="single_record"       name="bprm_fcaps" minOccurs="0"/>
+            <xsd:element type="single_record"       name="capset" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mmap" minOccurs="0"/>
+            <xsd:element type="single_record"       name="netfilter_pkt" minOccurs="0"/>
+            <xsd:element type="single_record"       name="netfilter_cfg" minOccurs="0"/>
+            <xsd:element type="single_record"       name="seccomp" minOccurs="0"/>
+            <xsd:element type="single_record"       name="proctitle" minOccurs="0"/>
+            <xsd:element type="single_record"       name="feature_change" minOccurs="0"/>
+            <xsd:element type="single_record"       name="avc" minOccurs="0"/>
+            <xsd:element type="single_record"       name="selinux_err" minOccurs="0"/>
+            <xsd:element type="single_record"       name="avc_path" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mac_policy_load" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mac_status" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mac_config_change" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mac_unlbl_allow" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mac_cipsov4_add" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mac_cipsov4_del" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mac_map_add" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mac_map_del" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mac_ipsec_addsa" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mac_ipsec_delsa" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mac_ipsec_addspd" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mac_ipsec_delspd" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mac_ipsec_event" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mac_unlbl_stcadd" minOccurs="0"/>
+            <xsd:element type="single_record"       name="mac_unlbl_stcdel" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_promiscuous" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_abend" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_link" minOccurs="0"/>
+            <xsd:element type="single_record"       name="integrity_data" minOccurs="0"/>
+            <xsd:element type="single_record"       name="integrity_metadata" minOccurs="0"/>
+            <xsd:element type="single_record"       name="integrity_status" minOccurs="0"/>
+            <xsd:element type="single_record"       name="integrity_hash" minOccurs="0"/>
+            <xsd:element type="single_record"       name="integrity_pcr" minOccurs="0"/>
+            <xsd:element type="single_record"       name="integrity_rule" minOccurs="0"/>
+            <xsd:element type="single_record"       name="apparmor" minOccurs="0"/>
+            <xsd:element type="single_record"       name="apparmor_audit" minOccurs="0"/>
+            <xsd:element type="single_record"       name="apparmor_allowed" minOccurs="0"/>
+            <xsd:element type="single_record"       name="apparmor_denied" minOccurs="0"/>
+            <xsd:element type="single_record"       name="apparmor_hint" minOccurs="0"/>
+            <xsd:element type="single_record"       name="apparmor_status" minOccurs="0"/>
+            <xsd:element type="single_record"       name="apparmor_error" minOccurs="0"/>
+            <xsd:element type="single_record"       name="kernel" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_login_failures" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_login_time" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_login_sessions" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_login_acct" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_login_location" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_max_dac" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_max_mac" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_amtu_fail" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_rbac_fail" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_rbac_integrity_fail" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_crypto_fail" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_access_fs" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_exec" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_mk_exec" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_add_acct" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_del_acct" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_mod_acct" minOccurs="0"/>
+            <xsd:element type="single_record"       name="anom_root_trans" minOccurs="0"/>
+            <xsd:element type="single_record"       name="resp_anomaly" minOccurs="0"/>
+            <xsd:element type="single_record"       name="resp_alert" minOccurs="0"/>
+            <xsd:element type="single_record"       name="resp_kill_proc" minOccurs="0"/>
+            <xsd:element type="single_record"       name="resp_term_access" minOccurs="0"/>
+            <xsd:element type="single_record"       name="resp_acct_remote" minOccurs="0"/>
+            <xsd:element type="single_record"       name="resp_acct_lock_timed" minOccurs="0"/>
+            <xsd:element type="single_record"       name="resp_acct_unlock_timed" minOccurs="0"/>
+            <xsd:element type="single_record"       name="resp_acct_lock" minOccurs="0"/>
+            <xsd:element type="single_record"       name="resp_term_lock" minOccurs="0"/>
+            <xsd:element type="single_record"       name="resp_sebool" minOccurs="0"/>
+            <xsd:element type="single_record"       name="resp_exec" minOccurs="0"/>
+            <xsd:element type="single_record"       name="resp_single" minOccurs="0"/>
+            <xsd:element type="single_record"       name="resp_halt" minOccurs="0"/>
+            <xsd:element type="single_record"       name="user_role_change" minOccurs="0"/>
+            <xsd:element type="single_record"       name="role_assign" minOccurs="0"/>
+            <xsd:element type="single_record"       name="role_remove" minOccurs="0"/>
+            <xsd:element type="single_record"       name="label_override" minOccurs="0"/>
+            <xsd:element type="single_record"       name="label_level_change" minOccurs="0"/>
+            <xsd:element type="single_record"       name="user_labeled_export" minOccurs="0"/>
+            <xsd:element type="single_record"       name="user_unlabeled_export" minOccurs="0"/>
+            <xsd:element type="single_record"       name="dev_alloc" minOccurs="0"/>
+            <xsd:element type="single_record"       name="dev_dealloc" minOccurs="0"/>
+            <xsd:element type="single_record"       name="fs_relabel" minOccurs="0"/>
+            <xsd:element type="single_record"       name="user_mac_policy_load" minOccurs="0"/>
+            <xsd:element type="single_record"       name="role_modify" minOccurs="0"/>
+            <xsd:element type="single_record"       name="user_mac_config_change" minOccurs="0"/>
+            <xsd:element type="single_record"       name="crypto_test_user" minOccurs="0"/>
+            <xsd:element type="single_record"       name="crypto_param_change_user" minOccurs="0"/>
+            <xsd:element type="single_record"       name="crypto_login" minOccurs="0"/>
+            <xsd:element type="single_record"       name="crypto_logout" minOccurs="0"/>
+            <xsd:element type="single_record"       name="crypto_key_user" minOccurs="0"/>
+            <xsd:element type="single_record"       name="crypto_failure_user" minOccurs="0"/>
+            <xsd:element type="single_record"       name="crypto_replay_user" minOccurs="0"/>
+            <xsd:element type="single_record"       name="crypto_session" minOccurs="0"/>
+            <xsd:element type="single_record"       name="crypto_ike_sa" minOccurs="0"/>
+            <xsd:element type="single_record"       name="crypto_ipsec_sa" minOccurs="0"/>
+            <xsd:element type="single_record"       name="virt_control" minOccurs="0"/>
+            <xsd:element type="single_record"       name="virt_resource" minOccurs="0"/>
+            <xsd:element type="single_record"       name="virt_machine_id" minOccurs="0"/>
+        </xsd:all>
     </xsd:group>
 
     <!-- Event -->
@@ -685,10 +681,7 @@
     </xsd:simpleType>
     <xsd:element name="event">
         <xsd:complexType>
-            <xsd:sequence>
-                <xsd:group ref="records"
-                           minOccurs="0" maxOccurs="unbounded"/>
-            </xsd:sequence>
+            <xsd:group ref="records" minOccurs="0" maxOccurs="1"/>
             <xsd:attribute name="serial" type="serial" use="required"/>
             <xsd:attribute name="time" type="xsd:dateTime" use="required"/>
             <xsd:attribute name="host"/>
