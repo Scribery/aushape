@@ -82,11 +82,13 @@ aushape_record_format(struct aushape_gbuf *gbuf,
         AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, format, l));
         AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '<'));
         AUSHAPE_GUARD(aushape_gbuf_add_str_lowercase(gbuf, name));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, " raw=\""));
-        raw = auparse_get_record_text(au);
-        AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
-        AUSHAPE_GUARD(aushape_gbuf_add_str_xml(gbuf, raw));
-        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
+        if (format->with_raw) {
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, " raw=\""));
+            raw = auparse_get_record_text(au);
+            AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
+            AUSHAPE_GUARD(aushape_gbuf_add_str_xml(gbuf, raw));
+            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
+        }
         AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '>'));
     } else if (format->lang == AUSHAPE_LANG_JSON) {
         if (!first) {
@@ -98,12 +100,14 @@ aushape_record_format(struct aushape_gbuf *gbuf,
         AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\":"));
         AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '{'));
         l++;
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"raw\":\""));
-        raw = auparse_get_record_text(au);
-        AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
-        AUSHAPE_GUARD(aushape_gbuf_add_str_json(gbuf, raw));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\","));
+        if (format->with_raw) {
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, format, l));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"raw\":\""));
+            raw = auparse_get_record_text(au);
+            AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
+            AUSHAPE_GUARD(aushape_gbuf_add_str_json(gbuf, raw));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\","));
+        }
         AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, format, l));
         AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"fields\":{"));
     }

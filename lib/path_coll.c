@@ -139,15 +139,17 @@ aushape_path_coll_add(struct aushape_coll *coll,
         l+=2;
     }
 
-    /*
-     * Add raw record
-     */
-    if (!aushape_gbuf_is_empty(&path_coll->raw)) {
-        AUSHAPE_GUARD(aushape_gbuf_add_char(&path_coll->raw, '\n'));
+    if (coll->format.with_raw) {
+        /*
+         * Add raw record
+         */
+        if (!aushape_gbuf_is_empty(&path_coll->raw)) {
+            AUSHAPE_GUARD(aushape_gbuf_add_char(&path_coll->raw, '\n'));
+        }
+        raw = auparse_get_record_text(au);
+        AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
+        AUSHAPE_GUARD(aushape_gbuf_add_str(&path_coll->raw, raw));
     }
-    raw = auparse_get_record_text(au);
-    AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
-    AUSHAPE_GUARD(aushape_gbuf_add_str(&path_coll->raw, raw));
 
     /*
      * Begin the item
@@ -283,11 +285,15 @@ aushape_path_coll_end(struct aushape_coll *coll,
     /* Output prologue */
     if (coll->format.lang == AUSHAPE_LANG_XML) {
         AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<path raw=\""));
-        AUSHAPE_GUARD(aushape_gbuf_add_buf_xml(gbuf,
-                                               path_coll->raw.ptr,
-                                               path_coll->raw.len));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\">"));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<path"));
+        if (coll->format.with_raw) {
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, " raw=\""));
+            AUSHAPE_GUARD(aushape_gbuf_add_buf_xml(gbuf,
+                                                   path_coll->raw.ptr,
+                                                   path_coll->raw.len));
+            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
+        }
+        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '>'));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
         if (!*pfirst) {
             AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
@@ -295,12 +301,14 @@ aushape_path_coll_end(struct aushape_coll *coll,
         AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
         AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"path\":{"));
         l++;
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"raw\":\""));
-        AUSHAPE_GUARD(aushape_gbuf_add_buf_json(gbuf,
-                                                path_coll->raw.ptr,
-                                                path_coll->raw.len));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\","));
+        if (coll->format.with_raw) {
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"raw\":\""));
+            AUSHAPE_GUARD(aushape_gbuf_add_buf_json(gbuf,
+                                                    path_coll->raw.ptr,
+                                                    path_coll->raw.len));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\","));
+        }
         AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
         AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"items\":["));
     }

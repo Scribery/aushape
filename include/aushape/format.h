@@ -51,6 +51,11 @@ struct aushape_format {
      * the size of accumulated event text crosses the negated number.
      */
     ssize_t             events_per_doc;
+    /**
+     * True if raw log messages should be included in the output, false
+     * otherwise.
+     */
+    bool                with_raw;
 };
 
 /**

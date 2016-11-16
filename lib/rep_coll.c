@@ -123,15 +123,17 @@ aushape_rep_coll_add(struct aushape_coll *coll,
         l+=2;
     }
 
-    /*
-     * Add the raw line
-     */
-    raw = auparse_get_record_text(au);
-    AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
-    if (!aushape_gbuf_is_empty(&rep_coll->lines)) {
-        AUSHAPE_GUARD(aushape_gbuf_add_char(&rep_coll->lines, '\n'));
+    if (coll->format.with_raw) {
+        /*
+         * Add the raw line
+         */
+        raw = auparse_get_record_text(au);
+        AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
+        if (!aushape_gbuf_is_empty(&rep_coll->lines)) {
+            AUSHAPE_GUARD(aushape_gbuf_add_char(&rep_coll->lines, '\n'));
+        }
+        AUSHAPE_GUARD(aushape_gbuf_add_str(&rep_coll->lines, raw));
     }
-    AUSHAPE_GUARD(aushape_gbuf_add_str(&rep_coll->lines, raw));
 
     /*
      * Begin the output record
@@ -203,12 +205,15 @@ aushape_rep_coll_end(struct aushape_coll *coll,
     /* Output prologue */
     if (coll->format.lang == AUSHAPE_LANG_XML) {
         AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_fmt(gbuf, "<%s raw=\"",
-                                           rep_coll->name));
-        AUSHAPE_GUARD(aushape_gbuf_add_buf_xml(gbuf,
-                                               rep_coll->lines.ptr,
-                                               rep_coll->lines.len));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\">"));
+        AUSHAPE_GUARD(aushape_gbuf_add_fmt(gbuf, "<%s", rep_coll->name));
+        if (coll->format.with_raw) {
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, " raw=\""));
+            AUSHAPE_GUARD(aushape_gbuf_add_buf_xml(gbuf,
+                                                   rep_coll->lines.ptr,
+                                                   rep_coll->lines.len));
+            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
+        }
+        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '>'));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
         if (!*pfirst) {
             AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
@@ -216,12 +221,14 @@ aushape_rep_coll_end(struct aushape_coll *coll,
         AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
         AUSHAPE_GUARD(aushape_gbuf_add_fmt(gbuf, "\"%s\":{", rep_coll->name));
         l++;
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"raw\":\""));
-        AUSHAPE_GUARD(aushape_gbuf_add_buf_json(gbuf,
-                                                rep_coll->lines.ptr,
-                                                rep_coll->lines.len));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\","));
+        if (coll->format.with_raw) {
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"raw\":\""));
+            AUSHAPE_GUARD(aushape_gbuf_add_buf_json(gbuf,
+                                                    rep_coll->lines.ptr,
+                                                    rep_coll->lines.len));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\","));
+        }
         AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
         AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
         AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "items"));
