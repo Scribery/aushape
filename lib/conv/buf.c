@@ -41,9 +41,6 @@ enum aushape_rc
 aushape_conv_buf_init(struct aushape_conv_buf *buf,
                       const struct aushape_format *format)
 {
-    static const struct aushape_single_coll_args single_args = {
-        .unique = true
-    };
     static const struct aushape_rep_coll_args obj_pid_args = {
         .name = "obj_pid",
     };
@@ -66,7 +63,7 @@ aushape_conv_buf_init(struct aushape_conv_buf *buf,
         {
             .name   = NULL,
             .type   = &aushape_single_coll_type,
-            .args   = &single_args,
+            .args   = NULL,
         },
     };
 

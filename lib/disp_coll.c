@@ -43,17 +43,11 @@ struct aushape_disp_coll {
     struct aushape_disp_coll_inst_link    *map;
 };
 
-static const struct aushape_single_coll_args
-                            aushape_disp_coll_args_default_single = {
-    .unique = false
-};
-
 static const struct aushape_disp_coll_type_link
                             aushape_disp_coll_args_default[] = {
     {
         .name  = NULL,
-        .type  = &aushape_single_coll_type,
-        .args  = &aushape_disp_coll_args_default_single
+        .type  = &aushape_single_coll_type
     }
 };
 

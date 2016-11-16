@@ -23,16 +23,10 @@
 
 #include <aushape/coll_type.h>
 
-struct aushape_single_coll_args {
-    /** Do not allow adding duplicate record types, if true */
-    bool    unique;
-};
-
 /**
  * Single (non-aggregated) record collector type.
  *
- * Expects a pointer to struct aushape_single_coll_args as the creation
- * argument. If passed NULL, assumes the default value of {.unique = true}.
+ * Doesn't require creation arguments.
  *
  * Collector-specific return codes:
  *

@@ -24,16 +24,9 @@
 #include <aushape/guard.h>
 #include <string.h>
 
-static const struct aushape_single_coll_args
-                        aushape_single_coll_args_default = {
-    .unique = true
-};
-
 struct aushape_single_coll {
     /** Abstract base collector */
     struct aushape_coll    coll;
-    /** Do not allow adding duplicate record types, if true */
-    bool    unique;
     /** Names of the record types seen, zero-terminated, one after another */
     struct aushape_gbuf seen;
 };
@@ -52,12 +45,7 @@ aushape_single_coll_init(struct aushape_coll *coll,
 {
     struct aushape_single_coll *single_coll =
                     (struct aushape_single_coll *)coll;
-    const struct aushape_single_coll_args *single_args =
-                    (const struct aushape_single_coll_args *)args;
-    if (single_args == NULL) {
-        single_args = &aushape_single_coll_args_default;
-    }
-    single_coll->unique = single_args->unique;
+    (void)args;
     aushape_gbuf_init(&single_coll->seen);
     return AUSHAPE_RC_OK;
 }
@@ -150,8 +138,6 @@ aushape_single_coll_add(struct aushape_coll *coll,
                         auparse_state_t *au)
 {
     enum aushape_rc rc;
-    struct aushape_single_coll *single_coll =
-                    (struct aushape_single_coll *)coll;
     const char *name;
 
     assert(aushape_coll_is_valid(coll));
@@ -161,10 +147,8 @@ aushape_single_coll_add(struct aushape_coll *coll,
     name = auparse_get_type_name(au);
     AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, name != NULL);
     if (aushape_single_coll_seen_has(coll, name)) {
-        if (single_coll->unique) {
-            rc = AUSHAPE_RC_REPEATED_RECORD;
-            goto cleanup;
-        }
+        rc = AUSHAPE_RC_REPEATED_RECORD;
+        goto cleanup;
     } else {
         AUSHAPE_GUARD(aushape_single_coll_seen_add(coll, name));
     }
