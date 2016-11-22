@@ -477,7 +477,6 @@
     <!-- Single record type -->
     <xsd:complexType name="single_record">
         <xsd:group ref="generic_fields" minOccurs="0" maxOccurs="1"/>
-        <xsd:attribute name="raw" type="xsd:string"/>
     </xsd:complexType>
 
     <!-- Repeated record type -->
@@ -490,7 +489,6 @@
                 </xsd:complexType>
             </xsd:element>
         </xsd:sequence>
-        <xsd:attribute name="raw" type="xsd:string"/>
     </xsd:complexType>
 
     <!-- Execve record type -->
@@ -498,7 +496,6 @@
         <xsd:sequence>
             <xsd:element ref="a" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
-        <xsd:attribute name="raw" type="xsd:string"/>
     </xsd:complexType>
 
     <!-- All records -->
@@ -681,7 +678,20 @@
     </xsd:simpleType>
     <xsd:element name="event">
         <xsd:complexType>
-            <xsd:group ref="records" minOccurs="0" maxOccurs="1"/>
+            <xsd:sequence>
+                <xsd:element name="text" minOccurs="0" maxOccurs="1">
+                    <xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:element name="line" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+                        </xsd:sequence>
+                    </xsd:complexType>
+                </xsd:element>
+                <xsd:element name="data" minOccurs="0" maxOccurs="1">
+                    <xsd:complexType>
+                        <xsd:group ref="records" minOccurs="0" maxOccurs="1"/>
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:sequence>
             <xsd:attribute name="serial" type="serial" use="required"/>
             <xsd:attribute name="time" type="xsd:dateTime" use="required"/>
             <xsd:attribute name="host" type="xsd:string"/>

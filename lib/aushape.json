@@ -247,60 +247,18 @@
             },
             "additionalProperties": false
         },
-        "single_record": {
-            "description":  "A record",
-            "type":         "object",
-            "properties": {
-                "raw": {
-                    "description":  "Source raw audit log line(s)",
-                    "type":         "string"
-                },
-                "fields": { "$ref": "#/definitions/generic_fields" }
-            },
-            "required": [
-                "fields"
-            ],
-            "additionalProperties": false
-        },
+        "single_record": { "$ref": "#/definitions/generic_fields" },
         "repeated_record": {
             "description":  "A repeated, aggregated record list",
-            "type":         "object",
-            "properties": {
-                "raw": {
-                    "description":  "Source raw audit log line(s)",
-                    "type":         "string"
-                },
-                "items": {
-                    "description":  "Aggregated records",
-                    "type":         "array",
-                    "items": { "$ref": "#/definitions/generic_fields" }
-                }
-            },
-            "required": [
-                "items"
-            ],
-            "additionalProperties": false
+            "type":         "array",
+            "items":        { "$ref": "#/definitions/generic_fields" }
         },
         "execve_record": {
             "description":  "An execve record",
-            "type":         "object",
-            "properties": {
-                "raw": {
-                    "description":  "Source raw audit log line(s)",
-                    "type":         "string"
-                },
-                "args": {
-                    "description":  "Execve arguments",
-                    "type":         "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            },
-            "required": [
-                "args"
-            ],
-            "additionalProperties": false
+            "type":         "array",
+            "items": {
+                "type": "string"
+            }
         }
     },
     "type":         "array",
@@ -322,7 +280,13 @@
                     "description":  "Event hostname",
                     "type":         "string"
             },
-            "records": {
+            "text": {
+                "type":     "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "data": {
                 "type":     "object",
                 "properties": {
                     "acct_lock":                        { "$ref": "#/definitions/single_record" },
@@ -496,8 +460,7 @@
         },
         "required": [
             "serial",
-            "time",
-            "records"
+            "time"
         ],
         "additionalProperties": false
     }
