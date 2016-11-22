@@ -243,8 +243,8 @@ extern enum aushape_rc aushape_gbuf_space_closing(
                                         size_t level);
 
 /**
- * Add the contents of an abstract buffer to a growing buffer, escaped as a
- * double-quoted XML attribute value.
+ * Add the contents of an abstract buffer to a growing buffer,
+ * escaped as XML text.
  *
  * @param gbuf      The growing buffer to add the escaped buffer contents to.
  * @param ptr       The pointer to the buffer to escape and add.
@@ -258,8 +258,7 @@ extern enum aushape_rc aushape_gbuf_add_buf_xml(struct aushape_gbuf *gbuf,
                                                 const void *ptr, size_t len);
 
 /**
- * Add a string to a growing buffer, escaped as a double-quoted XML attribute
- * value.
+ * Add a string to a growing buffer, escaped as XML text.
  *
  * @param gbuf      The growing buffer to add the escaped string to.
  * @param str       The string to escape and add.

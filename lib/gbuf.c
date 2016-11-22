@@ -300,7 +300,9 @@ aushape_gbuf_add_buf_xml(struct aushape_gbuf *gbuf,
             esc_len = strlen(_e);   \
             break
         ESC_CASE('"',   "&quot;");
+        ESC_CASE('\'',  "&apos;");
         ESC_CASE('<',   "&lt;");
+        ESC_CASE('>',   "&gt;");
         ESC_CASE('&',   "&amp;");
 #undef ESC_CASE
         default:
