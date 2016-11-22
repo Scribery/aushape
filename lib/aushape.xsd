@@ -684,7 +684,7 @@
             <xsd:group ref="records" minOccurs="0" maxOccurs="1"/>
             <xsd:attribute name="serial" type="serial" use="required"/>
             <xsd:attribute name="time" type="xsd:dateTime" use="required"/>
-            <xsd:attribute name="host"/>
+            <xsd:attribute name="host" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
