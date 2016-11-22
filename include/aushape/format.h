@@ -52,10 +52,10 @@ struct aushape_format {
      */
     ssize_t             events_per_doc;
     /**
-     * True if raw log messages should be included in the output, false
-     * otherwise.
+     * True if source text log messages should be included in the output,
+     * false otherwise.
      */
-    bool                with_raw;
+    bool                with_text;
 };
 
 /**

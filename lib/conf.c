@@ -56,7 +56,7 @@ const char *aushape_conf_cmd_help =
    "                            Default: 4\n"
    "    --indent=NUMBER         Indent each nesting level by NUMBER spaces.\n"
    "                            Default: 4\n"
-   "    --with-raw              Include original raw log messages in the output.\n"
+   "    --with-text             Include original text log messages in the output.\n"
    "                            Default: off\n"
    "\n"
    "Output options:\n"
@@ -80,7 +80,7 @@ enum aushape_conf_opt {
     AUSHAPE_CONF_OPT_EVENTS_PER_DOC = 0x100,
     AUSHAPE_CONF_OPT_FOLD,
     AUSHAPE_CONF_OPT_INDENT,
-    AUSHAPE_CONF_OPT_WITH_RAW,
+    AUSHAPE_CONF_OPT_WITH_TEXT,
     AUSHAPE_CONF_OPT_SYSLOG_FACILITY,
     AUSHAPE_CONF_OPT_SYSLOG_PRIORITY,
 };
@@ -131,8 +131,8 @@ static const struct option aushape_conf_longopts[] = {
         .has_arg = required_argument,
     },
     {
-        .name = "with-raw",
-        .val = AUSHAPE_CONF_OPT_WITH_RAW,
+        .name = "with-text",
+        .val = AUSHAPE_CONF_OPT_WITH_TEXT,
         .has_arg = no_argument,
     },
     {
@@ -162,7 +162,7 @@ aushape_conf_load(struct aushape_conf *pconf, int argc, char **argv)
             .init_indent = 0,
             .nest_indent = 4,
             .events_per_doc = SSIZE_MAX,
-            .with_raw = false,
+            .with_text = false,
         },
         .output_type = AUSHAPE_CONF_OUTPUT_TYPE_FD,
         .output_conf = {
@@ -271,8 +271,8 @@ aushape_conf_load(struct aushape_conf *pconf, int argc, char **argv)
             }
             break;
 
-        case AUSHAPE_CONF_OPT_WITH_RAW:
-            conf.format.with_raw = true;
+        case AUSHAPE_CONF_OPT_WITH_TEXT:
+            conf.format.with_text = true;
             break;
 
         case AUSHAPE_CONF_OPT_SYSLOG_FACILITY:

@@ -80,7 +80,7 @@ aushape_conv_buf_init(struct aushape_conv_buf *buf,
                              &aushape_disp_coll_type,
                              &buf->format,
                              /* Divert to separate buffer, if with text */
-                             format->with_raw ? &buf->data : &buf->gbuf,
+                             format->with_text ? &buf->data : &buf->gbuf,
                              &map);
     if (rc != AUSHAPE_RC_OK) {
         assert(rc != AUSHAPE_RC_INVALID_ARGS);
@@ -123,8 +123,8 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     char time_buf[32];
     char zone_buf[16];
     char timestamp_buf[64];
-    bool first_raw;
-    bool first_record;
+    bool first_text;
+    bool first_data;
     struct aushape_gbuf *gbuf;
     struct aushape_gbuf *data;
 
@@ -135,7 +135,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     l = level;
 
     /* Divert data to separate buffer if also outputting text */
-    data = buf->format.with_raw ? &buf->data : &buf->gbuf;
+    data = buf->format.with_text ? &buf->data : &buf->gbuf;
     gbuf = &buf->gbuf;
 
     e = auparse_get_timestamp(au);
@@ -162,13 +162,13 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, ">"));
         l++;
         /* Begin source text, if any */
-        if (buf->format.with_raw) {
+        if (buf->format.with_text) {
             AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &buf->format, l));
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<raw>"));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<text>"));
         }
-        /* Begin records */
+        /* Begin data */
         AUSHAPE_GUARD(aushape_gbuf_space_opening(data, &buf->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(data, "<records>"));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(data, "<data>"));
     } else {
         /* Begin event */
         if (!first) {
@@ -194,13 +194,13 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
             AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\","));
         }
         /* Begin source text, if any */
-        if (buf->format.with_raw) {
+        if (buf->format.with_text) {
             AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &buf->format, l));
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"raw\":["));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"text\":["));
         }
-        /* Begin records */
+        /* Begin data */
         AUSHAPE_GUARD(aushape_gbuf_space_opening(data, &buf->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(data, "\"records\":{"));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(data, "\"data\":{"));
     }
 
     l++;
@@ -208,32 +208,32 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     /* Output records */
     AUSHAPE_GUARD_BOOL(AUPARSE_FAILED,
                        auparse_first_record(au) >= 0);
-    first_raw = true;
-    first_record = true;
+    first_text = true;
+    first_data = true;
     do {
         /* Add the source text, if requested */
-        if (buf->format.with_raw) {
-            const char *raw;
-            raw = auparse_get_record_text(au);
-            AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
+        if (buf->format.with_text) {
+            const char *text;
+            text = auparse_get_record_text(au);
+            AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, text != NULL);
             if (buf->format.lang == AUSHAPE_LANG_XML) {
                 AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &buf->format, l));
                 AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<line>"));
-                AUSHAPE_GUARD(aushape_gbuf_add_str_xml(gbuf, raw));
+                AUSHAPE_GUARD(aushape_gbuf_add_str_xml(gbuf, text));
                 AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "</line>"));
             } else if (buf->format.lang == AUSHAPE_LANG_JSON) {
-                if (!first_raw) {
+                if (!first_text) {
                     AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
                 }
                 AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &buf->format, l));
                 AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
-                AUSHAPE_GUARD(aushape_gbuf_add_str_json(gbuf, raw));
+                AUSHAPE_GUARD(aushape_gbuf_add_str_json(gbuf, text));
                 AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
             }
-            first_raw = false;
+            first_text = false;
         }
         /* Add the record to the collector */
-        rc = aushape_coll_add(buf->coll, l, &first_record, au);
+        rc = aushape_coll_add(buf->coll, l, &first_data, au);
         if (rc != AUSHAPE_RC_OK) {
             assert(rc != AUSHAPE_RC_INVALID_ARGS);
             assert(rc != AUSHAPE_RC_INVALID_STATE);
@@ -243,7 +243,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     } while(auparse_next_record(au) > 0);
 
     /* Make sure the record sequence is complete and added, if any */
-    rc = aushape_coll_end(buf->coll, l, &first_record);
+    rc = aushape_coll_end(buf->coll, l, &first_data);
     if (rc != AUSHAPE_RC_OK) {
         assert(rc != AUSHAPE_RC_INVALID_ARGS);
         assert(aushape_conv_buf_is_valid(buf));
@@ -252,30 +252,30 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
 
     l--;
 
-    /* Terminate records */
+    /* Terminate data */
     if (buf->format.lang == AUSHAPE_LANG_XML) {
         AUSHAPE_GUARD(aushape_gbuf_space_closing(data, &buf->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(data, "</records>"));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(data, "</data>"));
     } else if (buf->format.lang == AUSHAPE_LANG_JSON) {
-        if (!first_record) {
+        if (!first_data) {
             AUSHAPE_GUARD(aushape_gbuf_space_closing(data, &buf->format, l));
         }
         AUSHAPE_GUARD(aushape_gbuf_add_char(data, '}'));
     }
 
     /* If also outputting the source text */
-    if (buf->format.with_raw) {
+    if (buf->format.with_text) {
         /* Terminate source text */
         if (buf->format.lang == AUSHAPE_LANG_XML) {
             AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &buf->format, l));
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "</raw>"));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "</text>"));
         } else if (buf->format.lang == AUSHAPE_LANG_JSON) {
-            if (!first_record) {
+            if (!first_data) {
                 AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &buf->format, l));
             }
             AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "],"));
         }
-        /* Paste the records */
+        /* Paste the data */
         AUSHAPE_GUARD(aushape_gbuf_add_buf(gbuf, data->ptr, data->len));
     }
 
