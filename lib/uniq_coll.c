@@ -26,9 +26,9 @@
 
 struct aushape_uniq_coll {
     /** Abstract base collector */
-    struct aushape_coll    coll;
+    struct aushape_coll     coll;
     /** Names of the record types seen, zero-terminated, one after another */
-    struct aushape_gbuf seen;
+    struct aushape_gbuf     seen;
 };
 
 static bool
