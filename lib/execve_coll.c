@@ -27,8 +27,6 @@
 struct aushape_execve_coll {
     /** Abstract base collector */
     struct aushape_coll coll;
-    /** Formatted raw log buffer */
-    struct aushape_gbuf raw;
     /** Formatted argument list buffer */
     struct aushape_gbuf args;
     /** Number of arguments expected */
@@ -50,8 +48,7 @@ aushape_execve_coll_is_valid(const struct aushape_coll *coll)
 {
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
-    return aushape_gbuf_is_valid(&execve_coll->raw) &&
-           aushape_gbuf_is_valid(&execve_coll->args) &&
+    return aushape_gbuf_is_valid(&execve_coll->args) &&
            execve_coll->arg_idx <= execve_coll->arg_num &&
            (execve_coll->got_len ||
             (execve_coll->slice_idx == 0 && execve_coll->len_total == 0)) &&
@@ -64,7 +61,6 @@ aushape_execve_coll_init(struct aushape_coll *coll, const void *args)
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
     (void)args;
-    aushape_gbuf_init(&execve_coll->raw);
     aushape_gbuf_init(&execve_coll->args);
     return AUSHAPE_RC_OK;
 }
@@ -74,7 +70,6 @@ aushape_execve_coll_cleanup(struct aushape_coll *coll)
 {
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
-    aushape_gbuf_cleanup(&execve_coll->raw);
     aushape_gbuf_cleanup(&execve_coll->args);
 }
 
@@ -91,7 +86,6 @@ aushape_execve_coll_empty(struct aushape_coll *coll)
 {
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
-    aushape_gbuf_empty(&execve_coll->raw);
     aushape_gbuf_empty(&execve_coll->args);
     execve_coll->arg_num = 0;
     execve_coll->arg_idx = 0;
@@ -430,36 +424,14 @@ aushape_execve_coll_add(struct aushape_coll *coll,
                         bool *pfirst,
                         auparse_state_t *au)
 {
-    struct aushape_execve_coll *execve_coll =
-                    (struct aushape_execve_coll *)coll;
     enum aushape_rc rc;
-    size_t l = level;
-    const char *raw;
+    size_t l = level + 1;
     const char *field_name;
     size_t arg_idx;
     size_t slice_idx;
     int end;
 
     (void)pfirst;
-
-    if (coll->format.lang == AUSHAPE_LANG_XML) {
-        l++;
-    } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        l+=2;
-    }
-
-    if (coll->format.with_raw) {
-        /*
-         * If it's not the first argument being processed,
-         * and so it's not the first record
-         */
-        if (execve_coll->arg_idx > 0) {
-            AUSHAPE_GUARD(aushape_gbuf_add_char(&execve_coll->raw, '\n'));
-        }
-        raw = auparse_get_record_text(au);
-        AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
-        AUSHAPE_GUARD(aushape_gbuf_add_str(&execve_coll->raw, raw));
-    }
 
     /*
      * For each field in the record
@@ -521,32 +493,13 @@ aushape_execve_coll_end(struct aushape_coll *coll,
     /* Output prologue */
     if (coll->format.lang == AUSHAPE_LANG_XML) {
         AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<execve"));
-        if (coll->format.with_raw) {
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, " raw=\""));
-            AUSHAPE_GUARD(aushape_gbuf_add_buf_xml(gbuf,
-                                                   execve_coll->raw.ptr,
-                                                   execve_coll->raw.len));
-            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
-        }
-        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '>'));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<execve>"));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
         if (!*pfirst) {
             AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
         }
         AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"execve\":{"));
-        l++;
-        if (coll->format.with_raw) {
-            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"raw\":\""));
-            AUSHAPE_GUARD(aushape_gbuf_add_buf_json(gbuf,
-                                                    execve_coll->raw.ptr,
-                                                    execve_coll->raw.len));
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\","));
-        }
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"args\":["));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"execve\":["));
     }
     l++;
 
@@ -573,9 +526,6 @@ aushape_execve_coll_end(struct aushape_coll *coll,
             AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &coll->format, l));
         }
         AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ']'));
-        l--;
-        AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '}'));
     }
 
     assert(l == level);

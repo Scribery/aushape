@@ -33,6 +33,8 @@ struct aushape_conv_buf {
     struct aushape_format   format;
     /** Growing buffer for an output piece */
     struct aushape_gbuf     gbuf;
+    /** Growing buffer for diverted parsed data */
+    struct aushape_gbuf     data;
     /** Record collector */
     struct aushape_coll    *coll;
 };

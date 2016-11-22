@@ -53,7 +53,7 @@ const char *aushape_conf_cmd_help =
    "                                0 / \"all\"   - fold all, single-line output,\n"
    "                                N           - fold at level N,\n"
    "                                \"none\"      - unfold fully.\n"
-   "                            Default: 5\n"
+   "                            Default: 4\n"
    "    --indent=NUMBER         Indent each nesting level by NUMBER spaces.\n"
    "                            Default: 4\n"
    "    --with-raw              Include original raw log messages in the output.\n"
@@ -158,7 +158,7 @@ aushape_conf_load(struct aushape_conf *pconf, int argc, char **argv)
         .input = "-",
         .format = {
             .lang = AUSHAPE_LANG_JSON,
-            .fold_level = 5,
+            .fold_level = 4,
             .init_indent = 0,
             .nest_indent = 4,
             .events_per_doc = SSIZE_MAX,

@@ -43,8 +43,6 @@ struct aushape_path_coll_loc {
 struct aushape_path_coll {
     /** Abstract base collector */
     struct aushape_coll             coll;
-    /** Raw log buffer */
-    struct aushape_gbuf             raw;
     /** Buffer for items, in order of addition, without separation */
     struct aushape_gbuf             items;
     /**
@@ -62,8 +60,7 @@ static bool
 aushape_path_coll_is_valid(const struct aushape_coll *coll)
 {
     struct aushape_path_coll *path_coll = (struct aushape_path_coll *)coll;
-    return aushape_gbuf_is_valid(&path_coll->raw) &&
-           aushape_gbuf_is_valid(&path_coll->items) &&
+    return aushape_gbuf_is_valid(&path_coll->items) &&
            path_coll->loc_list != NULL &&
            path_coll->loc_size >= AUSHAPE_PATH_COLL_LOC_SIZE_MIN &&
            path_coll->loc_size <= AUSHAPE_PATH_COLL_LOC_SIZE_MAX &&
@@ -75,7 +72,6 @@ aushape_path_coll_init(struct aushape_coll *coll, const void *args)
 {
     struct aushape_path_coll *path_coll = (struct aushape_path_coll *)coll;
     (void)args;
-    aushape_gbuf_init(&path_coll->raw);
     aushape_gbuf_init(&path_coll->items);
     path_coll->loc_size = AUSHAPE_PATH_COLL_LOC_SIZE_MIN;
     path_coll->loc_list = malloc(sizeof(*path_coll->loc_list) *
@@ -89,7 +85,6 @@ aushape_path_coll_cleanup(struct aushape_coll *coll)
     struct aushape_path_coll *path_coll = (struct aushape_path_coll *)coll;
     free(path_coll->loc_list);
     aushape_gbuf_cleanup(&path_coll->items);
-    aushape_gbuf_cleanup(&path_coll->raw);
 }
 
 static bool
@@ -104,7 +99,6 @@ static void
 aushape_path_coll_empty(struct aushape_coll *coll)
 {
     struct aushape_path_coll *path_coll = (struct aushape_path_coll *)coll;
-    aushape_gbuf_empty(&path_coll->raw);
     aushape_gbuf_empty(&path_coll->items);
     path_coll->loc_num = 0;
 }
@@ -118,7 +112,6 @@ aushape_path_coll_add(struct aushape_coll *coll,
     struct aushape_path_coll *path_coll = (struct aushape_path_coll *)coll;
     enum aushape_rc rc;
     size_t l = level;
-    const char *raw;
     size_t start;
     bool first_field = true;
     const char *field_name;
@@ -133,23 +126,7 @@ aushape_path_coll_add(struct aushape_coll *coll,
     start = path_coll->items.len;
 
     /* Account for the record markup */
-    if (coll->format.lang == AUSHAPE_LANG_XML) {
-        l++;
-    } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        l+=2;
-    }
-
-    if (coll->format.with_raw) {
-        /*
-         * Add raw record
-         */
-        if (!aushape_gbuf_is_empty(&path_coll->raw)) {
-            AUSHAPE_GUARD(aushape_gbuf_add_char(&path_coll->raw, '\n'));
-        }
-        raw = auparse_get_record_text(au);
-        AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
-        AUSHAPE_GUARD(aushape_gbuf_add_str(&path_coll->raw, raw));
-    }
+    l++;
 
     /*
      * Begin the item
@@ -252,11 +229,7 @@ aushape_path_coll_add(struct aushape_coll *coll,
     }
 
     /* Account for the record markup */
-    if (coll->format.lang == AUSHAPE_LANG_XML) {
-        l--;
-    } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        l-=2;
-    }
+    l--;
 
     assert(l == level);
 
@@ -285,32 +258,13 @@ aushape_path_coll_end(struct aushape_coll *coll,
     /* Output prologue */
     if (coll->format.lang == AUSHAPE_LANG_XML) {
         AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<path"));
-        if (coll->format.with_raw) {
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, " raw=\""));
-            AUSHAPE_GUARD(aushape_gbuf_add_buf_xml(gbuf,
-                                                   path_coll->raw.ptr,
-                                                   path_coll->raw.len));
-            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
-        }
-        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '>'));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<path>"));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
         if (!*pfirst) {
             AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
         }
         AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"path\":{"));
-        l++;
-        if (coll->format.with_raw) {
-            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"raw\":\""));
-            AUSHAPE_GUARD(aushape_gbuf_add_buf_json(gbuf,
-                                                    path_coll->raw.ptr,
-                                                    path_coll->raw.len));
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\","));
-        }
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"items\":["));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"path\":["));
     }
     l++;
 
@@ -343,9 +297,6 @@ aushape_path_coll_end(struct aushape_coll *coll,
                                                      &coll->format, l));
         }
         AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ']'));
-        l--;
-        AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '}'));
     }
 
     assert(l == level);

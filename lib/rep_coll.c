@@ -29,8 +29,6 @@ struct aushape_rep_coll {
     struct aushape_coll    coll;
     /** Name of the output container */
     const char *name;
-    /** Raw log lines buffer */
-    struct aushape_gbuf lines;
     /** Output log record buffer */
     struct aushape_gbuf items;
 };
@@ -41,7 +39,6 @@ aushape_rep_coll_is_valid(const struct aushape_coll *coll)
     struct aushape_rep_coll *rep_coll =
                     (struct aushape_rep_coll *)coll;
     return rep_coll->name != NULL &&
-           aushape_gbuf_is_valid(&rep_coll->lines) &&
            aushape_gbuf_is_valid(&rep_coll->items);
 }
 
@@ -59,7 +56,6 @@ aushape_rep_coll_init(struct aushape_coll *coll,
                                      rep_args->name != NULL);
 
     rep_coll->name = rep_args->name;
-    aushape_gbuf_init(&rep_coll->lines);
     aushape_gbuf_init(&rep_coll->items);
 
     rc = AUSHAPE_RC_OK;
@@ -72,7 +68,6 @@ aushape_rep_coll_cleanup(struct aushape_coll *coll)
 {
     struct aushape_rep_coll *rep_coll =
                     (struct aushape_rep_coll *)coll;
-    aushape_gbuf_cleanup(&rep_coll->lines);
     aushape_gbuf_cleanup(&rep_coll->items);
 }
 
@@ -81,8 +76,7 @@ aushape_rep_coll_is_empty(const struct aushape_coll *coll)
 {
     struct aushape_rep_coll *rep_coll =
                     (struct aushape_rep_coll *)coll;
-    return aushape_gbuf_is_empty(&rep_coll->lines) &&
-           aushape_gbuf_is_empty(&rep_coll->items);
+    return aushape_gbuf_is_empty(&rep_coll->items);
 }
 
 static void
@@ -90,7 +84,6 @@ aushape_rep_coll_empty(struct aushape_coll *coll)
 {
     struct aushape_rep_coll *rep_coll =
                     (struct aushape_rep_coll *)coll;
-    aushape_gbuf_empty(&rep_coll->lines);
     aushape_gbuf_empty(&rep_coll->items);
 }
 
@@ -105,7 +98,6 @@ aushape_rep_coll_add(struct aushape_coll *coll,
     struct aushape_rep_coll *rep_coll =
                     (struct aushape_rep_coll *)coll;
     struct aushape_gbuf *items;
-    const char *raw;
     size_t len;
 
     (void)pfirst;
@@ -117,23 +109,7 @@ aushape_rep_coll_add(struct aushape_coll *coll,
     items = &rep_coll->items;
 
     /* Account for the container markup */
-    if (coll->format.lang == AUSHAPE_LANG_XML) {
-        l++;
-    } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        l+=2;
-    }
-
-    if (coll->format.with_raw) {
-        /*
-         * Add the raw line
-         */
-        raw = auparse_get_record_text(au);
-        AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, raw != NULL);
-        if (!aushape_gbuf_is_empty(&rep_coll->lines)) {
-            AUSHAPE_GUARD(aushape_gbuf_add_char(&rep_coll->lines, '\n'));
-        }
-        AUSHAPE_GUARD(aushape_gbuf_add_str(&rep_coll->lines, raw));
-    }
+    l++;
 
     /*
      * Begin the output record
@@ -179,11 +155,7 @@ aushape_rep_coll_add(struct aushape_coll *coll,
     }
 
     /* Account for the container markup */
-    if (coll->format.lang == AUSHAPE_LANG_XML) {
-        l--;
-    } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        l-=2;
-    }
+    l--;
 
     assert(l == level);
     rc = AUSHAPE_RC_OK;
@@ -205,34 +177,13 @@ aushape_rep_coll_end(struct aushape_coll *coll,
     /* Output prologue */
     if (coll->format.lang == AUSHAPE_LANG_XML) {
         AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_fmt(gbuf, "<%s", rep_coll->name));
-        if (coll->format.with_raw) {
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, " raw=\""));
-            AUSHAPE_GUARD(aushape_gbuf_add_buf_xml(gbuf,
-                                                   rep_coll->lines.ptr,
-                                                   rep_coll->lines.len));
-            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
-        }
-        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '>'));
+        AUSHAPE_GUARD(aushape_gbuf_add_fmt(gbuf, "<%s>", rep_coll->name));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
         if (!*pfirst) {
             AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
         }
         AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_fmt(gbuf, "\"%s\":{", rep_coll->name));
-        l++;
-        if (coll->format.with_raw) {
-            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"raw\":\""));
-            AUSHAPE_GUARD(aushape_gbuf_add_buf_json(gbuf,
-                                                    rep_coll->lines.ptr,
-                                                    rep_coll->lines.len));
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\","));
-        }
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "items"));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\":["));
+        AUSHAPE_GUARD(aushape_gbuf_add_fmt(gbuf, "\"%s\":[", rep_coll->name));
     }
     l++;
 
@@ -251,9 +202,6 @@ aushape_rep_coll_end(struct aushape_coll *coll,
             AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &coll->format, l));
         }
         AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ']'));
-        l--;
-        AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '}'));
     }
 
     assert(l == level);
