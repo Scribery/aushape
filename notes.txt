@@ -231,3 +231,19 @@ can add other policies, like limiting document size in bytes, instead of in
 events. With wrapping logic inside the converter we can't do that easily.
 OTOH, we can implement size limiting inside the converter too.
 
+----
+
+We need to limit event size. The question is what to cut. On the top level we
+have records *and* raw log lines. Sometimes we need to process *all* records,
+because some records have data for some other records. Like the syscall
+record having "items" field specifying number of "path" records logged. Or the
+execve records having an argument split between them.
+
+What if we simply format everything in memory and then decide what to cut and
+cut it before output? Sure, that can take a lot of memory, but it will be much
+simpler and still faster than passing huge messages up the pipeline and more
+reliable than just dropping them. For this to work we need to quantize the
+buffers somehow, so that we can go and count out the items that would fit.
+
+This would make the truncating algorithm much simpler. But first, we might
+need to deal with the separators and all that passing "first" argument around.
