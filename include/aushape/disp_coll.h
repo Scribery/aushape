@@ -46,7 +46,7 @@ struct aushape_disp_coll_type_link {
  *  {
  *      {
  *          .name = NULL,
- *          .type = &aushape_single_coll_type
+ *          .type = &aushape_uniq_coll_type
  *       }
  *  }
  *

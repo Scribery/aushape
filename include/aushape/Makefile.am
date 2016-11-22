@@ -44,5 +44,5 @@ noinst_HEADERS = \
     path_coll.h     \
     record.h        \
     rep_coll.h      \
-    single_coll.h   \
-    syslog_misc.h
+    syslog_misc.h   \
+    uniq_coll.h

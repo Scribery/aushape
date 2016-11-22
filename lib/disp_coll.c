@@ -19,7 +19,7 @@
  */
 
 #include <aushape/disp_coll.h>
-#include <aushape/single_coll.h>
+#include <aushape/uniq_coll.h>
 #include <aushape/coll.h>
 #include <aushape/misc.h>
 #include <string.h>
@@ -46,7 +46,7 @@ static const struct aushape_disp_coll_type_link
                             aushape_disp_coll_args_default[] = {
     {
         .name  = NULL,
-        .type  = &aushape_single_coll_type
+        .type  = &aushape_uniq_coll_type
     }
 };
 

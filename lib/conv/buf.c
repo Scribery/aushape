@@ -20,7 +20,7 @@
 
 #include <aushape/conv/buf.h>
 #include <aushape/disp_coll.h>
-#include <aushape/single_coll.h>
+#include <aushape/uniq_coll.h>
 #include <aushape/execve_coll.h>
 #include <aushape/path_coll.h>
 #include <aushape/rep_coll.h>
@@ -62,7 +62,7 @@ aushape_conv_buf_init(struct aushape_conv_buf *buf,
         },
         {
             .name   = NULL,
-            .type   = &aushape_single_coll_type,
+            .type   = &aushape_uniq_coll_type,
             .args   = NULL,
         },
     };

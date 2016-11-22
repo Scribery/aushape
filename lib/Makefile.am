@@ -37,9 +37,9 @@ libaushape_la_SOURCES = \
     rc.c                \
     record.c            \
     rep_coll.c          \
-    single_coll.c       \
     syslog_misc.c       \
-    syslog_output.c
+    syslog_output.c     \
+    uniq_coll.c
 
 libaushape_la_LIBADD = \
     conv/libaushape_conv.la \

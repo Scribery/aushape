@@ -1,5 +1,5 @@
 /**
- * @brief Single (non-aggregated) record collector
+ * @brief Unique (non-aggregated) record collector
  *
  * Copyright (C) 2016 Red Hat
  *
@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _AUSHAPE_SINGLE_COLL_H
-#define _AUSHAPE_SINGLE_COLL_H
+#ifndef _AUSHAPE_UNIQ_COLL_H
+#define _AUSHAPE_UNIQ_COLL_H
 
 #include <aushape/coll_type.h>
 
 /**
- * Single (non-aggregated) record collector type.
+ * Unique (non-aggregated) record collector type.
  *
  * Doesn't require creation arguments.
  *
@@ -34,6 +34,6 @@
  *      AUSHAPE_RC_REPEATED_RECORD  - an unexpected repeated record
  *                                    type encountered
  */
-extern const struct aushape_coll_type aushape_single_coll_type;
+extern const struct aushape_coll_type aushape_uniq_coll_type;
 
-#endif /* _AUSHAPE_SINGLE_COLL_H */
+#endif /* _AUSHAPE_UNIQ_COLL_H */
