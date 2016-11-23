@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <title>aushape by Scribery</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>aushape</h1>
+        <h2>Audit log converter</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/Scribery/aushape/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/Scribery/aushape/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/Scribery/aushape" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <p>Aushape is a tool and a library for converting Linux audit log messages to JSON and XML, allowing both single-shot and streaming conversion.</p>
+
+<p>Aushape output schemas are still in flux, but the main idea is to aggregate input records belonging to the same event into single output event object/element, while keeping the naming and the structure as close to the original audit log as possible:</p>
+
+<p>A truncated JSON example:</p>
+
+<pre><code>[   
+    {   
+        "serial"    : 123,
+        "time"      : "2016-01-03T02:37:51.394+02:00",
+        "host"      : "auditdtest.a1959.org",
+        "text"   : [
+            "node=auditdtest.a1959.org type=SYSCALL ...",
+            "node=auditdtest.a1959.org type=PROCTITLE ...",
+            ...
+        ],
+        "data"   : {
+            "syscall"   : {
+                "syscall"   : ["rt_sigaction","13"],
+                "success"   : ["yes"],
+                "exit"      : ["0"],
+                ...
+            },
+            "proctitle" : {
+                "proctitle" : ["bash","\"bash\""]
+            },
+            ...
+        }
+    },
+    ...
+]
+</code></pre>
+
+<p>A truncated XML example:</p>
+
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;log&gt;
+    &lt;event serial="194433" time="2016-01-03T02:37:51.394+02:00" host="auditdtest.a1959.org"&gt;
+        &lt;text&gt;
+            &lt;line&gt;node=auditdtest.a1959.org type=SYSCALL ...&lt;/line&gt;
+            &lt;line&gt;node=auditdtest.a1959.org type=PROCTITLE ...&lt;/line&gt;
+            ...
+        &lt;/text&gt;
+        &lt;data&gt;
+            &lt;syscall&gt;
+                &lt;syscall i="rt_sigaction" r="13"/&gt;
+                &lt;success i="yes"/&gt;
+                &lt;exit i="0"/&gt;
+                ...
+            &lt;/syscall&gt;
+            &lt;proctitle&gt;
+                &lt;proctitle i="bash" r="&amp;quot;bash&amp;quot;"/&gt;
+            &lt;/proctitle&gt;
+            ...
+        &lt;/data&gt;
+    &lt;/event&gt;
+    ...
+&lt;/log&gt;
+</code></pre>
+
+<p>Aushape can be used on the command line for a single-shot conversion of a log file:</p>
+
+<pre><code>aushape -ljson audit.log &gt; audit.json
+aushape -lxml audit.log &gt; audit.xml
+</code></pre>
+
+<p>or as an audispd plugin, converting audit log messages on the fly and logging them via syslog(3) with specified facility and priority:</p>
+
+<pre><code>aushape -l json --events-per-doc=none --fold=all -o syslog
+</code></pre>
+
+<p>See more in <a href="https://github.com/Scribery/aushape/blob/master/README.md">README.md</a>.</p>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
