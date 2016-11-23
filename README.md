@@ -25,25 +25,23 @@ A truncated JSON example:
             "serial"    : 123,
             "time"      : "2016-01-03T02:37:51.394+02:00",
             "host"      : "auditdtest.a1959.org",
-            "records"   : {
+            "text"   : [
+                "node=auditdtest.a1959.org type=SYSCALL ...",
+                "node=auditdtest.a1959.org type=PROCTITLE ...",
+                ...
+            ],
+            "data"   : {
                 "syscall"   : {
-                    "raw"       : "node=auditdtest.a1959.org type=SYSCALL ...",
-                    "fields"    : {
-                        "syscall"   : ["rt_sigaction","13"],
-                        "success"   : ["yes"],
-                        "exit"      : ["0"],
-                        ...
-                    }
+                    "syscall"   : ["rt_sigaction","13"],
+                    "success"   : ["yes"],
+                    "exit"      : ["0"],
+                    ...
                 },
                 "proctitle" : {
-                    "raw"       : "node=auditdtest.a1959.org type=PROCTITLE ...",
-                    "fields"    : {
-                        "proctitle" : ["bash","\"bash\""]
-                    }
+                    "proctitle" : ["bash","\"bash\""]
                 },
                 ...
             }
-            ...
         },
         ...
     ]
@@ -54,16 +52,23 @@ A truncated XML example:
     <?xml version="1.0" encoding="UTF-8"?>
     <log>
         <event serial="194433" time="2016-01-03T02:37:51.394+02:00" host="auditdtest.a1959.org">
-            <syscall raw="node=auditdtest.a1959.org type=SYSCALL ...">
-                <syscall i="rt_sigaction" r="13"/>
-                <success i="yes"/>
-                <exit i="0"/>
+            <text>
+                <line>node=auditdtest.a1959.org type=SYSCALL ...</line>
+                <line>node=auditdtest.a1959.org type=PROCTITLE ...</line>
                 ...
-            </syscall>
-            <proctitle raw="node=auditdtest.a1959.org type=PROCTITLE ...">
-                <proctitle i="bash" r="&quot;bash&quot;"/>
-            </proctitle>
-            ...
+            </text>
+            <data>
+                <syscall>
+                    <syscall i="rt_sigaction" r="13"/>
+                    <success i="yes"/>
+                    <exit i="0"/>
+                    ...
+                </syscall>
+                <proctitle>
+                    <proctitle i="bash" r="&quot;bash&quot;"/>
+                </proctitle>
+                ...
+            </data>
         </event>
         ...
     </log>
