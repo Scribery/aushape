@@ -94,7 +94,7 @@
 aushape -lxml audit.log &gt; audit.xml
 </code></pre>
 
-<p>or as an audispd plugin, converting audit log messages on the fly and logging them via syslog(3) with specified facility and priority:</p>
+<p>or as an audispd plugin, converting audit log messages on the fly and logging them via syslog(3):</p>
 
 <pre><code>aushape -l json --events-per-doc=none --fold=all -o syslog
 </code></pre>
