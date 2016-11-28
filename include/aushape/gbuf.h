@@ -1,3 +1,6 @@
+/**
+ * @brief (Exponentially) growing buffer
+ */
 /*
  * Copyright (C) 2016 Red Hat
  *
