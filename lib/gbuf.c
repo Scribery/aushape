@@ -26,15 +26,19 @@ bool
 aushape_gbuf_is_valid(const struct aushape_gbuf *gbuf)
 {
     return gbuf != NULL &&
-           (gbuf->ptr == NULL || gbuf->size > 0) &&
+           gbuf->init_size != 0 &&
+           (gbuf->size == 0 ||
+            (gbuf->ptr != NULL && gbuf->size >= gbuf->init_size)) &&
            gbuf->len <= gbuf->size;
 }
 
 void
-aushape_gbuf_init(struct aushape_gbuf *gbuf)
+aushape_gbuf_init(struct aushape_gbuf *gbuf, size_t size)
 {
     assert(gbuf != NULL);
+    assert(size != 0);
     memset(gbuf, 0, sizeof(*gbuf));
+    gbuf->init_size = size;
     assert(aushape_gbuf_is_valid(gbuf));
 }
 
@@ -68,9 +72,9 @@ aushape_gbuf_accomodate(struct aushape_gbuf *gbuf, size_t len)
 
     if (len > gbuf->size) {
         char *new_ptr;
-        size_t new_size = (gbuf->size == 0
-                                ? AUSHAPE_GBUF_SIZE_MIN :
-                                gbuf->size * 2);
+        size_t new_size = gbuf->size == 0
+                            ? gbuf->init_size
+                            : gbuf->size * 2;
         while (new_size < len) {
             new_size *= 2;
         }

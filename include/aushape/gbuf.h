@@ -27,14 +27,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-/** Minimum growing buffer size */
-#define AUSHAPE_GBUF_SIZE_MIN    4096
-
 /** An (exponentially) growing buffer */
 struct aushape_gbuf {
-    char   *ptr;    /**< Pointer to the buffer memory */
-    size_t  size;   /**< Buffer size */
-    size_t  len;    /**< Buffer contents length */
+    char   *ptr;        /**< Pointer to the buffer memory */
+    size_t  size;       /**< Buffer size */
+    size_t  init_size;  /**< Initial buffer size */
+    size_t  len;        /**< Buffer contents length */
 };
 
 /**
@@ -50,8 +48,9 @@ extern bool aushape_gbuf_is_valid(const struct aushape_gbuf *gbuf);
  * Initialize a growing buffer.
  *
  * @param gbuf  The growing buffer to initialize.
+ * @param size  Initial buffer size to allocate. Cannot be zero.
  */
-extern void aushape_gbuf_init(struct aushape_gbuf *gbuf);
+extern void aushape_gbuf_init(struct aushape_gbuf *gbuf, size_t size);
 
 /**
  * Cleanup a growing buffer.

@@ -72,7 +72,7 @@ aushape_path_coll_init(struct aushape_coll *coll, const void *args)
 {
     struct aushape_path_coll *path_coll = (struct aushape_path_coll *)coll;
     (void)args;
-    aushape_gbuf_init(&path_coll->items);
+    aushape_gbuf_init(&path_coll->items, 2048);
     path_coll->loc_size = AUSHAPE_PATH_COLL_LOC_SIZE_MIN;
     path_coll->loc_list = malloc(sizeof(*path_coll->loc_list) *
                                  path_coll->loc_size);

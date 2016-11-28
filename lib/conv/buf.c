@@ -74,8 +74,8 @@ aushape_conv_buf_init(struct aushape_conv_buf *buf,
     }
     memset(buf, 0, sizeof(*buf));
     buf->format = *format;
-    aushape_gbuf_init(&buf->gbuf);
-    aushape_gbuf_init(&buf->data);
+    aushape_gbuf_init(&buf->gbuf, 4096);
+    aushape_gbuf_init(&buf->data, 4096);
     rc = aushape_coll_create(&buf->coll,
                              &aushape_disp_coll_type,
                              &buf->format,

@@ -56,7 +56,7 @@ aushape_rep_coll_init(struct aushape_coll *coll,
                                      rep_args->name != NULL);
 
     rep_coll->name = rep_args->name;
-    aushape_gbuf_init(&rep_coll->items);
+    aushape_gbuf_init(&rep_coll->items, 4096);
 
     rc = AUSHAPE_RC_OK;
 cleanup:

@@ -61,7 +61,7 @@ aushape_execve_coll_init(struct aushape_coll *coll, const void *args)
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
     (void)args;
-    aushape_gbuf_init(&execve_coll->args);
+    aushape_gbuf_init(&execve_coll->args, 1024);
     return AUSHAPE_RC_OK;
 }
 

@@ -46,7 +46,7 @@ aushape_uniq_coll_init(struct aushape_coll *coll,
     struct aushape_uniq_coll *uniq_coll =
                     (struct aushape_uniq_coll *)coll;
     (void)args;
-    aushape_gbuf_init(&uniq_coll->seen);
+    aushape_gbuf_init(&uniq_coll->seen, 4096);
     return AUSHAPE_RC_OK;
 }
 
