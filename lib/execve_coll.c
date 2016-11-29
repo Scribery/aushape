@@ -365,6 +365,9 @@ aushape_execve_coll_add_arg_slice(struct aushape_coll *coll,
      * This seems to be true, since there is no sense in outputting an empty
      * quoted argument slice - the only quoted slice that can be half the
      * length when "interpreted".
+     *
+     * FIXME No, empty quoted argument length is 2, while unquoted would be 0.
+     *       What about "xx", which *will* be half the length unquoted?
      */
     len = (int_len == raw_len / 2) ? raw_len : int_len;
     AUSHAPE_GUARD_BOOL(INVALID_EXECVE,
