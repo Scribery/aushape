@@ -38,6 +38,7 @@ noinst_HEADERS = \
     disp_coll.h     \
     execve_coll.h   \
     field.h         \
+    garr.h          \
     gbuf.h          \
     guard.h         \
     misc.h          \

@@ -31,6 +31,7 @@ libaushape_la_SOURCES = \
     execve_coll.c       \
     fd_output.c         \
     field.c             \
+    garr.c              \
     gbuf.c              \
     output.c            \
     path_coll.c         \
