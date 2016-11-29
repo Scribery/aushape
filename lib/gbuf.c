@@ -1,4 +1,6 @@
 /*
+ * (Exponentially) growing text buffer.
+ *
  * Copyright (C) 2016 Red Hat
  *
  * This library is free software; you can redistribute it and/or
