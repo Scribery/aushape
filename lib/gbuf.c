@@ -128,7 +128,7 @@ aushape_gbuf_add_buf(struct aushape_gbuf *gbuf, const void *ptr, size_t len)
     size_t new_len;
 
     assert(aushape_gbuf_is_valid(gbuf));
-    assert(ptr != NULL);
+    assert(ptr != NULL || len == 0);
 
     if (len == 0) {
         return AUSHAPE_RC_OK;
