@@ -23,6 +23,7 @@
 #define _AUSHAPE_GBUF_H
 
 #include <aushape/format.h>
+#include <aushape/rc.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdbool.h>
