@@ -39,6 +39,8 @@ noinst_HEADERS = \
     execve_coll.h   \
     field.h         \
     garr.h          \
+    gbnode.h        \
+    gbtree.h        \
     gbuf.h          \
     guard.h         \
     misc.h          \
