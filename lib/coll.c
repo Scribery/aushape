@@ -25,7 +25,7 @@ enum aushape_rc
 aushape_coll_create(struct aushape_coll **pcoll,
                     const struct aushape_coll_type *type,
                     const struct aushape_format *format,
-                    struct aushape_gbuf *gbuf,
+                    struct aushape_gbtree *gbtree,
                     const void *args)
 {
     enum aushape_rc rc;
@@ -34,7 +34,7 @@ aushape_coll_create(struct aushape_coll **pcoll,
     if (pcoll == NULL ||
         !aushape_coll_type_is_valid(type) ||
         !aushape_format_is_valid(format) ||
-        !aushape_gbuf_is_valid(gbuf)) {
+        !aushape_gbtree_is_valid(gbtree)) {
         return AUSHAPE_RC_INVALID_ARGS;
     }
 
@@ -44,7 +44,7 @@ aushape_coll_create(struct aushape_coll **pcoll,
     } else {
         coll->type = type;
         coll->format = *format;
-        coll->gbuf = gbuf;
+        coll->gbtree = gbtree;
 
         rc = (type->init != NULL) ? type->init(coll, args) : AUSHAPE_RC_OK;
         if (rc == AUSHAPE_RC_OK) {
@@ -64,7 +64,7 @@ aushape_coll_is_valid(const struct aushape_coll *coll)
     return coll != NULL &&
            aushape_coll_type_is_valid(coll->type) &&
            aushape_format_is_valid(&coll->format) &&
-           aushape_gbuf_is_valid(coll->gbuf) &&
+           aushape_gbtree_is_valid(coll->gbtree) &&
            (coll->type->is_valid == NULL ||
             coll->type->is_valid(coll));
 }
@@ -108,26 +108,28 @@ aushape_coll_is_ended(const struct aushape_coll *coll)
 
 enum aushape_rc
 aushape_coll_add(struct aushape_coll *coll,
+                 size_t *pcount,
                  size_t level,
-                 bool *pfirst,
+                 size_t prio,
                  auparse_state_t *au)
 {
-    if (!aushape_coll_is_valid(coll) || pfirst == NULL || au == NULL) {
+    if (!aushape_coll_is_valid(coll) || pcount == NULL || au == NULL) {
         return AUSHAPE_RC_INVALID_ARGS;
     }
     if (aushape_coll_is_ended(coll)) {
         return AUSHAPE_RC_INVALID_STATE;
     }
-    return coll->type->add(coll, level, pfirst, au);
+    return coll->type->add(coll, pcount, level, prio, au);
 }
 
 enum aushape_rc
 aushape_coll_end(struct aushape_coll *coll,
+                 size_t *pcount,
                  size_t level,
-                 bool *pfirst)
+                 size_t prio)
 {
     enum aushape_rc rc;
-    if (!aushape_coll_is_valid(coll) || pfirst == NULL) {
+    if (!aushape_coll_is_valid(coll) || pcount == NULL) {
         return AUSHAPE_RC_INVALID_ARGS;
     }
     if (aushape_coll_is_empty(coll) ||
@@ -135,7 +137,7 @@ aushape_coll_end(struct aushape_coll *coll,
         return AUSHAPE_RC_OK;
     }
     rc = (coll->type->end != NULL)
-                ? coll->type->end(coll, level, pfirst)
+                ? coll->type->end(coll, pcount, level, prio)
                 : AUSHAPE_RC_OK;
     if (rc == AUSHAPE_RC_OK) {
         coll->ended = true;

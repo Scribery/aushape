@@ -26,21 +26,21 @@
 
 struct aushape_execve_coll {
     /** Abstract base collector */
-    struct aushape_coll coll;
+    struct aushape_coll     coll;
     /** Formatted argument list buffer */
-    struct aushape_gbuf args;
+    struct aushape_gbtree   args;
     /** Number of arguments expected */
-    size_t              arg_num;
+    size_t                  arg_num;
     /** Index of the argument being read */
-    size_t              arg_idx;
+    size_t                  arg_idx;
     /** True if argument length is specified */
-    bool                got_len;
+    bool                    got_len;
     /** Index of the argument slice being read */
-    size_t              slice_idx;
+    size_t                  slice_idx;
     /** Total length of the argument being read */
-    size_t              len_total;
+    size_t                  len_total;
     /** Length of the argument read so far */
-    size_t              len_read;
+    size_t                  len_read;
 };
 
 static bool
@@ -48,7 +48,7 @@ aushape_execve_coll_is_valid(const struct aushape_coll *coll)
 {
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
-    return aushape_gbuf_is_valid(&execve_coll->args) &&
+    return aushape_gbtree_is_valid(&execve_coll->args) &&
            execve_coll->arg_idx <= execve_coll->arg_num &&
            (execve_coll->got_len ||
             (execve_coll->slice_idx == 0 && execve_coll->len_total == 0)) &&
@@ -61,7 +61,7 @@ aushape_execve_coll_init(struct aushape_coll *coll, const void *args)
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
     (void)args;
-    aushape_gbuf_init(&execve_coll->args, 1024);
+    aushape_gbtree_init(&execve_coll->args, 1024, 8, 8);
     return AUSHAPE_RC_OK;
 }
 
@@ -70,7 +70,7 @@ aushape_execve_coll_cleanup(struct aushape_coll *coll)
 {
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
-    aushape_gbuf_cleanup(&execve_coll->args);
+    aushape_gbtree_cleanup(&execve_coll->args);
 }
 
 static bool
@@ -86,7 +86,7 @@ aushape_execve_coll_empty(struct aushape_coll *coll)
 {
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
-    aushape_gbuf_empty(&execve_coll->args);
+    aushape_gbtree_empty(&execve_coll->args);
     execve_coll->arg_num = 0;
     execve_coll->arg_idx = 0;
     execve_coll->got_len = false;
@@ -157,6 +157,8 @@ aushape_execve_coll_add_arg_str(struct aushape_coll *coll,
 {
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
+    struct aushape_gbtree *gbtree = &execve_coll->args;
+    struct aushape_gbuf *gbuf = &gbtree->text;
     enum aushape_rc rc;
 
     assert(aushape_coll_is_valid(coll));
@@ -164,22 +166,21 @@ aushape_execve_coll_add_arg_str(struct aushape_coll *coll,
     assert(str != NULL);
 
     if (coll->format.lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(&execve_coll->args,
-                                                 &coll->format, level));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(&execve_coll->args, "<a i=\""));
-        AUSHAPE_GUARD(aushape_gbuf_add_str_xml(&execve_coll->args, str));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(&execve_coll->args, "\"/>"));
+        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, level));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<a i=\""));
+        AUSHAPE_GUARD(aushape_gbuf_add_str_xml(gbuf, str));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"/>"));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
         /* If it's not the first argument in the record */
         if (execve_coll->arg_idx > 0) {
-            AUSHAPE_GUARD(aushape_gbuf_add_char(&execve_coll->args, ','));
+            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
         }
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(&execve_coll->args,
-                                                 &coll->format, level));
-        AUSHAPE_GUARD(aushape_gbuf_add_char(&execve_coll->args, '"'));
-        AUSHAPE_GUARD(aushape_gbuf_add_str_json(&execve_coll->args, str));
-        AUSHAPE_GUARD(aushape_gbuf_add_char(&execve_coll->args, '"'));
+        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, level));
+        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
+        AUSHAPE_GUARD(aushape_gbuf_add_str_json(gbuf, str));
+        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
     }
+    AUSHAPE_GUARD(aushape_gbtree_node_add_text(gbtree, execve_coll->arg_idx));
 
     execve_coll->arg_idx++;
 
@@ -328,6 +329,8 @@ aushape_execve_coll_add_arg_slice(struct aushape_coll *coll,
 {
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
+    struct aushape_gbtree *gbtree = &execve_coll->args;
+    struct aushape_gbuf *gbuf = &gbtree->text;
     enum aushape_rc rc;
     const char *raw_str;
     size_t raw_len;
@@ -377,39 +380,44 @@ aushape_execve_coll_add_arg_slice(struct aushape_coll *coll,
     if (slice_idx == 0) {
         /* Begin argument markup */
         if (coll->format.lang == AUSHAPE_LANG_XML) {
-            AUSHAPE_GUARD(aushape_gbuf_space_opening(&execve_coll->args,
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf,
                                                      &coll->format, level));
-            AUSHAPE_GUARD(aushape_gbuf_add_str(&execve_coll->args,
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf,
                                                "<a i=\""));
         } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
             /* If it's not the first argument in the record */
             if (execve_coll->arg_idx > 0) {
-                AUSHAPE_GUARD(aushape_gbuf_add_char(&execve_coll->args, ','));
+                AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
             }
-            AUSHAPE_GUARD(aushape_gbuf_space_opening(&execve_coll->args,
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf,
                                                      &coll->format, level));
-            AUSHAPE_GUARD(aushape_gbuf_add_char(&execve_coll->args, '"'));
+            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
         }
     }
     /* Add the slice */
     if (coll->format.lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD(aushape_gbuf_add_str_xml(&execve_coll->args, int_str));
+        AUSHAPE_GUARD(aushape_gbuf_add_str_xml(gbuf, int_str));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        AUSHAPE_GUARD(aushape_gbuf_add_str_json(&execve_coll->args, int_str));
+        AUSHAPE_GUARD(aushape_gbuf_add_str_json(gbuf, int_str));
     }
     execve_coll->len_read += len;
     /* If we have finished the argument */
     if (execve_coll->len_read == execve_coll->len_total) {
         /* End argument markup */
         if (coll->format.lang == AUSHAPE_LANG_XML) {
-            AUSHAPE_GUARD(aushape_gbuf_add_str(&execve_coll->args, "\"/>"));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"/>"));
         } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-            AUSHAPE_GUARD(aushape_gbuf_add_char(&execve_coll->args, '"'));
+            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
         }
+        /* Commit argument */
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(gbtree,
+                                                   execve_coll->arg_idx));
+        /* Reset parsing state */
         execve_coll->got_len = 0;
         execve_coll->slice_idx = 0;
         execve_coll->len_total = 0;
         execve_coll->len_read = 0;
+        /* Move onto the next argument */
         execve_coll->arg_idx++;
     } else {
         execve_coll->slice_idx++;
@@ -423,18 +431,41 @@ cleanup:
 
 static enum aushape_rc
 aushape_execve_coll_add(struct aushape_coll *coll,
+                        size_t *pcount,
                         size_t level,
-                        bool *pfirst,
+                        size_t prio,
                         auparse_state_t *au)
 {
+    struct aushape_execve_coll *execve_coll =
+                    (struct aushape_execve_coll *)coll;
+    struct aushape_gbtree *gbtree = &execve_coll->args;
+    struct aushape_gbuf *gbuf = &gbtree->text;
     enum aushape_rc rc;
-    size_t l = level + 1;
+    size_t l = level;
     const char *field_name;
     size_t arg_idx;
     size_t slice_idx;
     int end;
 
-    (void)pfirst;
+    (void)pcount;
+    (void)prio;
+
+    /* If output hasn't started yet */
+    if (aushape_gbtree_is_empty(gbtree)) {
+        /* Output prologue */
+        if (coll->format.lang == AUSHAPE_LANG_XML) {
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<execve>"));
+        } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"execve\":["));
+        }
+        /* Commit prologue item */
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(gbtree, 0));
+    }
+
+    /* Account for the container markup */
+    l++;
 
     /*
      * For each field in the record
@@ -477,6 +508,10 @@ aushape_execve_coll_add(struct aushape_coll *coll,
         }
     } while (auparse_next_field(au) > 0);
 
+    /* Account for the container markup */
+    l--;
+
+    assert(l == level);
     rc = AUSHAPE_RC_OK;
 cleanup:
     return rc;
@@ -484,26 +519,18 @@ cleanup:
 
 static enum aushape_rc
 aushape_execve_coll_end(struct aushape_coll *coll,
+                        size_t *pcount,
                         size_t level,
-                        bool *pfirst)
+                        size_t prio)
 {
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
+    struct aushape_gbtree *gbtree = &execve_coll->args;
+    struct aushape_gbuf *gbuf = &gbtree->text;
     enum aushape_rc rc = AUSHAPE_RC_OK;
-    struct aushape_gbuf *gbuf = coll->gbuf;
     size_t l = level;
 
-    /* Output prologue */
-    if (coll->format.lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<execve>"));
-    } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        if (!*pfirst) {
-            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
-        }
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"execve\":["));
-    }
+    /* Account for the container markup */
     l++;
 
     /* Add skipped empty arguments */
@@ -514,25 +541,31 @@ aushape_execve_coll_end(struct aushape_coll *coll,
         }
     }
 
-    /* Output arguments */
-    AUSHAPE_GUARD(aushape_gbuf_add_buf(gbuf,
-                                       execve_coll->args.ptr,
-                                       execve_coll->args.len));
-
+    /* Account for the container markup */
     l--;
+
     /* Output epilogue */
     if (coll->format.lang == AUSHAPE_LANG_XML) {
         AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &coll->format, l));
         AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "</execve>"));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        if (execve_coll->args.len > 0) {
+        if (execve_coll->arg_num > 0) {
             AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &coll->format, l));
         }
         AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ']'));
     }
+    /* Commit epilogue item */
+    AUSHAPE_GUARD(aushape_gbtree_node_add_text(gbtree, 0));
+
+    /* Commit record */
+    if (coll->format.lang == AUSHAPE_LANG_JSON && *pcount > 0) {
+        AUSHAPE_GUARD(aushape_gbuf_add_char(&coll->gbtree->text, ','));
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(coll->gbtree, prio));
+    }
+    AUSHAPE_GUARD(aushape_gbtree_node_add_tree(coll->gbtree, prio, gbtree));
 
     assert(l == level);
-    *pfirst = false;
+    (*pcount)++;
     rc = AUSHAPE_RC_OK;
 cleanup:
     return rc;

@@ -26,11 +26,11 @@
 
 struct aushape_rep_coll {
     /** Abstract base collector */
-    struct aushape_coll    coll;
+    struct aushape_coll     coll;
     /** Name of the output container */
-    const char *name;
-    /** Output log record buffer */
-    struct aushape_gbuf items;
+    const char             *name;
+    /** Items growing buffer tree */
+    struct aushape_gbtree   items;
 };
 
 static bool
@@ -39,7 +39,7 @@ aushape_rep_coll_is_valid(const struct aushape_coll *coll)
     struct aushape_rep_coll *rep_coll =
                     (struct aushape_rep_coll *)coll;
     return rep_coll->name != NULL &&
-           aushape_gbuf_is_valid(&rep_coll->items);
+           aushape_gbtree_is_valid(&rep_coll->items);
 }
 
 static enum aushape_rc
@@ -56,7 +56,7 @@ aushape_rep_coll_init(struct aushape_coll *coll,
                                      rep_args->name != NULL);
 
     rep_coll->name = rep_args->name;
-    aushape_gbuf_init(&rep_coll->items, 4096);
+    aushape_gbtree_init(&rep_coll->items, 4096, 8, 8);
 
     rc = AUSHAPE_RC_OK;
 cleanup:
@@ -68,7 +68,7 @@ aushape_rep_coll_cleanup(struct aushape_coll *coll)
 {
     struct aushape_rep_coll *rep_coll =
                     (struct aushape_rep_coll *)coll;
-    aushape_gbuf_cleanup(&rep_coll->items);
+    aushape_gbtree_cleanup(&rep_coll->items);
 }
 
 static bool
@@ -76,7 +76,7 @@ aushape_rep_coll_is_empty(const struct aushape_coll *coll)
 {
     struct aushape_rep_coll *rep_coll =
                     (struct aushape_rep_coll *)coll;
-    return aushape_gbuf_is_empty(&rep_coll->items);
+    return aushape_gbtree_is_empty(&rep_coll->items);
 }
 
 static void
@@ -84,45 +84,60 @@ aushape_rep_coll_empty(struct aushape_coll *coll)
 {
     struct aushape_rep_coll *rep_coll =
                     (struct aushape_rep_coll *)coll;
-    aushape_gbuf_empty(&rep_coll->items);
+    aushape_gbtree_empty(&rep_coll->items);
 }
 
 static enum aushape_rc
 aushape_rep_coll_add(struct aushape_coll *coll,
+                     size_t *pcount,
                      size_t level,
-                     bool *pfirst,
+                     size_t prio,
                      auparse_state_t *au)
 {
     enum aushape_rc rc;
     size_t l = level;
     struct aushape_rep_coll *rep_coll =
                     (struct aushape_rep_coll *)coll;
-    struct aushape_gbuf *items;
+    struct aushape_gbtree *gbtree = &rep_coll->items;
+    struct aushape_gbuf *gbuf = &gbtree->text;
     size_t len;
 
-    (void)pfirst;
+    (void)pcount;
+    (void)prio;
 
     assert(aushape_coll_is_valid(coll));
-    assert(pfirst != NULL);
+    assert(pcount != NULL);
     assert(au != NULL);
 
-    items = &rep_coll->items;
+    /* If it's the first record */
+    if (aushape_gbtree_is_empty(gbtree)) {
+        /* Output prologue */
+        if (coll->format.lang == AUSHAPE_LANG_XML) {
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
+            AUSHAPE_GUARD(aushape_gbuf_add_fmt(gbuf, "<%s>", rep_coll->name));
+        } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
+            AUSHAPE_GUARD(aushape_gbuf_add_fmt(gbuf, "\"%s\":[", rep_coll->name));
+        }
+        /* Commit prologue item */
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(gbtree, 0));
+    }
 
     /* Account for the container markup */
     l++;
 
     /*
-     * Begin the output record
+     * Begin the item
      */
     if (coll->format.lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(items, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(items, "<item>"));
+        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<item>"));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        if (!aushape_gbuf_is_empty(items)) {
-            AUSHAPE_GUARD(aushape_gbuf_add_char(items, ','));
+        if (aushape_gbtree_get_node_num(gbtree) > 1) {
+            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
         }
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(items, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_char(items, '{'));
+        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '{'));
     }
 
     l++;
@@ -130,8 +145,8 @@ aushape_rep_coll_add(struct aushape_coll *coll,
     /*
      * Output the fields
      */
-    len = items->len;
-    rc = aushape_record_format_fields(items, &coll->format,
+    len = gbuf->len;
+    rc = aushape_record_format_fields(gbuf, &coll->format,
                                       l, au);
     if (rc != AUSHAPE_RC_OK) {
         assert(rc != AUSHAPE_RC_INVALID_ARGS);
@@ -141,18 +156,24 @@ aushape_rep_coll_add(struct aushape_coll *coll,
     l--;
 
     /*
-     * Finish the output record
+     * Finish the item
      */
     if (coll->format.lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD(aushape_gbuf_space_closing(items, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(items, "</item>"));
+        AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &coll->format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "</item>"));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        if (items->len > len) {
-            AUSHAPE_GUARD(aushape_gbuf_space_closing(items,
+        if (gbuf->len > len) {
+            AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf,
                                                      &coll->format, l));
         }
-        AUSHAPE_GUARD(aushape_gbuf_add_char(items, '}'));
+        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '}'));
     }
+
+    /*
+     * Commit the item
+     */
+    aushape_gbtree_node_add_text(gbtree,
+                                 aushape_gbtree_get_node_num(gbtree) - 1);
 
     /* Account for the container markup */
     l--;
@@ -165,47 +186,42 @@ cleanup:
 
 static enum aushape_rc
 aushape_rep_coll_end(struct aushape_coll *coll,
-                        size_t level,
-                        bool *pfirst)
+                     size_t *pcount,
+                     size_t level,
+                     size_t prio)
 {
     struct aushape_rep_coll *rep_coll =
                     (struct aushape_rep_coll *)coll;
+    struct aushape_gbtree *gbtree = &rep_coll->items;
+    struct aushape_gbuf *gbuf = &gbtree->text;
     enum aushape_rc rc = AUSHAPE_RC_OK;
-    struct aushape_gbuf *gbuf = coll->gbuf;
     size_t l = level;
 
-    /* Output prologue */
-    if (coll->format.lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_fmt(gbuf, "<%s>", rep_coll->name));
-    } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        if (!*pfirst) {
-            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
-        }
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_fmt(gbuf, "\"%s\":[", rep_coll->name));
-    }
-    l++;
+    assert(aushape_coll_is_valid(coll));
+    assert(pcount != NULL);
 
-    /* Output items */
-    AUSHAPE_GUARD(aushape_gbuf_add_buf(gbuf,
-                                       rep_coll->items.ptr,
-                                       rep_coll->items.len));
-
-    l--;
     /* Output epilogue */
     if (coll->format.lang == AUSHAPE_LANG_XML) {
         AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &coll->format, l));
         AUSHAPE_GUARD(aushape_gbuf_add_fmt(gbuf, "</%s>", rep_coll->name));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        if (!aushape_gbuf_is_empty(&rep_coll->items)) {
+        if (!aushape_gbtree_is_empty(&rep_coll->items)) {
             AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &coll->format, l));
         }
         AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ']'));
     }
+    /* Commit epilogue */
+    AUSHAPE_GUARD(aushape_gbtree_node_add_text(gbtree, 0));
+
+    /* Output record */
+    if (coll->format.lang == AUSHAPE_LANG_JSON && *pcount > 0) {
+        AUSHAPE_GUARD(aushape_gbuf_add_char(&coll->gbtree->text, ','));
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(coll->gbtree, prio));
+    }
+    AUSHAPE_GUARD(aushape_gbtree_node_add_tree(coll->gbtree, prio, gbtree));
 
     assert(l == level);
-    *pfirst = false;
+    (*pcount)++;
     rc = AUSHAPE_RC_OK;
 cleanup:
     return rc;

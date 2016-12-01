@@ -92,10 +92,10 @@ typedef void (*aushape_coll_type_empty_fn)(
  * complete record.
  *
  * @param coll      The collector to add the record to.
+ * @param pcount    Location of/for the record counter in the container.
+ *                  Incremented for every record added by the function.
  * @param level     Syntactic nesting level to output at.
- * @param pfirst    Location of the flag being true if the output container
- *                  already had a record added, and false otherwise. Will be
- *                  set to false if the function added a record.
+ * @param prio      Growing buffer tree priority to add the record with.
  * @param au        The auparse state with the current record as the record to
  *                  be added.
  *
@@ -109,8 +109,9 @@ typedef void (*aushape_coll_type_empty_fn)(
  */
 typedef enum aushape_rc (*aushape_coll_type_add_fn)(
                                 struct aushape_coll *coll,
+                                size_t *pcount,
                                 size_t level,
-                                bool *pfirst,
+                                size_t prio,
                                 auparse_state_t *au);
 
 /**
@@ -119,10 +120,10 @@ typedef enum aushape_rc (*aushape_coll_type_add_fn)(
  * ended. Can output a complete record.
  *
  * @param coll      The collector to end the sequence for.
+ * @param pcount    Location of/for the record counter in the container.
+ *                  Incremented for every record added by the function.
  * @param level     Syntactic nesting level to output at.
- * @param pfirst    Location of the flag being true if the output container
- *                  already had a record added, and false otherwise. Will be
- *                  set to false if the function added a record.
+ * @param prio      Growing buffer tree priority to add the record with.
  *
  * @return Return code:
  *          AUSHAPE_RC_OK               - added succesfully,
@@ -133,8 +134,9 @@ typedef enum aushape_rc (*aushape_coll_type_add_fn)(
  */
 typedef enum aushape_rc (*aushape_coll_type_end_fn)(
                                 struct aushape_coll *coll,
+                                size_t *pcount,
                                 size_t level,
-                                bool *pfirst);
+                                size_t prio);
 
 /** Record collector type */
 struct aushape_coll_type {

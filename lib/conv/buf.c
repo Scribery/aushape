@@ -34,6 +34,9 @@ aushape_conv_buf_is_valid(const struct aushape_conv_buf *buf)
     return buf != NULL &&
            aushape_format_is_valid(&buf->format) &&
            aushape_gbuf_is_valid(&buf->gbuf) &&
+           aushape_gbtree_is_valid(&buf->event) &&
+           aushape_gbtree_is_valid(&buf->text) &&
+           aushape_gbtree_is_valid(&buf->data) &&
            aushape_coll_is_valid(buf->coll);
 }
 
@@ -75,12 +78,13 @@ aushape_conv_buf_init(struct aushape_conv_buf *buf,
     memset(buf, 0, sizeof(*buf));
     buf->format = *format;
     aushape_gbuf_init(&buf->gbuf, 4096);
-    aushape_gbuf_init(&buf->data, 4096);
+    aushape_gbtree_init(&buf->event, 1024, 32, 32);
+    aushape_gbtree_init(&buf->text, 4096, 8, 8);
+    aushape_gbtree_init(&buf->data, 4096, 256, 256);
     rc = aushape_coll_create(&buf->coll,
                              &aushape_disp_coll_type,
                              &buf->format,
-                             /* Divert to separate buffer, if with text */
-                             format->with_text ? &buf->data : &buf->gbuf,
+                             &buf->data,
                              &map);
     if (rc != AUSHAPE_RC_OK) {
         assert(rc != AUSHAPE_RC_INVALID_ARGS);
@@ -94,9 +98,11 @@ void
 aushape_conv_buf_cleanup(struct aushape_conv_buf *buf)
 {
     assert(aushape_conv_buf_is_valid(buf));
-    aushape_gbuf_cleanup(&buf->gbuf);
-    aushape_gbuf_cleanup(&buf->data);
     aushape_coll_destroy(buf->coll);
+    aushape_gbtree_cleanup(&buf->data);
+    aushape_gbtree_cleanup(&buf->text);
+    aushape_gbtree_cleanup(&buf->event);
+    aushape_gbuf_cleanup(&buf->gbuf);
     memset(buf, 0, sizeof(*buf));
 }
 
@@ -105,7 +111,6 @@ aushape_conv_buf_empty(struct aushape_conv_buf *buf)
 {
     assert(aushape_conv_buf_is_valid(buf));
     aushape_gbuf_empty(&buf->gbuf);
-    aushape_gbuf_empty(&buf->data);
     aushape_coll_empty(buf->coll);
     assert(aushape_conv_buf_is_valid(buf));
 }
@@ -123,20 +128,23 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     char time_buf[32];
     char zone_buf[16];
     char timestamp_buf[64];
-    bool first_text;
-    bool first_data;
-    struct aushape_gbuf *gbuf;
-    struct aushape_gbuf *data;
+    size_t line_num;
+    size_t record_num;
+    struct aushape_gbtree *event_tree = &buf->event;
+    struct aushape_gbuf *event_buf = &event_tree->text;
+    struct aushape_gbtree *text_tree = &buf->text;
+    struct aushape_gbuf *text_buf = &text_tree->text;
+    struct aushape_gbtree *data_tree = &buf->data;
+    struct aushape_gbuf *data_buf = &data_tree->text;
+    const char *line;
+    size_t trimmed_node_index;
+    size_t error_node_index;
 
     assert(aushape_conv_buf_is_valid(buf));
     assert(au != NULL);
 
     level = buf->format.events_per_doc != 0;
     l = level;
-
-    /* Divert data to separate buffer if also outputting text */
-    data = buf->format.with_text ? &buf->data : &buf->gbuf;
-    gbuf = &buf->gbuf;
 
     e = auparse_get_timestamp(au);
     AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, e != NULL);
@@ -150,90 +158,114 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
 
     /* Output event header */
     if (buf->format.lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &buf->format, l));
+        /* Add start tag header node */
+        AUSHAPE_GUARD(aushape_gbuf_space_opening(event_buf, &buf->format, l));
         AUSHAPE_GUARD(aushape_gbuf_add_fmt(
-                            gbuf, "<event serial=\"%lu\" time=\"%s\"",
+                            event_buf, "<event serial=\"%lu\" time=\"%s\"",
                             e->serial, timestamp_buf));
         if (e->host != NULL) {
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, " host=\""));
-            AUSHAPE_GUARD(aushape_gbuf_add_str_xml(gbuf, e->host));
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\""));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(event_buf, " host=\""));
+            AUSHAPE_GUARD(aushape_gbuf_add_str_xml(event_buf, e->host));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(event_buf, "\""));
         }
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, ">"));
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(event_tree, 0));
+        /* Add empty placeholder node for trimmed attribute */
+        trimmed_node_index = aushape_gbtree_get_node_num(event_tree);
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(event_tree, 0));
+        /* Add empty placeholder node for error attribute */
+        error_node_index = aushape_gbtree_get_node_num(event_tree);
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(event_tree, 0));
+        /* Add start tag trailer node */
+        AUSHAPE_GUARD(aushape_gbuf_add_str(event_buf, ">"));
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(event_tree, 0));
+
         l++;
-        /* Begin source text, if any */
-        if (buf->format.with_text) {
-            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &buf->format, l));
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<text>"));
-        }
-        /* Begin data */
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(data, &buf->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(data, "<data>"));
+
+        /* Begin and attach text node */
+        AUSHAPE_GUARD(aushape_gbuf_space_opening(text_buf, &buf->format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(text_buf, "<text>"));
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(text_tree, 0));
+        AUSHAPE_GUARD(aushape_gbtree_node_add_tree(event_tree, 1, text_tree));
+
+        /* Begin and attach data node */
+        AUSHAPE_GUARD(aushape_gbuf_space_opening(data_buf, &buf->format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(data_buf, "<data>"));
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(data_tree, 0));
+        AUSHAPE_GUARD(aushape_gbtree_node_add_tree(event_tree, 2, data_tree));
     } else {
-        /* Begin event */
+        /* Add event header */
         if (!first) {
-            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
+            AUSHAPE_GUARD(aushape_gbuf_add_char(event_buf, ','));
         }
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf,
+        AUSHAPE_GUARD(aushape_gbuf_space_opening(event_buf,
                                                  &buf->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '{'));
+        AUSHAPE_GUARD(aushape_gbuf_add_char(event_buf, '{'));
         l++;
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf,
+        AUSHAPE_GUARD(aushape_gbuf_space_opening(event_buf,
                                                  &buf->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_fmt(gbuf,
+        AUSHAPE_GUARD(aushape_gbuf_add_fmt(event_buf,
                                            "\"serial\":%lu,", e->serial));
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf,
+        AUSHAPE_GUARD(aushape_gbuf_space_opening(event_buf,
                                                  &buf->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_fmt(gbuf,
+        AUSHAPE_GUARD(aushape_gbuf_add_fmt(event_buf,
                                            "\"time\":\"%s\",",
                                            timestamp_buf));
         if (e->host != NULL) {
-            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &buf->format, l));
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"host\":\""));
-            AUSHAPE_GUARD(aushape_gbuf_add_str_json(gbuf, e->host));
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\","));
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(event_buf, &buf->format, l));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(event_buf, "\"host\":\""));
+            AUSHAPE_GUARD(aushape_gbuf_add_str_json(event_buf, e->host));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(event_buf, "\","));
         }
-        /* Begin source text, if any */
-        if (buf->format.with_text) {
-            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &buf->format, l));
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"text\":["));
-        }
-        /* Begin data */
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(data, &buf->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(data, "\"data\":{"));
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(event_tree, 0));
+        /* Add empty placeholder node for trimmed attribute */
+        trimmed_node_index = aushape_gbtree_get_node_num(event_tree);
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(event_tree, 0));
+        /* Add empty placeholder node for error attribute */
+        error_node_index = aushape_gbtree_get_node_num(event_tree);
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(event_tree, 0));
+
+        /* Begin and attach text node */
+        AUSHAPE_GUARD(aushape_gbuf_space_opening(text_buf, &buf->format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(text_buf, "\"text\":["));
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(text_tree, 0));
+        AUSHAPE_GUARD(aushape_gbtree_node_add_tree(event_tree, 1, text_tree));
+        /* Begin and attach data node */
+        AUSHAPE_GUARD(aushape_gbuf_space_opening(data_buf, &buf->format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(data_buf, "\"data\":{"));
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(data_tree, 0));
+        AUSHAPE_GUARD(aushape_gbtree_node_add_tree(event_tree, 2, data_tree));
     }
 
     l++;
 
-    /* Output records */
+    /* Output raw and parsed records */
     AUSHAPE_GUARD_BOOL(AUPARSE_FAILED,
                        auparse_first_record(au) >= 0);
-    first_text = true;
-    first_data = true;
+    line_num = 0;
+    record_num = 0;
     do {
-        /* Add the source text, if requested */
-        if (buf->format.with_text) {
-            const char *text;
-            text = auparse_get_record_text(au);
-            AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, text != NULL);
-            if (buf->format.lang == AUSHAPE_LANG_XML) {
-                AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &buf->format, l));
-                AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<line>"));
-                AUSHAPE_GUARD(aushape_gbuf_add_str_xml(gbuf, text));
-                AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "</line>"));
-            } else if (buf->format.lang == AUSHAPE_LANG_JSON) {
-                if (!first_text) {
-                    AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
-                }
-                AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &buf->format, l));
-                AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
-                AUSHAPE_GUARD(aushape_gbuf_add_str_json(gbuf, text));
-                AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
+        /* Add the source text line */
+        line = auparse_get_record_text(au);
+        AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, line != NULL);
+        if (buf->format.lang == AUSHAPE_LANG_XML) {
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(text_buf, &buf->format, l));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(text_buf, "<line>"));
+            AUSHAPE_GUARD(aushape_gbuf_add_str_xml(text_buf, line));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(text_buf, "</line>"));
+        } else if (buf->format.lang == AUSHAPE_LANG_JSON) {
+            if (line_num > 0) {
+                AUSHAPE_GUARD(aushape_gbuf_add_char(text_buf, ','));
             }
-            first_text = false;
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(text_buf, &buf->format, l));
+            AUSHAPE_GUARD(aushape_gbuf_add_char(text_buf, '"'));
+            AUSHAPE_GUARD(aushape_gbuf_add_str_json(text_buf, line));
+            AUSHAPE_GUARD(aushape_gbuf_add_char(text_buf, '"'));
         }
-        /* Add the record to the collector */
-        rc = aushape_coll_add(buf->coll, l, &first_data, au);
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(text_tree, line_num));
+        line_num++;
+
+        /* Add the parsed record to the collector */
+        rc = aushape_coll_add(buf->coll, &record_num, l, record_num, au);
         if (rc != AUSHAPE_RC_OK) {
             assert(rc != AUSHAPE_RC_INVALID_ARGS);
             assert(rc != AUSHAPE_RC_INVALID_STATE);
@@ -242,8 +274,10 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         }
     } while(auparse_next_record(au) > 0);
 
+    (void)error_node_index;
+
     /* Make sure the record sequence is complete and added, if any */
-    rc = aushape_coll_end(buf->coll, l, &first_data);
+    rc = aushape_coll_end(buf->coll, &record_num, l, record_num);
     if (rc != AUSHAPE_RC_OK) {
         assert(rc != AUSHAPE_RC_INVALID_ARGS);
         assert(aushape_conv_buf_is_valid(buf));
@@ -252,47 +286,53 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
 
     l--;
 
+    /* Terminate source text */
+    if (buf->format.lang == AUSHAPE_LANG_XML) {
+        AUSHAPE_GUARD(aushape_gbuf_space_closing(text_buf, &buf->format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(text_buf, "</text>"));
+    } else if (buf->format.lang == AUSHAPE_LANG_JSON) {
+        if (line_num > 0) {
+            AUSHAPE_GUARD(aushape_gbuf_space_closing(text_buf, &buf->format, l));
+        }
+        AUSHAPE_GUARD(aushape_gbuf_add_str(text_buf, "],"));
+    }
+    AUSHAPE_GUARD(aushape_gbtree_node_add_text(text_tree, 0));
+
     /* Terminate data */
     if (buf->format.lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD(aushape_gbuf_space_closing(data, &buf->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(data, "</data>"));
+        AUSHAPE_GUARD(aushape_gbuf_space_closing(data_buf, &buf->format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(data_buf, "</data>"));
     } else if (buf->format.lang == AUSHAPE_LANG_JSON) {
-        if (!first_data) {
-            AUSHAPE_GUARD(aushape_gbuf_space_closing(data, &buf->format, l));
+        if (record_num > 0) {
+            AUSHAPE_GUARD(aushape_gbuf_space_closing(data_buf, &buf->format, l));
         }
-        AUSHAPE_GUARD(aushape_gbuf_add_char(data, '}'));
+        AUSHAPE_GUARD(aushape_gbuf_add_char(data_buf, '}'));
     }
-
-    /* If also outputting the source text */
-    if (buf->format.with_text) {
-        /* Terminate source text */
-        if (buf->format.lang == AUSHAPE_LANG_XML) {
-            AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &buf->format, l));
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "</text>"));
-        } else if (buf->format.lang == AUSHAPE_LANG_JSON) {
-            if (!first_data) {
-                AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &buf->format, l));
-            }
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "],"));
-        }
-        /* Paste the data */
-        AUSHAPE_GUARD(aushape_gbuf_add_buf(gbuf, data->ptr, data->len));
-    }
+    AUSHAPE_GUARD(aushape_gbtree_node_add_text(data_tree, 0));
 
     l--;
 
     /* Terminate event */
     if (buf->format.lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &buf->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "</event>"));
+        AUSHAPE_GUARD(aushape_gbuf_space_closing(event_buf, &buf->format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(event_buf, "</event>"));
     } else {
-        AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &buf->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '}'));
+        AUSHAPE_GUARD(aushape_gbuf_space_closing(event_buf, &buf->format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_char(event_buf, '}'));
     }
+    AUSHAPE_GUARD(aushape_gbtree_node_add_text(event_tree, 0));
+
+    (void)trimmed_node_index;
+
+    /* Render the event */
+    AUSHAPE_GUARD(aushape_gbtree_render(event_tree, &buf->gbuf));
 
     assert(l == level);
     rc = AUSHAPE_RC_OK;
 cleanup:
+    aushape_gbtree_empty(event_tree);
+    aushape_gbtree_empty(text_tree);
+    aushape_gbtree_empty(data_tree);
     assert(aushape_conv_buf_is_valid(buf));
     return rc;
 }

@@ -22,7 +22,7 @@
 #define _AUSHAPE_COLL_H
 
 #include <aushape/coll_type.h>
-#include <aushape/gbuf.h>
+#include <aushape/gbtree.h>
 
 /** Abstract record collector instance */
 struct aushape_coll {
@@ -30,8 +30,8 @@ struct aushape_coll {
     const struct aushape_coll_type *type;
     /** The output format to use */
     struct aushape_format           format;
-    /** The growing buffer to add collected output records to */
-    struct aushape_gbuf            *gbuf;
+    /** The growing buffer tree to add collected output records to */
+    struct aushape_gbtree          *gbtree;
     /** True if the record sequence was ended, false otherwise */
     bool                            ended;
 };
@@ -42,9 +42,9 @@ struct aushape_coll {
  * @param pcoll     Location for the created collector pointer, cannot be NULL.
  * @param type      The type of the collector to create.
  * @param format    The output format to use.
- * @param gbuf      The growing buffer to add collected output records to.
- *                  Never emptied by the collector. Must stay valid for the
- *                  existence of the collector.
+ * @param gbtree    The growing buffer tree to add collected output records
+ *                  to. Never emptied by the collector. Must stay valid for
+ *                  the existence of the collector.
  * @param args      Initialization arguments, type-specific. See description
  *                  of the corresponding type for the expected values.
  *
@@ -60,7 +60,7 @@ extern enum aushape_rc aushape_coll_create(
                                 struct aushape_coll **pcoll,
                                 const struct aushape_coll_type *type,
                                 const struct aushape_format *format,
-                                struct aushape_gbuf *gbuf,
+                                struct aushape_gbtree *gbtree,
                                 const void *args);
 
 /**
@@ -111,10 +111,10 @@ extern bool aushape_coll_is_ended(const struct aushape_coll *coll);
  * emptying the collector first.
  *
  * @param coll      The collector to add the record to.
+ * @param pcount    Location of/for the record counter in the container.
+ *                  Incremented for every record added by the function.
  * @param level     Syntactic nesting level to output at.
- * @param pfirst    Location of the flag being true if the output container
- *                  already had a record added, and false otherwise. Will be
- *                  set to false if the function added a record.
+ * @param prio      Growing buffer tree priority to add the record with.
  * @param au        The auparse state with the current record as the record to
  *                  be added.
  *
@@ -130,8 +130,9 @@ extern bool aushape_coll_is_ended(const struct aushape_coll *coll);
  *                                        documentation.
  */
 extern enum aushape_rc aushape_coll_add(struct aushape_coll *coll,
+                                        size_t *pcount,
                                         size_t level,
-                                        bool *pfirst,
+                                        size_t prio,
                                         auparse_state_t *au);
 
 /**
@@ -140,10 +141,10 @@ extern enum aushape_rc aushape_coll_add(struct aushape_coll *coll,
  * created or ended.
  *
  * @param coll      The collector to end the sequence for.
+ * @param pcount    Location of/for the record counter in the container.
+ *                  Incremented for every record added by the function.
  * @param level     Syntactic nesting level to output at.
- * @param pfirst    Location of the flag being true if the output container
- *                  already had a record added, and false otherwise. Will be
- *                  set to false if the function added a record.
+ * @param prio      Growing buffer tree priority to add the record with.
  *
  * @return Return code:
  *          AUSHAPE_RC_OK               - added succesfully,
@@ -154,7 +155,8 @@ extern enum aushape_rc aushape_coll_add(struct aushape_coll *coll,
  *                                        documentation.
  */
 extern enum aushape_rc aushape_coll_end(struct aushape_coll *coll,
+                                        size_t *pcount,
                                         size_t level,
-                                        bool *pfirst);
+                                        size_t prio);
 
 #endif /* _AUSHAPE_COLL_H */

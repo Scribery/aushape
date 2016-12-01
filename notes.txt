@@ -247,3 +247,48 @@ buffers somehow, so that we can go and count out the items that would fit.
 
 This would make the truncating algorithm much simpler. But first, we might
 need to deal with the separators and all that passing "first" argument around.
+
+----
+
+If we want to have structured truncating, we need to define that structure.
+What if we model the output as a prologue, epilogue, and a series of items?
+The prologue and epilogue cannot be removed then, but items can. Each item can
+then have a priority which will decide the order of the items being removed.
+
+As most of the time we'll need the tail to be removed, and it's more
+human-friendly to be counting up, the top priority would have the smallest
+value. I.e. 1 - top priority, SIZE_MAX - lowest priority.
+
+Each item can be a piece of text, or another, nested structure.
+
+We can further abstract the prologue and epilogue to simply be top priority
+items that cannot be removed. E.g. priority zero. Then we don't have to know
+anything more about them. Although, we would need to have a rule that items of
+the same priority can only be removed together.
+
+In fact, we can even model the whole truncating hierarchy simply by using the
+priority value. The only difficulty is managing the value appropriately with
+arbitrary-length nested lists. We can surrender a few top bits of a size_t for
+nesting level and still have plenty of space in the remaining bits. Let's say
+we support 16 nesting levels (even though we use less than 8 currently), then
+we need only four bits for that and we have 28 or 60 bits left still. Even
+with 28 bits we have space for 268435455 items, which is a lot.
+
+However, we have a problem of locating maximums in that flat list, or a tree,
+which can take a while for a large event.
+
+Alright, first, a tree would make more sense, as parts of the output can be
+accumulated in a random order and we would need a tree anyway. Then, to prune
+the excess, we would need to descend into highest-priority branches first and
+keep adding to the global counter and then stop when we exceed the maximum.
+
+We can once again sacrifice the memory for performance and have an array of
+priorities vs size for each list, assuming we need at most the number of items
+of priorities, and they grow steadily. Then we can do one sweep of the item
+array, sum up all the sizes for each priority, and then go down that priority
+array, summing it up, and decide on which priority level we want to keep.
+
+We can start with the dumbest, slowest algorightm, though. Not that the one
+above is very smart either, but we can use a simpler one still.
+
+

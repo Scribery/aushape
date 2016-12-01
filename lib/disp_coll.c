@@ -105,7 +105,7 @@ aushape_disp_coll_init(struct aushape_coll *coll,
     while (true) {
         inst_link->name = type_link->name;
         rc = aushape_coll_create(&inst_link->inst, type_link->type,
-                                 &coll->format, coll->gbuf,
+                                 &coll->format, coll->gbtree,
                                  type_link->args);
         if (rc != AUSHAPE_RC_OK) {
             assert(rc != AUSHAPE_RC_INVALID_ARGS);
@@ -207,14 +207,15 @@ aushape_disp_coll_lookup(struct aushape_coll *coll,
 
 static enum aushape_rc
 aushape_disp_coll_add(struct aushape_coll *coll,
+                      size_t *pcount,
                       size_t level,
-                      bool *pfirst,
+                      size_t prio,
                       auparse_state_t *au)
 {
     const char *name;
     assert(aushape_coll_is_valid(coll));
     assert(coll->type == &aushape_disp_coll_type);
-    assert(pfirst != NULL);
+    assert(pcount != NULL);
     assert(au != NULL);
 
     name = auparse_get_type_name(au);
@@ -222,26 +223,31 @@ aushape_disp_coll_add(struct aushape_coll *coll,
         return AUSHAPE_RC_AUPARSE_FAILED;
     }
     return aushape_coll_add(aushape_disp_coll_lookup(coll, name),
-                            level, pfirst, au);
+                            pcount, level, prio, au);
 }
 
 static enum aushape_rc
 aushape_disp_coll_end(struct aushape_coll *coll,
+                      size_t *pcount,
                       size_t level,
-                      bool *pfirst)
+                      size_t prio)
 {
     struct aushape_disp_coll *disp_coll =
                     (struct aushape_disp_coll *)coll;
     struct aushape_disp_coll_inst_link *link;
+    size_t prev_count;
     enum aushape_rc rc;
 
     assert(aushape_coll_is_valid(coll));
     assert(coll->type == &aushape_disp_coll_type);
-    assert(pfirst != NULL);
+    assert(pcount != NULL);
 
     link = disp_coll->map;
     do {
-        rc = aushape_coll_end(link->inst, level, pfirst);
+        prev_count = *pcount;
+        rc = aushape_coll_end(link->inst, pcount, level, prio);
+        /* FIXME We can't really mess with priority here */
+        prio += *pcount - prev_count;
         if (rc != AUSHAPE_RC_OK) {
             assert(rc != AUSHAPE_RC_INVALID_ARGS);
             return rc;

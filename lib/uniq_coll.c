@@ -133,15 +133,16 @@ aushape_uniq_coll_seen_add(struct aushape_coll *coll,
 
 static enum aushape_rc
 aushape_uniq_coll_add(struct aushape_coll *coll,
+                      size_t *pcount,
                       size_t level,
-                      bool *pfirst,
+                      size_t prio,
                       auparse_state_t *au)
 {
     enum aushape_rc rc;
     const char *name;
 
     assert(aushape_coll_is_valid(coll));
-    assert(pfirst != NULL);
+    assert(pcount != NULL);
     assert(au != NULL);
 
     name = auparse_get_type_name(au);
@@ -152,13 +153,14 @@ aushape_uniq_coll_add(struct aushape_coll *coll,
     } else {
         AUSHAPE_GUARD(aushape_uniq_coll_seen_add(coll, name));
     }
-    rc = aushape_record_format(coll->gbuf, &coll->format,
-                               level, *pfirst, name, au);
+    rc = aushape_record_format(&coll->gbtree->text,
+                               &coll->format, level, *pcount == 0, name, au);
     if (rc != AUSHAPE_RC_OK) {
         assert(rc != AUSHAPE_RC_INVALID_ARGS);
         goto cleanup;
     }
-    *pfirst = false;
+    AUSHAPE_GUARD(aushape_gbtree_node_add_text(coll->gbtree, prio));
+    (*pcount)++;
     rc = AUSHAPE_RC_OK;
 cleanup:
     return rc;

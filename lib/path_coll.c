@@ -25,46 +25,22 @@
 #include <string.h>
 #include <stdio.h>
 
-/** Location of an item in the output buffer */
-struct aushape_path_coll_loc {
-    /** Offset */
-    size_t  off;
-    /** Length */
-    size_t  len;
-};
-
-/** Minimum number of allocated item locations */
-#define AUSHAPE_PATH_COLL_LOC_SIZE_MIN  16
-
-/** Maximum number of allocated item locations */
-#define AUSHAPE_PATH_COLL_LOC_SIZE_MAX  4096
+/** Maximum accepted path item index */
+#define AUSHAPE_PATH_COLL_MAX_IDX   255
 
 /** Path record collector */
 struct aushape_path_coll {
     /** Abstract base collector */
     struct aushape_coll             coll;
-    /** Buffer for items, in order of addition, without separation */
-    struct aushape_gbuf             items;
-    /**
-     * Item locations within the buffer, in the proper order.
-     * Zero item length means item wasn't encountered yet.
-     */
-    struct aushape_path_coll_loc   *loc_list;
-    /** Number of allocated item locations */
-    size_t                          loc_size;
-    /** Number of valid item locations (max index seen + 1) */
-    size_t                          loc_num;
+    /** Growing buffer tree for items */
+    struct aushape_gbtree           items;
 };
 
 static bool
 aushape_path_coll_is_valid(const struct aushape_coll *coll)
 {
     struct aushape_path_coll *path_coll = (struct aushape_path_coll *)coll;
-    return aushape_gbuf_is_valid(&path_coll->items) &&
-           path_coll->loc_list != NULL &&
-           path_coll->loc_size >= AUSHAPE_PATH_COLL_LOC_SIZE_MIN &&
-           path_coll->loc_size <= AUSHAPE_PATH_COLL_LOC_SIZE_MAX &&
-           path_coll->loc_num <= path_coll->loc_size;
+    return aushape_gbtree_is_valid(&path_coll->items);
 }
 
 static enum aushape_rc
@@ -72,10 +48,7 @@ aushape_path_coll_init(struct aushape_coll *coll, const void *args)
 {
     struct aushape_path_coll *path_coll = (struct aushape_path_coll *)coll;
     (void)args;
-    aushape_gbuf_init(&path_coll->items, 2048);
-    path_coll->loc_size = AUSHAPE_PATH_COLL_LOC_SIZE_MIN;
-    path_coll->loc_list = malloc(sizeof(*path_coll->loc_list) *
-                                 path_coll->loc_size);
+    aushape_gbtree_init(&path_coll->items, 2048, 8, 8);
     return AUSHAPE_RC_OK;
 }
 
@@ -83,8 +56,7 @@ static void
 aushape_path_coll_cleanup(struct aushape_coll *coll)
 {
     struct aushape_path_coll *path_coll = (struct aushape_path_coll *)coll;
-    free(path_coll->loc_list);
-    aushape_gbuf_cleanup(&path_coll->items);
+    aushape_gbtree_cleanup(&path_coll->items);
 }
 
 static bool
@@ -92,38 +64,52 @@ aushape_path_coll_is_empty(const struct aushape_coll *coll)
 {
     struct aushape_path_coll *path_coll =
                     (struct aushape_path_coll *)coll;
-    return path_coll->loc_num == 0;
+    return aushape_gbtree_is_empty(&path_coll->items);
 }
 
 static void
 aushape_path_coll_empty(struct aushape_coll *coll)
 {
     struct aushape_path_coll *path_coll = (struct aushape_path_coll *)coll;
-    aushape_gbuf_empty(&path_coll->items);
-    path_coll->loc_num = 0;
+    aushape_gbtree_empty(&path_coll->items);
 }
 
 static enum aushape_rc
 aushape_path_coll_add(struct aushape_coll *coll,
+                      size_t *pcount,
                       size_t level,
-                      bool *pfirst,
+                      size_t prio,
                       auparse_state_t *au)
 {
     struct aushape_path_coll *path_coll = (struct aushape_path_coll *)coll;
+    struct aushape_gbtree *gbtree = &path_coll->items;
+    struct aushape_gbuf *gbuf = &gbtree->text;
     enum aushape_rc rc;
     size_t l = level;
-    size_t start;
     bool first_field = true;
     const char *field_name;
     const char *field_value;
     bool got_idx = false;
     size_t idx;
     int end;
+    size_t node_idx;
 
-    (void)pfirst;
+    (void)pcount;
+    (void)prio;
 
-    /* Remember the new item start offset in the buffer */
-    start = path_coll->items.len;
+    /* If haven't output anything yet */
+    if (aushape_gbtree_is_empty(gbtree)) {
+        /* Output prologue */
+        if (coll->format.lang == AUSHAPE_LANG_XML) {
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<path>"));
+        } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"path\":["));
+        }
+        /* Commit prologue item */
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(gbtree, 0));
+    }
 
     /* Account for the record markup */
     l++;
@@ -132,13 +118,11 @@ aushape_path_coll_add(struct aushape_coll *coll,
      * Begin the item
      */
     if (coll->format.lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(&path_coll->items,
-                                                 &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(&path_coll->items, "<item>"));
+        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<item>"));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(&path_coll->items,
-                                                 &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_char(&path_coll->items, '{'));
+        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '{'));
     }
     l++;
 
@@ -167,43 +151,14 @@ aushape_path_coll_add(struct aushape_coll *coll,
             AUSHAPE_GUARD_BOOL(
                     INVALID_PATH,
                     sscanf(field_value, "%zu%n", &idx, &end) >= 1 &&
-                    (size_t)end == strlen(field_value));
+                    (size_t)end == strlen(field_value) &&
+                    idx <= AUSHAPE_PATH_COLL_MAX_IDX);
 
-            /* Make sure the space for the item is allocated */
-            if (idx > path_coll->loc_size) {
-                struct aushape_path_coll_loc *new_loc_list;
-                size_t new_loc_size = path_coll->loc_size;
-                do {
-                    new_loc_size *= 2;
-                    AUSHAPE_GUARD_BOOL(
-                            INVALID_PATH,
-                            new_loc_size <= AUSHAPE_PATH_COLL_LOC_SIZE_MAX);
-                } while (idx >= new_loc_size);
-                new_loc_list = realloc(path_coll->loc_list,
-                                       sizeof(*new_loc_list) * new_loc_size);
-                AUSHAPE_GUARD_BOOL(NOMEM, new_loc_list != NULL);
-                path_coll->loc_list = new_loc_list;
-                memset(path_coll->loc_list + path_coll->loc_size, 0,
-                       (new_loc_size - path_coll->loc_size) *
-                        sizeof(*new_loc_list));
-                path_coll->loc_size = new_loc_size;
-            }
-
-            /* Make sure the item slot is accounted for and is unnocupied */
-            if (idx >= path_coll->loc_num) {
-                path_coll->loc_num = idx + 1;
-            } else {
-                AUSHAPE_GUARD_BOOL(INVALID_PATH,
-                                   path_coll->loc_list[idx].len == 0);
-            }
-
-            /* Record the item start index */
-            path_coll->loc_list[idx].off = start;
             got_idx = true;
         /* If it's something else */
         } else {
             /* Add the field */
-            AUSHAPE_GUARD(aushape_field_format(&path_coll->items,
+            AUSHAPE_GUARD(aushape_field_format(gbuf,
                                                &coll->format, l,
                                                first_field,
                                                field_name, au));
@@ -219,23 +174,25 @@ aushape_path_coll_add(struct aushape_coll *coll,
      */
     l--;
     if (coll->format.lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD(aushape_gbuf_space_closing(&path_coll->items,
-                                                 &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(&path_coll->items, "</item>"));
+        AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &coll->format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "</item>"));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        AUSHAPE_GUARD(aushape_gbuf_space_closing(&path_coll->items,
-                                                 &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_char(&path_coll->items, '}'));
+        AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &coll->format, l));
+        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '}'));
     }
+
+    /*
+     * Commit the item, leaving space for separator items, if needed
+     */
+    node_idx = ((coll->format.lang == AUSHAPE_LANG_JSON) ? idx * 2 : idx) + 1;
+    AUSHAPE_GUARD_BOOL(INVALID_PATH,
+                       !aushape_gbtree_node_exists(gbtree, node_idx));
+    AUSHAPE_GUARD(aushape_gbtree_node_put_text(gbtree, node_idx, idx));
 
     /* Account for the record markup */
     l--;
 
     assert(l == level);
-
-    /* Record item length */
-    path_coll->loc_list[idx].len = path_coll->items.len - start;
-
     rc = AUSHAPE_RC_OK;
 cleanup:
     return rc;
@@ -243,64 +200,60 @@ cleanup:
 
 static enum aushape_rc
 aushape_path_coll_end(struct aushape_coll *coll,
+                      size_t *pcount,
                       size_t level,
-                      bool *pfirst)
+                      size_t prio)
 {
     struct aushape_path_coll *path_coll =
                     (struct aushape_path_coll *)coll;
+    struct aushape_gbtree *gbtree = &path_coll->items;
+    struct aushape_gbuf *gbuf = &gbtree->text;
     enum aushape_rc rc = AUSHAPE_RC_OK;
-    struct aushape_gbuf *gbuf = coll->gbuf;
-    size_t l = level;
     size_t idx;
-    const char *ptr;
-    size_t len;
 
-    /* Output prologue */
-    if (coll->format.lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<path>"));
-    } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        if (!*pfirst) {
-            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
-        }
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"path\":["));
-    }
-    l++;
+    assert(aushape_coll_is_valid(coll));
+    assert(pcount != NULL);
 
-    /* Output items */
-    for (idx = 0; idx < path_coll->loc_num; idx++) {
-        /* Add separator, if necessary */
+    /* Insert item separators, if needed */
+    if (aushape_gbtree_get_node_num(gbtree) > 1) {
         if (coll->format.lang == AUSHAPE_LANG_JSON) {
-            /* If it's not the first item */
-            if (idx > 0) {
+            for (idx = 1;
+                 idx <= (aushape_gbtree_get_node_num(gbtree) - 1) / 2;
+                 idx++) {
+                /* TODO Reuse the comma, don't copy */
                 AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
+                AUSHAPE_GUARD(aushape_gbtree_node_put_text(gbtree,
+                                                           idx * 2, idx));
             }
         }
-        /* Get the item location and length */
-        ptr = path_coll->items.ptr + path_coll->loc_list[idx].off;
-        len = path_coll->loc_list[idx].len;
-        /* Check that the item is not missing */
-        AUSHAPE_GUARD_BOOL(INVALID_PATH, len != 0);
-        /* Add the item */
-        AUSHAPE_GUARD(aushape_gbuf_add_buf(gbuf, ptr, len));
     }
 
-    l--;
+    /* Check that all items were received */
+    AUSHAPE_GUARD_BOOL(INVALID_PATH,
+                       aushape_gbtree_is_solid(gbtree));
+
     /* Output epilogue */
     if (coll->format.lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &coll->format, l));
+        AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &coll->format, level));
         AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "</path>"));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        if (path_coll->loc_num > 0) {
+        if (aushape_gbtree_get_node_num(gbtree) > 1) {
             AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf,
-                                                     &coll->format, l));
+                                                     &coll->format, level));
         }
         AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ']'));
     }
+    /* Commit epilogue item */
+    AUSHAPE_GUARD(aushape_gbtree_node_add_text(gbtree, 0));
 
-    assert(l == level);
-    *pfirst = false;
+    /* Commit record */
+    if (coll->format.lang == AUSHAPE_LANG_JSON && *pcount > 0) {
+        AUSHAPE_GUARD(aushape_gbuf_add_char(&coll->gbtree->text, ','));
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(coll->gbtree, prio));
+    }
+    AUSHAPE_GUARD(aushape_gbtree_node_add_tree(coll->gbtree, prio, gbtree));
+
+    (*pcount)++;
     rc = AUSHAPE_RC_OK;
 cleanup:
     return rc;

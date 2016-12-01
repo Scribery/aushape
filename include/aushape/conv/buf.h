@@ -23,6 +23,7 @@
 
 #include <aushape/coll.h>
 #include <aushape/format.h>
+#include <aushape/gbtree.h>
 #include <aushape/gbuf.h>
 #include <aushape/rc.h>
 #include <auparse.h>
@@ -33,8 +34,12 @@ struct aushape_conv_buf {
     struct aushape_format   format;
     /** Growing buffer for an output piece */
     struct aushape_gbuf     gbuf;
-    /** Growing buffer for diverted parsed data */
-    struct aushape_gbuf     data;
+    /** Growing buffer tree for an event */
+    struct aushape_gbtree   event;
+    /** Growing buffer sub-tree for event's text */
+    struct aushape_gbtree   text;
+    /** Growing buffer sub-tree for event's data */
+    struct aushape_gbtree   data;
     /** Record collector */
     struct aushape_coll    *coll;
 };
