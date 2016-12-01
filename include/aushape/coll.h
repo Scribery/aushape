@@ -22,6 +22,7 @@
 #define _AUSHAPE_COLL_H
 
 #include <aushape/coll_type.h>
+#include <aushape/gbuf.h>
 
 /** Abstract record collector instance */
 struct aushape_coll {

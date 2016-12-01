@@ -21,10 +21,10 @@
 #ifndef _AUSHAPE_COLL_TYPE_H
 #define _AUSHAPE_COLL_TYPE_H
 
-#include <aushape/gbuf.h>
 #include <aushape/rc.h>
 #include <auparse.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 /** Forward declaration of record collector instance */
 struct aushape_coll;
