@@ -137,8 +137,11 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     struct aushape_gbtree *data_tree = &buf->data;
     struct aushape_gbuf *data_buf = &data_tree->text;
     const char *line;
+    enum aushape_rc error_rc;
     size_t trimmed_node_index;
     size_t error_node_index;
+    size_t text_node_index;
+    size_t data_node_index;
 
     assert(aushape_conv_buf_is_valid(buf));
     assert(au != NULL);
@@ -185,12 +188,14 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         AUSHAPE_GUARD(aushape_gbuf_space_opening(text_buf, &buf->format, l));
         AUSHAPE_GUARD(aushape_gbuf_add_str(text_buf, "<text>"));
         AUSHAPE_GUARD(aushape_gbtree_node_add_text(text_tree, 0));
+        text_node_index = aushape_gbtree_get_node_num(event_tree);
         AUSHAPE_GUARD(aushape_gbtree_node_add_tree(event_tree, 1, text_tree));
 
         /* Begin and attach data node */
         AUSHAPE_GUARD(aushape_gbuf_space_opening(data_buf, &buf->format, l));
         AUSHAPE_GUARD(aushape_gbuf_add_str(data_buf, "<data>"));
         AUSHAPE_GUARD(aushape_gbtree_node_add_text(data_tree, 0));
+        data_node_index = aushape_gbtree_get_node_num(event_tree);
         AUSHAPE_GUARD(aushape_gbtree_node_add_tree(event_tree, 2, data_tree));
     } else {
         /* Add event header */
@@ -228,11 +233,13 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         AUSHAPE_GUARD(aushape_gbuf_space_opening(text_buf, &buf->format, l));
         AUSHAPE_GUARD(aushape_gbuf_add_str(text_buf, "\"text\":["));
         AUSHAPE_GUARD(aushape_gbtree_node_add_text(text_tree, 0));
+        text_node_index = aushape_gbtree_get_node_num(event_tree);
         AUSHAPE_GUARD(aushape_gbtree_node_add_tree(event_tree, 1, text_tree));
         /* Begin and attach data node */
         AUSHAPE_GUARD(aushape_gbuf_space_opening(data_buf, &buf->format, l));
         AUSHAPE_GUARD(aushape_gbuf_add_str(data_buf, "\"data\":{"));
         AUSHAPE_GUARD(aushape_gbtree_node_add_text(data_tree, 0));
+        data_node_index = aushape_gbtree_get_node_num(event_tree);
         AUSHAPE_GUARD(aushape_gbtree_node_add_tree(event_tree, 2, data_tree));
     }
 
@@ -243,6 +250,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
                        auparse_first_record(au) >= 0);
     line_num = 0;
     record_num = 0;
+    error_rc = AUSHAPE_RC_OK;
     do {
         /* Add the source text line */
         line = auparse_get_record_text(au);
@@ -264,24 +272,25 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         AUSHAPE_GUARD(aushape_gbtree_node_add_text(text_tree, line_num));
         line_num++;
 
-        /* Add the parsed record to the collector */
-        rc = aushape_coll_add(buf->coll, &record_num, l, record_num, au);
-        if (rc != AUSHAPE_RC_OK) {
-            assert(rc != AUSHAPE_RC_INVALID_ARGS);
-            assert(rc != AUSHAPE_RC_INVALID_STATE);
-            assert(aushape_conv_buf_is_valid(buf));
-            goto cleanup;
+        if (error_rc == AUSHAPE_RC_OK) {
+            /* Add the parsed record to the collector */
+            rc = aushape_coll_add(buf->coll, &record_num, l, record_num, au);
+            if (rc != AUSHAPE_RC_OK) {
+                assert(rc != AUSHAPE_RC_INVALID_ARGS);
+                assert(rc != AUSHAPE_RC_INVALID_STATE);
+                error_rc = rc;
+            }
         }
     } while(auparse_next_record(au) > 0);
 
-    (void)error_node_index;
-
-    /* Make sure the record sequence is complete and added, if any */
-    rc = aushape_coll_end(buf->coll, &record_num, l, record_num);
-    if (rc != AUSHAPE_RC_OK) {
-        assert(rc != AUSHAPE_RC_INVALID_ARGS);
-        assert(aushape_conv_buf_is_valid(buf));
-        goto cleanup;
+    /* Finish the record sequence, if no error has occurred */
+    if (error_rc == AUSHAPE_RC_OK) {
+        rc = aushape_coll_end(buf->coll, &record_num, l, record_num);
+        if (rc != AUSHAPE_RC_OK) {
+            assert(rc != AUSHAPE_RC_INVALID_ARGS);
+            assert(aushape_conv_buf_is_valid(buf));
+            error_rc = rc;
+        }
     }
 
     l--;
@@ -298,17 +307,43 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     }
     AUSHAPE_GUARD(aushape_gbtree_node_add_text(text_tree, 0));
 
-    /* Terminate data */
-    if (buf->format.lang == AUSHAPE_LANG_XML) {
-        AUSHAPE_GUARD(aushape_gbuf_space_closing(data_buf, &buf->format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(data_buf, "</data>"));
-    } else if (buf->format.lang == AUSHAPE_LANG_JSON) {
-        if (record_num > 0) {
-            AUSHAPE_GUARD(aushape_gbuf_space_closing(data_buf, &buf->format, l));
+    /* Terminate data if no error has occured */
+    if (error_rc == AUSHAPE_RC_OK) {
+        if (buf->format.lang == AUSHAPE_LANG_XML) {
+            AUSHAPE_GUARD(aushape_gbuf_space_closing(data_buf,
+                                                     &buf->format, l));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(data_buf, "</data>"));
+        } else if (buf->format.lang == AUSHAPE_LANG_JSON) {
+            if (record_num > 0) {
+                AUSHAPE_GUARD(aushape_gbuf_space_closing(data_buf,
+                                                         &buf->format, l));
+            }
+            AUSHAPE_GUARD(aushape_gbuf_add_char(data_buf, '}'));
         }
-        AUSHAPE_GUARD(aushape_gbuf_add_char(data_buf, '}'));
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(data_tree, 0));
     }
-    AUSHAPE_GUARD(aushape_gbtree_node_add_text(data_tree, 0));
+
+    /* If an error has occurred */
+    if (error_rc != AUSHAPE_RC_OK) {
+        /* Remove the possibly invalid data node */
+        aushape_gbtree_node_void(event_tree, data_node_index);
+        /* Add the error node */
+        if (buf->format.lang == AUSHAPE_LANG_XML) {
+            AUSHAPE_GUARD(aushape_gbuf_add_str(event_buf, " error=\""));
+            AUSHAPE_GUARD(aushape_gbuf_add_str_xml(
+                                    event_buf, aushape_rc_to_desc(error_rc)));
+            AUSHAPE_GUARD(aushape_gbuf_add_char(event_buf, '"'));
+        } else if (buf->format.lang == AUSHAPE_LANG_JSON) {
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(event_buf,
+                                                     &buf->format, l));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(event_buf, "\"error\":\""));
+            AUSHAPE_GUARD(aushape_gbuf_add_str_json(
+                                    event_buf, aushape_rc_to_desc(error_rc)));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(event_buf, "\","));
+        }
+        AUSHAPE_GUARD(aushape_gbtree_node_put_text(event_tree,
+                                                   error_node_index, 0));
+    }
 
     l--;
 
@@ -323,6 +358,12 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     AUSHAPE_GUARD(aushape_gbtree_node_add_text(event_tree, 0));
 
     (void)trimmed_node_index;
+
+    /* If we weren't asked for the source, and no error has occurred */
+    if (!buf->format.with_text && error_rc == AUSHAPE_RC_OK) {
+        /* Remove the text node */
+        aushape_gbtree_node_void(event_tree, text_node_index);
+    }
 
     /* Render the event */
     AUSHAPE_GUARD(aushape_gbtree_render(event_tree, &buf->gbuf));
