@@ -113,7 +113,6 @@ aushape_record_format(struct aushape_gbuf *gbuf,
         if (gbuf->len > len) {
             AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, format, l));
         }
-        AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, format, l));
         AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '}'));
     }
 
