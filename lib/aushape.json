@@ -280,6 +280,17 @@
                     "description":  "Event hostname",
                     "type":         "string"
             },
+            "error": {
+                    "description":  "Conversion error message",
+                    "type":         "string"
+            },
+            "trimmed": {
+                "type":     "array",
+                "description":  "A list of JSONPath expressions relative to the event object, specifying objects/arrays with (some) contents removed as the result of event size limiting. Empty string means event itself. Empty array means trimming occurred at unspecified objects/arrays.",
+                "items": {
+                    "type": "string"
+                }
+            },
             "text": {
                 "type":     "array",
                 "items": {

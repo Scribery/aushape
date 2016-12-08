@@ -695,6 +695,23 @@
             <xsd:attribute name="serial" type="serial" use="required"/>
             <xsd:attribute name="time" type="xsd:dateTime" use="required"/>
             <xsd:attribute name="host" type="xsd:string"/>
+            <xsd:attribute name="error" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Conversion error message.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="trimmed" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        An XPath expression relative to the event element,
+                        specifying the elements with (some) sub-elements
+                        removed as the result of event size limiting. Empty
+                        value means trimming occurred at unspecified elements.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
         </xsd:complexType>
     </xsd:element>
 
