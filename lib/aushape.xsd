@@ -575,7 +575,7 @@
             <xsd:element type="single_record"       name="seccomp" minOccurs="0"/>
             <xsd:element type="single_record"       name="proctitle" minOccurs="0"/>
             <xsd:element type="single_record"       name="feature_change" minOccurs="0"/>
-            <xsd:element type="single_record"       name="avc" minOccurs="0"/>
+            <xsd:element type="repeated_record"     name="avc" minOccurs="0"/>
             <xsd:element type="single_record"       name="selinux_err" minOccurs="0"/>
             <xsd:element type="single_record"       name="avc_path" minOccurs="0"/>
             <xsd:element type="single_record"       name="mac_policy_load" minOccurs="0"/>

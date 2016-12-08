@@ -321,7 +321,7 @@
                     "apparmor_error":                   { "$ref": "#/definitions/single_record" },
                     "apparmor_hint":                    { "$ref": "#/definitions/single_record" },
                     "apparmor_status":                  { "$ref": "#/definitions/single_record" },
-                    "avc":                              { "$ref": "#/definitions/single_record" },
+                    "avc":                              { "$ref": "#/definitions/repeated_record" },
                     "avc_path":                         { "$ref": "#/definitions/single_record" },
                     "bprm_fcaps":                       { "$ref": "#/definitions/single_record" },
                     "capset":                           { "$ref": "#/definitions/single_record" },
