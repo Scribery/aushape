@@ -49,6 +49,14 @@ const char *aushape_conf_cmd_help =
    "                                -N          - N (floor) bytes per document max,\n"
    "                                \"all\"       - all events in one document.\n"
    "                            Default: \"all\"\n"
+   "    --max-event-size=STRING Limit output events to STRING size:\n"
+   "                                N           - N bytes\n"
+   "                                Nk          - N kilobytes\n"
+   "                                Nm          - N megabytes\n"
+   "                                \"unlimited\" - unlimited\n"
+   /* TODO Consider substituting the actual constant */
+   "                            Minimum: 1024\n"
+   "                            Default: \"unlimited\"\n"
    "    --fold=STRING           Fold STRING nesting level into single line:\n"
    "                                0 / \"all\"   - fold all, single-line output,\n"
    "                                N           - fold at level N,\n"
@@ -78,6 +86,7 @@ enum aushape_conf_opt {
     AUSHAPE_CONF_OPT_OUTPUT = 'o',
     AUSHAPE_CONF_OPT_FILE = 'f',
     AUSHAPE_CONF_OPT_EVENTS_PER_DOC = 0x100,
+    AUSHAPE_CONF_OPT_MAX_EVENT_SIZE,
     AUSHAPE_CONF_OPT_FOLD,
     AUSHAPE_CONF_OPT_INDENT,
     AUSHAPE_CONF_OPT_WITH_TEXT,
@@ -118,6 +127,11 @@ static const struct option aushape_conf_longopts[] = {
     {
         .name = "events-per-doc",
         .val = AUSHAPE_CONF_OPT_EVENTS_PER_DOC,
+        .has_arg = required_argument,
+    },
+    {
+        .name = "max-event-size",
+        .val = AUSHAPE_CONF_OPT_MAX_EVENT_SIZE,
         .has_arg = required_argument,
     },
     {
@@ -162,6 +176,7 @@ aushape_conf_load(struct aushape_conf *pconf, int argc, char **argv)
             .init_indent = 0,
             .nest_indent = 4,
             .events_per_doc = SSIZE_MAX,
+            .max_event_size = SIZE_MAX,
             .with_text = false,
         },
         .output_type = AUSHAPE_CONF_OUTPUT_TYPE_FD,
@@ -240,6 +255,36 @@ aushape_conf_load(struct aushape_conf *pconf, int argc, char **argv)
                               &conf.format.events_per_doc, &end) < 1 ||
                        (size_t)end != strlen(optarg)) {
                 fprintf(stderr, "Invalid events per doc value: %s\n%s\n",
+                        optarg, aushape_conf_cmd_help);
+                goto cleanup;
+            }
+            break;
+
+        case AUSHAPE_CONF_OPT_MAX_EVENT_SIZE:
+            end = 0;
+            if (strcasecmp(optarg, "unlimited") == 0) {
+                conf.format.max_event_size = SIZE_MAX;
+            } else if (sscanf(optarg, "%zu%n",
+                              &conf.format.max_event_size, &end) < 1) {
+                fprintf(stderr, "Invalid maximum event size value: %s\n%s\n",
+                        optarg, aushape_conf_cmd_help);
+                goto cleanup;
+            }
+            if ((optarg[end] == 'k' || optarg[end] == 'K') &&
+                optarg[end + 1] == '\0') {
+                conf.format.max_event_size <<= 10;
+            } else if ((optarg[end] == 'm' || optarg[end] == 'M') &&
+                       optarg[end + 1] == '\0') {
+                conf.format.max_event_size <<= 20;
+            } else if (optarg[end] != '\0') {
+                fprintf(stderr, "Invalid maximum event size value: %s\n%s\n",
+                        optarg, aushape_conf_cmd_help);
+                goto cleanup;
+            }
+
+            if (conf.format.max_event_size <
+                AUSHAPE_FORMAT_MIN_MAX_EVENT_SIZE) {
+                fprintf(stderr, "Invalid maximum event size value: %s\n%s\n",
                         optarg, aushape_conf_cmd_help);
                 goto cleanup;
             }

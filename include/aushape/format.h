@@ -27,6 +27,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+/** Minimum event size limit allowed */
+#define AUSHAPE_FORMAT_MIN_MAX_EVENT_SIZE   1024
+
 /** Output format */
 struct aushape_format {
     /** Output language */
@@ -55,6 +58,10 @@ struct aushape_format {
      */
     ssize_t             events_per_doc;
     /**
+     * Maximum output event size, bytes
+     */
+    size_t              max_event_size;
+    /**
      * True if source text log messages should be included in the output,
      * false otherwise.
      */
@@ -72,7 +79,8 @@ static inline bool
 aushape_format_is_valid(const struct aushape_format *format)
 {
     return format != NULL &&
-           aushape_lang_is_valid(format->lang);
+           aushape_lang_is_valid(format->lang) &&
+           format->max_event_size >= AUSHAPE_FORMAT_MIN_MAX_EVENT_SIZE;
 }
 
 #endif /* _AUSHAPE_FORMAT_H */

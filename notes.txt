@@ -291,4 +291,28 @@ array, summing it up, and decide on which priority level we want to keep.
 We can start with the dumbest, slowest algorightm, though. Not that the one
 above is very smart either, but we can use a simpler one still.
 
+----
+We're supposed to only *remove* priority level completely, i.e. either remove
+all nodes from a priority level or none.
 
+One priority level can have nodes of different sizes, including text nodes,
+which can only be trimmed completely.
+
+First, we can either remove, or trim each node. What's the difference between
+trimming a node to zero and removing it?
+
+How can we decide which nodes to trim and by how much in a single priority
+level?
+
+What if we make the zero priority level non-removable, and instead force the
+caller to remove the node itself?
+
+    While the priority level size is bigger than the limit
+        For each node that is not known to be atomic
+            Trim it proportionally to the reduction we need
+                If it did trim
+                    Subtract the trim from overall length
+                else
+                    Mark it atomic
+        If there are no more trimmable nodes, break
+    return resulting length
