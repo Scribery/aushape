@@ -42,6 +42,9 @@ struct aushape_format {
     size_t              init_indent;
     /** Indentation for each nesting level, in spaces */
     size_t              nest_indent;
+    /*
+     * TODO Put the below into a separate structure, encapsulating the above
+     */
     /**
      * Amount of events to put into a single output document. Zero means
      * "bare" output - no document wrapping, and no event separators. One
