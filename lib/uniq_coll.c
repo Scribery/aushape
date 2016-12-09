@@ -1,5 +1,5 @@
 /**
- * Single (non-aggregated) record collector
+ * Unique (non-aggregated) record collector
  *
  * Copyright (C) 2016 Red Hat
  *

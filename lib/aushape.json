@@ -367,7 +367,6 @@
                     "del_user":                         { "$ref": "#/definitions/single_record" },
                     "dev_alloc":                        { "$ref": "#/definitions/single_record" },
                     "dev_dealloc":                      { "$ref": "#/definitions/single_record" },
-                    "eoe":                              { "$ref": "#/definitions/single_record" },
                     "execve":                           { "$ref": "#/definitions/execve_record" },
                     "fd_pair":                          { "$ref": "#/definitions/single_record" },
                     "feature_change":                   { "$ref": "#/definitions/single_record" },

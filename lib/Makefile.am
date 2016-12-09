@@ -28,6 +28,7 @@ libaushape_la_SOURCES = \
     conf.c              \
     conv.c              \
     disp_coll.c         \
+    drop_coll.c         \
     execve_coll.c       \
     fd_output.c         \
     field.c             \

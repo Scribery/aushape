@@ -20,6 +20,7 @@
 
 #include <aushape/conv/buf.h>
 #include <aushape/disp_coll.h>
+#include <aushape/drop_coll.h>
 #include <aushape/uniq_coll.h>
 #include <aushape/execve_coll.h>
 #include <aushape/path_coll.h>
@@ -70,6 +71,11 @@ aushape_conv_buf_init(struct aushape_conv_buf *buf,
             .name   = "AVC",
             .type   = &aushape_rep_coll_type,
             .args   = &avc_args,
+        },
+        {
+            .name   = "EOE",
+            .type   = &aushape_drop_coll_type,
+            .args   = NULL,
         },
         {
             .name   = NULL,

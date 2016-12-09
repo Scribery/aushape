@@ -36,6 +36,7 @@ noinst_HEADERS = \
     coll_type.h     \
     conf.h          \
     disp_coll.h     \
+    drop_coll.h     \
     execve_coll.h   \
     field.h         \
     garr.h          \

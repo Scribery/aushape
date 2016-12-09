@@ -566,7 +566,6 @@
             <xsd:element type="single_record"       name="fd_pair" minOccurs="0"/>
             <xsd:element type="repeated_record"     name="obj_pid" minOccurs="0"/>
             <xsd:element type="single_record"       name="tty" minOccurs="0"/>
-            <xsd:element type="single_record"       name="eoe" minOccurs="0"/>
             <xsd:element type="single_record"       name="bprm_fcaps" minOccurs="0"/>
             <xsd:element type="single_record"       name="capset" minOccurs="0"/>
             <xsd:element type="single_record"       name="mmap" minOccurs="0"/>
