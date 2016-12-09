@@ -100,6 +100,9 @@ extern enum aushape_rc aushape_conv_buf_add_prologue(
  * @param buf       The converter buffer to add the fragment to.
  * @param first     True if this is the first event being output for a record,
  *                  false otherwise.
+ * @param padded    Location for the flag signifying that the event was added.
+ *                  Set to true if the event was added. Not modified, if it
+ *                  was dropped or an error occurred.
  * @param au        The auparse state with the current event as the one to be
  *                  output.
  *
@@ -113,6 +116,7 @@ extern enum aushape_rc aushape_conv_buf_add_prologue(
 extern enum aushape_rc aushape_conv_buf_add_event(
                                     struct aushape_conv_buf *buf,
                                     bool first,
+                                    bool *padded,
                                     auparse_state_t *au);
 
 /**

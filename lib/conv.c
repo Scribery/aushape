@@ -111,23 +111,26 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
      * Output the event
      */
     if (conv->rc == AUSHAPE_RC_OK) {
+        bool added = false;
         rc = aushape_conv_buf_add_event(&conv->buf,
-                                        conv->events_in_doc == 0, au);
+                                        conv->events_in_doc == 0, &added, au);
         if (rc == AUSHAPE_RC_OK) {
-            if (conv->format.events_per_doc > 0) {
-                conv->events_in_doc++;
-            } else if (conv->format.events_per_doc < 0) {
-                conv->events_in_doc += conv->buf.gbuf.len;
-            }
-            if (aushape_output_is_cont(conv->output) ||
-                conv->format.events_per_doc == 0) {
-                rc = aushape_output_write(conv->output,
-                                          conv->buf.gbuf.ptr,
-                                          conv->buf.gbuf.len);
-                if (rc == AUSHAPE_RC_OK) {
-                    aushape_conv_buf_empty(&conv->buf);
-                } else {
-                    conv->rc = rc;
+            if (added) {
+                if (conv->format.events_per_doc > 0) {
+                    conv->events_in_doc++;
+                } else if (conv->format.events_per_doc < 0) {
+                    conv->events_in_doc += conv->buf.gbuf.len;
+                }
+                if (aushape_output_is_cont(conv->output) ||
+                    conv->format.events_per_doc == 0) {
+                    rc = aushape_output_write(conv->output,
+                                              conv->buf.gbuf.ptr,
+                                              conv->buf.gbuf.len);
+                    if (rc == AUSHAPE_RC_OK) {
+                        aushape_conv_buf_empty(&conv->buf);
+                    } else {
+                        conv->rc = rc;
+                    }
                 }
             }
         } else {

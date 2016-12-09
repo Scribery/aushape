@@ -132,6 +132,7 @@ aushape_conv_buf_empty(struct aushape_conv_buf *buf)
 enum aushape_rc
 aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
                            bool first,
+                           bool *padded,
                            auparse_state_t *au)
 {
     enum aushape_rc rc;
@@ -160,6 +161,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     size_t trimmed_len;
 
     assert(aushape_conv_buf_is_valid(buf));
+    assert(padded != NULL);
     assert(au != NULL);
 
     level = buf->format.events_per_doc != 0;
@@ -317,6 +319,12 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         }
     }
 
+    /* Drop the event if no records were added and no errors occurred */
+    if (record_num == 0 && error_rc == AUSHAPE_RC_OK) {
+        rc = AUSHAPE_RC_OK;
+        goto cleanup;
+    }
+
     l--;
 
     /* Terminate source text */
@@ -419,6 +427,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     AUSHAPE_GUARD(aushape_gbtree_render(event_tree, &buf->gbuf));
 
     assert(l == level);
+    *padded = true;
     rc = AUSHAPE_RC_OK;
 cleanup:
     aushape_gbtree_empty(event_tree);
