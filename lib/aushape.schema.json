@@ -267,22 +267,22 @@
         "type":                 "object",
         "properties": {
             "serial": {
-                    "description":  "Event serial number",
-                    "type":         "integer",
-                    "minimum":      1
+                "description":  "Event serial number",
+                "type":         "integer",
+                "minimum":      1
             },
             "time": {
-                    "description":  "Event timestamp",
-                    "type":         "string",
-                    "format":       "date-time"
+                "description":  "Event timestamp",
+                "type":         "string",
+                "format":       "date-time"
             },
             "host": {
-                    "description":  "Event hostname",
-                    "type":         "string"
+                "description":  "Event hostname",
+                "type":         "string"
             },
             "error": {
-                    "description":  "Conversion error message",
-                    "type":         "string"
+                "description":  "Conversion error message",
+                "type":         "string"
             },
             "trimmed": {
                 "type":     "array",
