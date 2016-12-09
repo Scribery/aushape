@@ -125,7 +125,6 @@ aushape_conv_buf_empty(struct aushape_conv_buf *buf)
 {
     assert(aushape_conv_buf_is_valid(buf));
     aushape_gbuf_empty(&buf->gbuf);
-    aushape_coll_empty(buf->coll);
     assert(aushape_conv_buf_is_valid(buf));
 }
 
@@ -430,6 +429,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     *padded = true;
     rc = AUSHAPE_RC_OK;
 cleanup:
+    aushape_coll_empty(buf->coll);
     aushape_gbtree_empty(event_tree);
     aushape_gbtree_empty(text_tree);
     aushape_gbtree_empty(data_tree);
