@@ -19,7 +19,7 @@
  */
 
 #include <aushape/conv.h>
-#include <aushape/conv/buf.h>
+#include <aushape/conv_buf.h>
 #include <aushape/gbuf.h>
 #include <aushape/guard.h>
 #include <auparse.h>

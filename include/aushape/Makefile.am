@@ -17,8 +17,6 @@
 # along with aushape; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-SUBDIRS = conv
-
 aushapedir = $(includedir)/aushape
 
 aushape_HEADERS = \
@@ -35,6 +33,7 @@ noinst_HEADERS = \
     coll.h          \
     coll_type.h     \
     conf.h          \
+    conv_buf.h      \
     disp_coll.h     \
     drop_coll.h     \
     execve_coll.h   \

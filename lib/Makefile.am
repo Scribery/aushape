@@ -18,8 +18,6 @@
 AM_CPPFLAGS = \
     $(AUPARSE_CFLAGS)
 
-SUBDIRS = conv
-
 lib_LTLIBRARIES = \
     libaushape.la
 
@@ -27,6 +25,7 @@ libaushape_la_SOURCES = \
     coll.c              \
     conf.c              \
     conv.c              \
+    conv_buf.c          \
     disp_coll.c         \
     drop_coll.c         \
     execve_coll.c       \
@@ -46,5 +45,4 @@ libaushape_la_SOURCES = \
     uniq_coll.c
 
 libaushape_la_LIBADD = \
-    conv/libaushape_conv.la \
     $(AUPARSE_LIBS)
