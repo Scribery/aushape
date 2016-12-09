@@ -157,7 +157,8 @@ enum aushape_rc
 aushape_gbnode_render_dump(const struct aushape_gbnode *gbnode,
                            struct aushape_gbuf *gbuf,
                            const struct aushape_format *format,
-                           size_t level)
+                           size_t level,
+                           bool first)
 {
     enum aushape_rc rc;
     size_t l = level;
@@ -168,16 +169,20 @@ aushape_gbnode_render_dump(const struct aushape_gbnode *gbnode,
 
     switch (gbnode->type) {
     case AUSHAPE_GBNODE_TYPE_VOID:
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, format, l));
         if (format->lang == AUSHAPE_LANG_XML) {
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, format, l));
             AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<void/>"));
         } else if (format->lang == AUSHAPE_LANG_JSON) {
+            if (!first) {
+                AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
+            }
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, format, l));
             AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "{\"type\":\"void\"}"));
         }
         break;
     case AUSHAPE_GBNODE_TYPE_TEXT:
-        AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, format, l));
         if (format->lang == AUSHAPE_LANG_XML) {
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, format, l));
             AUSHAPE_GUARD(aushape_gbuf_add_fmt(
                             gbuf,
                             "<text pos=\"%zu\" len=\"%zu\">",
@@ -188,6 +193,10 @@ aushape_gbnode_render_dump(const struct aushape_gbnode *gbnode,
                                     gbnode->len));
             AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "</text>"));
         } else if (format->lang == AUSHAPE_LANG_JSON) {
+            if (!first) {
+                AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
+            }
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, format, l));
             AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '{'));
             l++;
             AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, format, l));
@@ -220,7 +229,7 @@ aushape_gbnode_render_dump(const struct aushape_gbnode *gbnode,
         break;
     case AUSHAPE_GBNODE_TYPE_TREE:
         AUSHAPE_GUARD(aushape_gbtree_render_dump(gbnode->tree, gbuf,
-                                                 format, l));
+                                                 format, l, first));
     default:
         break;
     }
@@ -235,7 +244,8 @@ enum aushape_rc
 aushape_gbnode_print_dump_to_fd(const struct aushape_gbnode *gbnode,
                                 int fd,
                                 const struct aushape_format *format,
-                                size_t level)
+                                size_t level,
+                                bool first)
 {
     enum aushape_rc rc;
     struct aushape_gbuf gbuf;
@@ -246,7 +256,8 @@ aushape_gbnode_print_dump_to_fd(const struct aushape_gbnode *gbnode,
 
     aushape_gbuf_init(&gbuf, 4096);
 
-    AUSHAPE_GUARD(aushape_gbnode_render_dump(gbnode, &gbuf, format, level));
+    AUSHAPE_GUARD(aushape_gbnode_render_dump(gbnode, &gbuf,
+                                             format, level, first));
     /* TODO Handle errors */
     write(fd, gbuf.ptr, gbuf.len);
 
@@ -281,6 +292,6 @@ aushape_gbnode_print_dump_to_file(const struct aushape_gbnode *gbnode,
               S_IRGRP | S_IWGRP |
               S_IROTH | S_IWOTH);
 
-    return aushape_gbnode_print_dump_to_fd(gbnode, fd, &format, 0);
+    return aushape_gbnode_print_dump_to_fd(gbnode, fd, &format, 0, true);
 }
 

@@ -302,6 +302,8 @@ extern enum aushape_rc aushape_gbtree_render(struct aushape_gbtree *gbtree,
  * @param gbuf      The growing buffer to dump into.
  * @param format    The output format to use.
  * @param level     The syntactic nesting level to dump at.
+ * @param first     True if the tree is the first one being dumped for a
+ *                  container.
  *
  * @return Return code:
  *          AUSHAPE_RC_OK       - tree added successfully,
@@ -311,7 +313,8 @@ extern enum aushape_rc aushape_gbtree_render_dump(
                                     const struct aushape_gbtree *gbtree,
                                     struct aushape_gbuf *gbuf,
                                     const struct aushape_format *format,
-                                    size_t level);
+                                    size_t level,
+                                    bool first);
 
 /**
  * Print a dump of the structure of a growing buffer tree into a file for
@@ -321,6 +324,8 @@ extern enum aushape_rc aushape_gbtree_render_dump(
  * @param fd        The descriptor of the file to print to.
  * @param format    The output format to use.
  * @param level     The syntactic nesting level to dump at.
+ * @param first     True if the tree is the first one being dumped for a
+ *                  container.
  *
  * @return Return code:
  *          AUSHAPE_RC_OK       - tree added successfully,
@@ -330,7 +335,8 @@ extern enum aushape_rc aushape_gbtree_print_dump_to_fd(
                                     const struct aushape_gbtree *gbtree,
                                     int fd,
                                     const struct aushape_format *format,
-                                    size_t level);
+                                    size_t level,
+                                    bool first);
 
 /**
  * Print the dump of the structure of a growing buffer tree into a file for

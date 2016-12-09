@@ -171,6 +171,8 @@ extern enum aushape_rc aushape_gbnode_render(struct aushape_gbnode *gbnode,
  * @param gbuf      The growing buffer to dump into.
  * @param format    The output format to use.
  * @param level     The syntactic nesting level to dump at.
+ * @param first     True if the node is the first one being dumped for a
+ *                  container.
  *
  * @return Return code:
  *          AUSHAPE_RC_OK       - node added successfully,
@@ -180,7 +182,8 @@ extern enum aushape_rc aushape_gbnode_render_dump(
                                     const struct aushape_gbnode *gbnode,
                                     struct aushape_gbuf *gbuf,
                                     const struct aushape_format *format,
-                                    size_t level);
+                                    size_t level,
+                                    bool first);
 
 /**
  * Print a dump of the structure of a growing buffer node into a file for
@@ -190,6 +193,8 @@ extern enum aushape_rc aushape_gbnode_render_dump(
  * @param fd        The descriptor of the file to print to.
  * @param format    The output format to use.
  * @param level     The syntactic nesting level to dump at.
+ * @param first     True if the node is the first one being dumped for a
+ *                  container.
  *
  * @return Return code:
  *          AUSHAPE_RC_OK       - node added successfully,
@@ -199,7 +204,8 @@ extern enum aushape_rc aushape_gbnode_print_dump_to_fd(
                                     const struct aushape_gbnode *gbnode,
                                     int fd,
                                     const struct aushape_format *format,
-                                    size_t level);
+                                    size_t level,
+                                    bool first);
 
 /**
  * Print the dump of the structure of a growing buffer node into a file for
