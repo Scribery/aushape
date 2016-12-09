@@ -778,21 +778,26 @@ cleanup:
 enum aushape_rc
 aushape_gbtree_print_dump_to_fd(const struct aushape_gbtree *gbtree,
                                 int fd,
-                                const struct aushape_format *format,
-                                size_t level,
-                                bool first)
+                                enum aushape_lang lang)
 {
     enum aushape_rc rc;
+    struct aushape_format format;
     struct aushape_gbuf gbuf;
 
     assert(fd >= 0);
     assert(aushape_gbtree_is_valid(gbtree));
-    assert(aushape_format_is_valid(format));
+    assert(aushape_lang_is_valid(lang));
+
+    format = (struct aushape_format){
+                    .lang = lang,
+                    .fold_level = SIZE_MAX,
+                    .nest_indent = 4,
+                    .max_event_size = AUSHAPE_FORMAT_MIN_MAX_EVENT_SIZE};
 
     aushape_gbuf_init(&gbuf, 4096);
 
     AUSHAPE_GUARD(aushape_gbtree_render_dump(gbtree, &gbuf,
-                                             format, level, first));
+                                             &format, 0, true));
     /* TODO Handle errors */
     write(fd, gbuf.ptr, gbuf.len);
 
@@ -807,18 +812,11 @@ aushape_gbtree_print_dump_to_file(const struct aushape_gbtree *gbtree,
                                   const char *filename,
                                   enum aushape_lang lang)
 {
-    struct aushape_format format;
     int fd;
 
     assert(filename != NULL);
     assert(aushape_gbtree_is_valid(gbtree));
     assert(aushape_lang_is_valid(lang));
-
-    format = (struct aushape_format){
-                    .lang = lang,
-                    .fold_level = SIZE_MAX,
-                    .nest_indent = 4,
-                    .max_event_size = AUSHAPE_FORMAT_MIN_MAX_EVENT_SIZE};
 
     /* TODO Handle errors */
     fd = open(filename,
@@ -827,6 +825,6 @@ aushape_gbtree_print_dump_to_file(const struct aushape_gbtree *gbtree,
               S_IRGRP | S_IWGRP |
               S_IROTH | S_IWOTH);
 
-    return aushape_gbtree_print_dump_to_fd(gbtree, fd, &format, 0, true);
+    return aushape_gbtree_print_dump_to_fd(gbtree, fd, lang);
 }
 

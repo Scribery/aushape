@@ -187,14 +187,12 @@ extern enum aushape_rc aushape_gbnode_render_dump(
 
 /**
  * Print a dump of the structure of a growing buffer node into a file for
- * debugging.
+ * debugging, in specified language, without leading indent, with 4-space
+ * indent per nesting level, and fully unfolded.
  *
  * @param gbnode    The growing buffer node to dump.
  * @param fd        The descriptor of the file to print to.
- * @param format    The output format to use.
- * @param level     The syntactic nesting level to dump at.
- * @param first     True if the node is the first one being dumped for a
- *                  container.
+ * @param lang      The output language to use.
  *
  * @return Return code:
  *          AUSHAPE_RC_OK       - node added successfully,
@@ -203,9 +201,7 @@ extern enum aushape_rc aushape_gbnode_render_dump(
 extern enum aushape_rc aushape_gbnode_print_dump_to_fd(
                                     const struct aushape_gbnode *gbnode,
                                     int fd,
-                                    const struct aushape_format *format,
-                                    size_t level,
-                                    bool first);
+                                    enum aushape_lang lang);
 
 /**
  * Print the dump of the structure of a growing buffer node into a file for
