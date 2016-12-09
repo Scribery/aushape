@@ -285,7 +285,7 @@ aushape_gbnode_print_dump_to_file(const struct aushape_gbnode *gbnode,
 
     /* TODO Handle errors */
     fd = open(filename,
-              O_CREAT | O_WRONLY,
+              O_CREAT | O_TRUNC | O_WRONLY,
               S_IRUSR | S_IWUSR |
               S_IRGRP | S_IWGRP |
               S_IROTH | S_IWOTH);
