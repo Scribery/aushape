@@ -111,6 +111,7 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
      * Output the event
      */
     if (conv->rc == AUSHAPE_RC_OK) {
+        size_t orig_len = conv->buf.gbuf.len;
         bool added = false;
         rc = aushape_conv_buf_add_event(&conv->buf,
                                         conv->events_in_doc == 0, &added, au);
@@ -119,7 +120,7 @@ aushape_conv_cb(auparse_state_t *au, auparse_cb_event_t type, void *data)
                 if (conv->format.events_per_doc > 0) {
                     conv->events_in_doc++;
                 } else if (conv->format.events_per_doc < 0) {
-                    conv->events_in_doc += conv->buf.gbuf.len;
+                    conv->events_in_doc += conv->buf.gbuf.len - orig_len;
                 }
                 if (aushape_output_is_cont(conv->output) ||
                     conv->format.events_per_doc == 0) {
