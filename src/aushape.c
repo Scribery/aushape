@@ -42,7 +42,7 @@
  * @param pconv Location for the created converter pointer.
  * @param conf  The aushape configuration.
  *
- * @return True if converter created succesfully, false if creation failed,
+ * @return True if converter created successfully, false if creation failed,
  *         and an error message was printed to stderr.
  */
 static bool

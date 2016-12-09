@@ -100,7 +100,7 @@ typedef void (*aushape_coll_type_empty_fn)(
  *                  be added.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK               - added succesfully,
+ *          AUSHAPE_RC_OK               - added successfully,
  *          AUSHAPE_RC_NOMEM            - memory allocation failed,
  *          AUSHAPE_RC_AUPARSE_FAILED   - an auparse call failed,
  *          other                       - collector-specific return code,
@@ -126,7 +126,7 @@ typedef enum aushape_rc (*aushape_coll_type_add_fn)(
  * @param prio      Growing buffer tree priority to add the record with.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK               - added succesfully,
+ *          AUSHAPE_RC_OK               - added successfully,
  *          AUSHAPE_RC_NOMEM            - memory allocation failed,
  *          other                       - collector-specific return code,
  *                                        see corresponding collector type

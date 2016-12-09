@@ -50,7 +50,7 @@ bool aushape_conv_is_valid(const struct aushape_conv *conv);
  *                          converter is destroyed.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK                   - created succesfully,
+ *          AUSHAPE_RC_OK                   - created successfully,
  *          AUSHAPE_RC_INVALID_ARGS         - invalid arguments received,
  *          AUSHAPE_RC_NOMEM                - memory allocation failed.
  */
@@ -67,7 +67,7 @@ enum aushape_rc aushape_conv_create(struct aushape_conv **pconv,
  * @param pconv         Converter to start the document output with.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK                   - document started succesfully,
+ *          AUSHAPE_RC_OK                   - document started successfully,
  *          AUSHAPE_RC_INVALID_ARGS         - invalid arguments received,
  *          AUSHAPE_RC_INVALID_STATE        - called after document was
  *                                            started with aushape_conv_begin,
@@ -137,7 +137,7 @@ enum aushape_rc aushape_conv_flush(struct aushape_conv *conv);
  * @param pconv         Converter to start the document output with.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK                   - document finished succesfully,
+ *          AUSHAPE_RC_OK                   - document finished successfully,
  *          AUSHAPE_RC_INVALID_ARGS         - invalid arguments received,
  *          AUSHAPE_RC_INVALID_STATE        - called before starting document
  *                                            output with aushape_conv_begin,

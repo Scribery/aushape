@@ -41,7 +41,7 @@
  *                  output.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK               - output succesfully,
+ *          AUSHAPE_RC_OK               - output successfully,
  *          AUSHAPE_RC_INVALID_ARGS     - invalid arguments supplied,
  *          AUSHAPE_RC_NOMEM            - memory allocation failed,
  *          AUSHAPE_RC_AUPARSE_FAILED   - an auparse call failed.

@@ -41,7 +41,7 @@ extern const struct aushape_output_type aushape_fd_output_type;
  *                  destruction of the output, false otherwise.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK           - output created succesfully,
+ *          AUSHAPE_RC_OK           - output created successfully,
  *          AUSHAPE_RC_INVALID_ARGS - invalid arguments supplied,
  *          AUSHAPE_RC_NOMEM        - failed allocating memory.
  */

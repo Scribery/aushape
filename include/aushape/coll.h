@@ -119,7 +119,7 @@ extern bool aushape_coll_is_ended(const struct aushape_coll *coll);
  *                  be added.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK               - added succesfully,
+ *          AUSHAPE_RC_OK               - added successfully,
  *          AUSHAPE_RC_INVALID_ARGS     - invalid arguments supplied,
  *          AUSHAPE_RC_INVALID_STATE    - called after ending record
  *                                        sequence, without emptying,
@@ -147,7 +147,7 @@ extern enum aushape_rc aushape_coll_add(struct aushape_coll *coll,
  * @param prio      Growing buffer tree priority to add the record with.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK               - added succesfully,
+ *          AUSHAPE_RC_OK               - added successfully,
  *          AUSHAPE_RC_INVALID_ARGS     - invalid arguments supplied,
  *          AUSHAPE_RC_NOMEM            - memory allocation failed,
  *          other                       - collector-specific errors,

@@ -45,7 +45,7 @@ struct aushape_output {
  * @param ...       The type-specific output creation arguments.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK                   - output created succesfully,
+ *          AUSHAPE_RC_OK                   - output created successfully,
  *          AUSHAPE_RC_INVALID_ARGS         - invalid arguments supplied,
  *          AUSHAPE_RC_NOMEM                - failed allocating memory,
  *          AUSHAPE_RC_OUTPUT_INIT_FAILED   - output-specific initialization
@@ -88,7 +88,7 @@ static inline bool aushape_output_is_cont(
  * @param len       Length of the output fragment in bytes.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK                   - written succesfully,
+ *          AUSHAPE_RC_OK                   - written successfully,
  *          AUSHAPE_RC_INVALID_ARGS         - invalid arguments supplied,
  *          AUSHAPE_RC_OUTPUT_WRITE_FAILED  - output-specific write failure.
  */

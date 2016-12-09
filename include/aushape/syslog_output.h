@@ -38,7 +38,7 @@ extern const struct aushape_output_type aushape_syslog_output_type;
  * @param priority  The "priority" argument to pass to syslog(3).
  *
  * @return Return code:
- *          AUSHAPE_RC_OK           - output created succesfully,
+ *          AUSHAPE_RC_OK           - output created successfully,
  *          AUSHAPE_RC_INVALID_ARGS - invalid arguments supplied,
  *          AUSHAPE_RC_NOMEM        - failed allocating memory.
  */

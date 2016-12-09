@@ -587,7 +587,7 @@ aushape_gbtree_trim(struct aushape_gbtree *gbtree,
                         aushape_gbtree_prio_trim(gbtree, atomic_cached, true,
                                                  prio,
                                                  prio_len - (next_tree_len - len));
-        /* If trimmed succesfully, or if it was non-removable level zero */
+        /* If trimmed successfully, or if it was non-removable level zero */
         if (next_tree_len <= len || prio == 0) {
             /* Keep this priority level */
             tree_len = next_tree_len;

@@ -103,7 +103,7 @@ aushape_execve_coll_empty(struct aushape_coll *coll)
  *                  the current field.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK               - processed succesfully,
+ *          AUSHAPE_RC_OK               - processed successfully,
  *          AUSHAPE_RC_AUPARSE_FAILED   - an auparse call failed,
  *          AUSHAPE_RC_INVALID_EXECVE   - invalid execve record sequence
  *                                        encountered.
@@ -147,7 +147,7 @@ cleanup:
  * @param str       The argument string value.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK                   - added succesfully,
+ *          AUSHAPE_RC_OK                   - added successfully,
  *          AUSHAPE_RC_NOMEM                - memory allocation failed,
  */
 static enum aushape_rc
@@ -200,7 +200,7 @@ cleanup:
  *                  current field.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK               - processed succesfully,
+ *          AUSHAPE_RC_OK               - processed successfully,
  *          AUSHAPE_RC_NOMEM            - memory allocation failed,
  *          AUSHAPE_RC_AUPARSE_FAILED   - an auparse call failed,
  *          AUSHAPE_RC_INVALID_EXECVE   - invalid execve record sequence
@@ -253,7 +253,7 @@ cleanup:
  *                  current field.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK               - processed succesfully,
+ *          AUSHAPE_RC_OK               - processed successfully,
  *          AUSHAPE_RC_AUPARSE_FAILED   - an auparse call failed,
  *          AUSHAPE_RC_INVALID_EXECVE   - invalid execve record sequence
  *                                        encountered.
@@ -315,7 +315,7 @@ cleanup:
  *                  current field.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK               - processed succesfully,
+ *          AUSHAPE_RC_OK               - processed successfully,
  *          AUSHAPE_RC_NOMEM            - memory allocation failed,
  *          AUSHAPE_RC_AUPARSE_FAILED   - an auparse call failed,
  *          AUSHAPE_RC_INVALID_EXECVE   - invalid execve record sequence

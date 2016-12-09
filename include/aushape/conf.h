@@ -84,7 +84,7 @@ struct aushape_conf {
  * @param argc      The argc argument to main.
  * @param argv      The argv argument to main.
  *
- * @return True if loaded succesfully, false if failed and an error message,
+ * @return True if loaded successfully, false if failed and an error message,
  *         followed by a help message, if necessary, were printed to stderr.
  */
 extern bool aushape_conf_load(struct aushape_conf *pconf,

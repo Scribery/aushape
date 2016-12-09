@@ -88,7 +88,7 @@ extern void aushape_conv_buf_empty(struct aushape_conv_buf *buf);
  * @param buf       The converter output buffer to add the fragment to.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK                   - added succesfully,
+ *          AUSHAPE_RC_OK                   - added successfully,
  *          AUSHAPE_RC_NOMEM                - memory allocation failed.
  */
 extern enum aushape_rc aushape_conv_buf_add_prologue(
@@ -107,7 +107,7 @@ extern enum aushape_rc aushape_conv_buf_add_prologue(
  *                  output.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK               - added succesfully,
+ *          AUSHAPE_RC_OK               - added successfully,
  *          AUSHAPE_RC_NOMEM            - memory allocation failed,
  *          AUSHAPE_RC_AUPARSE_FAILED   - an auparse call failed,
  *          AUSHAPE_RC_INVALID_EXECVE   - invalid execve record sequence
@@ -125,7 +125,7 @@ extern enum aushape_rc aushape_conv_buf_add_event(
  * @param buf       The converter output buffer to add the fragment to.
  *
  * @return Return code:
- *          AUSHAPE_RC_OK                   - added succesfully,
+ *          AUSHAPE_RC_OK                   - added successfully,
  *          AUSHAPE_RC_NOMEM                - memory allocation failed.
  */
 extern enum aushape_rc aushape_conv_buf_add_epilogue(
