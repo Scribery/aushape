@@ -627,8 +627,8 @@ cleanup:
 }
 
 static enum aushape_rc
-aushape_gbtree_prio_render_dump(struct aushape_gbuf *gbuf,
-                                const struct aushape_gbtree *gbtree,
+aushape_gbtree_prio_render_dump(const struct aushape_gbtree *gbtree,
+                                struct aushape_gbuf *gbuf,
                                 size_t prio,
                                 const struct aushape_format *format,
                                 size_t level)
@@ -667,7 +667,7 @@ aushape_gbtree_prio_render_dump(struct aushape_gbuf *gbuf,
         index = head_index;
         do {
             node = aushape_garr_const_get(nodes, index);
-            AUSHAPE_GUARD(aushape_gbnode_render_dump(gbuf, node, format, l));
+            AUSHAPE_GUARD(aushape_gbnode_render_dump(node, gbuf, format, l));
             index = node->next_index;
         } while (index != head_index);
 
@@ -687,8 +687,8 @@ cleanup:
 }
 
 enum aushape_rc
-aushape_gbtree_render_dump(struct aushape_gbuf *gbuf,
-                           const struct aushape_gbtree *gbtree,
+aushape_gbtree_render_dump(const struct aushape_gbtree *gbtree,
+                           struct aushape_gbuf *gbuf,
                            const struct aushape_format *format,
                            size_t level)
 {
@@ -723,7 +723,7 @@ aushape_gbtree_render_dump(struct aushape_gbuf *gbuf,
 
     for (i = 0; i < aushape_garr_get_len(nodes); i++) {
         node = aushape_garr_const_get(nodes, i);
-        AUSHAPE_GUARD(aushape_gbnode_render_dump(gbuf, node, format, l));
+        AUSHAPE_GUARD(aushape_gbnode_render_dump(node, gbuf, format, l));
     }
 
     l--;
@@ -740,7 +740,7 @@ aushape_gbtree_render_dump(struct aushape_gbuf *gbuf,
     l++;
 
     for (i = 0; i < aushape_garr_get_len(prios); i++) {
-        AUSHAPE_GUARD(aushape_gbtree_prio_render_dump(gbuf, gbtree,
+        AUSHAPE_GUARD(aushape_gbtree_prio_render_dump(gbtree, gbuf,
                                                       i, format, l));
     }
 
@@ -765,8 +765,8 @@ cleanup:
 }
 
 enum aushape_rc
-aushape_gbtree_print_dump_to_fd(int fd,
-                                const struct aushape_gbtree *gbtree,
+aushape_gbtree_print_dump_to_fd(const struct aushape_gbtree *gbtree,
+                                int fd,
                                 const struct aushape_format *format,
                                 size_t level)
 {
@@ -779,7 +779,7 @@ aushape_gbtree_print_dump_to_fd(int fd,
 
     aushape_gbuf_init(&gbuf, 4096);
 
-    AUSHAPE_GUARD(aushape_gbtree_render_dump(&gbuf, gbtree, format, level));
+    AUSHAPE_GUARD(aushape_gbtree_render_dump(gbtree, &gbuf, format, level));
     /* TODO Handle errors */
     write(fd, gbuf.ptr, gbuf.len);
 
@@ -790,8 +790,8 @@ cleanup:
 }
 
 enum aushape_rc
-aushape_gbtree_print_dump_to_file(const char *filename,
-                                  const struct aushape_gbtree *gbtree,
+aushape_gbtree_print_dump_to_file(const struct aushape_gbtree *gbtree,
+                                  const char *filename,
                                   enum aushape_lang lang)
 {
     struct aushape_format format;
@@ -814,6 +814,6 @@ aushape_gbtree_print_dump_to_file(const char *filename,
               S_IRGRP | S_IWGRP |
               S_IROTH | S_IWOTH);
 
-    return aushape_gbtree_print_dump_to_fd(fd, gbtree, &format, 0);
+    return aushape_gbtree_print_dump_to_fd(gbtree, fd, &format, 0);
 }
 

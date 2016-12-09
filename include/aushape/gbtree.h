@@ -298,8 +298,8 @@ extern enum aushape_rc aushape_gbtree_render(struct aushape_gbtree *gbtree,
  * Render a dump of the structure of a growing buffer tree into a growing
  * buffer for debugging.
  *
- * @param gbuf      The growing buffer to dump into.
  * @param gbtree    The growing buffer tree to dump.
+ * @param gbuf      The growing buffer to dump into.
  * @param format    The output format to use.
  * @param level     The syntactic nesting level to dump at.
  *
@@ -308,8 +308,8 @@ extern enum aushape_rc aushape_gbtree_render(struct aushape_gbtree *gbtree,
  *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
 extern enum aushape_rc aushape_gbtree_render_dump(
-                                    struct aushape_gbuf *gbuf,
                                     const struct aushape_gbtree *gbtree,
+                                    struct aushape_gbuf *gbuf,
                                     const struct aushape_format *format,
                                     size_t level);
 
@@ -317,8 +317,8 @@ extern enum aushape_rc aushape_gbtree_render_dump(
  * Print a dump of the structure of a growing buffer tree into a file for
  * debugging.
  *
- * @param fd        The descriptor of the file to print to.
  * @param gbtree    The growing buffer tree to dump.
+ * @param fd        The descriptor of the file to print to.
  * @param format    The output format to use.
  * @param level     The syntactic nesting level to dump at.
  *
@@ -327,8 +327,8 @@ extern enum aushape_rc aushape_gbtree_render_dump(
  *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
 extern enum aushape_rc aushape_gbtree_print_dump_to_fd(
-                                    int fd,
                                     const struct aushape_gbtree *gbtree,
+                                    int fd,
                                     const struct aushape_format *format,
                                     size_t level);
 
@@ -337,8 +337,8 @@ extern enum aushape_rc aushape_gbtree_print_dump_to_fd(
  * debugging, in specified language, without leading indent, with 4-space
  * indent per nesting level, and fully unfolded.
  *
- * @param filename  The name of the file to print to.
  * @param gbtree    The growing buffer tree to dump.
+ * @param filename  The name of the file to print to.
  * @param lang      The output language to use.
  *
  * @return Return code:
@@ -346,8 +346,8 @@ extern enum aushape_rc aushape_gbtree_print_dump_to_fd(
  *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
 extern enum aushape_rc aushape_gbtree_print_dump_to_file(
-                                    const char *filename,
                                     const struct aushape_gbtree *gbtree,
+                                    const char *filename,
                                     enum aushape_lang lang);
 
 #endif /* _AUSHAPE_GBTREE_H */

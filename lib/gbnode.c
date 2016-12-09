@@ -154,8 +154,8 @@ aushape_gbnode_render(struct aushape_gbnode *gbnode,
 }
 
 enum aushape_rc
-aushape_gbnode_render_dump(struct aushape_gbuf *gbuf,
-                           const struct aushape_gbnode *gbnode,
+aushape_gbnode_render_dump(const struct aushape_gbnode *gbnode,
+                           struct aushape_gbuf *gbuf,
                            const struct aushape_format *format,
                            size_t level)
 {
@@ -219,7 +219,7 @@ aushape_gbnode_render_dump(struct aushape_gbuf *gbuf,
         }
         break;
     case AUSHAPE_GBNODE_TYPE_TREE:
-        AUSHAPE_GUARD(aushape_gbtree_render_dump(gbuf, gbnode->tree,
+        AUSHAPE_GUARD(aushape_gbtree_render_dump(gbnode->tree, gbuf,
                                                  format, l));
     default:
         break;
@@ -232,8 +232,8 @@ cleanup:
 }
 
 enum aushape_rc
-aushape_gbnode_print_dump_to_fd(int fd,
-                                const struct aushape_gbnode *gbnode,
+aushape_gbnode_print_dump_to_fd(const struct aushape_gbnode *gbnode,
+                                int fd,
                                 const struct aushape_format *format,
                                 size_t level)
 {
@@ -246,7 +246,7 @@ aushape_gbnode_print_dump_to_fd(int fd,
 
     aushape_gbuf_init(&gbuf, 4096);
 
-    AUSHAPE_GUARD(aushape_gbnode_render_dump(&gbuf, gbnode, format, level));
+    AUSHAPE_GUARD(aushape_gbnode_render_dump(gbnode, &gbuf, format, level));
     /* TODO Handle errors */
     write(fd, gbuf.ptr, gbuf.len);
 
@@ -257,8 +257,8 @@ cleanup:
 }
 
 enum aushape_rc
-aushape_gbnode_print_dump_to_file(const char *filename,
-                                  const struct aushape_gbnode *gbnode,
+aushape_gbnode_print_dump_to_file(const struct aushape_gbnode *gbnode,
+                                  const char *filename,
                                   enum aushape_lang lang)
 {
     struct aushape_format format;
@@ -281,6 +281,6 @@ aushape_gbnode_print_dump_to_file(const char *filename,
               S_IRGRP | S_IWGRP |
               S_IROTH | S_IWOTH);
 
-    return aushape_gbnode_print_dump_to_fd(fd, gbnode, &format, 0);
+    return aushape_gbnode_print_dump_to_fd(gbnode, fd, &format, 0);
 }
 

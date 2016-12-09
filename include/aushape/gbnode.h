@@ -167,8 +167,8 @@ extern enum aushape_rc aushape_gbnode_render(struct aushape_gbnode *gbnode,
  * Render a dump of the structure of a growing buffer node into a growing
  * buffer for debugging.
  *
- * @param gbuf      The growing buffer to dump into.
  * @param gbnode    The growing buffer node to dump.
+ * @param gbuf      The growing buffer to dump into.
  * @param format    The output format to use.
  * @param level     The syntactic nesting level to dump at.
  *
@@ -177,8 +177,8 @@ extern enum aushape_rc aushape_gbnode_render(struct aushape_gbnode *gbnode,
  *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
 extern enum aushape_rc aushape_gbnode_render_dump(
-                                    struct aushape_gbuf *gbuf,
                                     const struct aushape_gbnode *gbnode,
+                                    struct aushape_gbuf *gbuf,
                                     const struct aushape_format *format,
                                     size_t level);
 
@@ -186,8 +186,8 @@ extern enum aushape_rc aushape_gbnode_render_dump(
  * Print a dump of the structure of a growing buffer node into a file for
  * debugging.
  *
- * @param fd        The descriptor of the file to print to.
  * @param gbnode    The growing buffer node to dump.
+ * @param fd        The descriptor of the file to print to.
  * @param format    The output format to use.
  * @param level     The syntactic nesting level to dump at.
  *
@@ -196,8 +196,8 @@ extern enum aushape_rc aushape_gbnode_render_dump(
  *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
 extern enum aushape_rc aushape_gbnode_print_dump_to_fd(
-                                    int fd,
                                     const struct aushape_gbnode *gbnode,
+                                    int fd,
                                     const struct aushape_format *format,
                                     size_t level);
 
@@ -206,8 +206,8 @@ extern enum aushape_rc aushape_gbnode_print_dump_to_fd(
  * debugging, in specified language, without leading indent, with 4-space
  * indent per nesting level, and fully unfolded.
  *
- * @param filename  The name of the file to print to.
  * @param gbnode    The growing buffer node to dump.
+ * @param filename  The name of the file to print to.
  * @param lang      The output language to use.
  *
  * @return Return code:
@@ -215,8 +215,8 @@ extern enum aushape_rc aushape_gbnode_print_dump_to_fd(
  *          AUSHAPE_RC_NOMEM    - failed to allocate memory.
  */
 extern enum aushape_rc aushape_gbnode_print_dump_to_file(
-                                    const char *filename,
                                     const struct aushape_gbnode *gbnode,
+                                    const char *filename,
                                     enum aushape_lang lang);
 
 #endif /* _AUSHAPE_GBNODE_H */
