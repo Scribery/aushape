@@ -27,8 +27,8 @@
 struct aushape_execve_coll {
     /** Abstract base collector */
     struct aushape_coll     coll;
-    /** Formatted argument list buffer */
-    struct aushape_gbtree   args;
+    /** Output growing buffer tree */
+    struct aushape_gbtree   gbtree;
     /** Number of arguments expected */
     size_t                  arg_num;
     /** Index of the argument being read */
@@ -48,7 +48,7 @@ aushape_execve_coll_is_valid(const struct aushape_coll *coll)
 {
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
-    return aushape_gbtree_is_valid(&execve_coll->args) &&
+    return aushape_gbtree_is_valid(&execve_coll->gbtree) &&
            execve_coll->arg_idx <= execve_coll->arg_num &&
            (execve_coll->got_len ||
             (execve_coll->slice_idx == 0 && execve_coll->len_total == 0)) &&
@@ -61,7 +61,7 @@ aushape_execve_coll_init(struct aushape_coll *coll, const void *args)
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
     (void)args;
-    aushape_gbtree_init(&execve_coll->args, 1024, 8, 8);
+    aushape_gbtree_init(&execve_coll->gbtree, 1024, 8, 8);
     return AUSHAPE_RC_OK;
 }
 
@@ -70,7 +70,7 @@ aushape_execve_coll_cleanup(struct aushape_coll *coll)
 {
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
-    aushape_gbtree_cleanup(&execve_coll->args);
+    aushape_gbtree_cleanup(&execve_coll->gbtree);
 }
 
 static bool
@@ -86,7 +86,7 @@ aushape_execve_coll_empty(struct aushape_coll *coll)
 {
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
-    aushape_gbtree_empty(&execve_coll->args);
+    aushape_gbtree_empty(&execve_coll->gbtree);
     execve_coll->arg_num = 0;
     execve_coll->arg_idx = 0;
     execve_coll->got_len = false;
@@ -157,7 +157,7 @@ aushape_execve_coll_add_arg_str(struct aushape_coll *coll,
 {
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
-    struct aushape_gbtree *gbtree = &execve_coll->args;
+    struct aushape_gbtree *gbtree = &execve_coll->gbtree;
     struct aushape_gbuf *gbuf = &gbtree->text;
     enum aushape_rc rc;
 
@@ -329,7 +329,7 @@ aushape_execve_coll_add_arg_slice(struct aushape_coll *coll,
 {
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
-    struct aushape_gbtree *gbtree = &execve_coll->args;
+    struct aushape_gbtree *gbtree = &execve_coll->gbtree;
     struct aushape_gbuf *gbuf = &gbtree->text;
     enum aushape_rc rc;
     const char *raw_str;
@@ -438,7 +438,7 @@ aushape_execve_coll_add(struct aushape_coll *coll,
 {
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
-    struct aushape_gbtree *gbtree = &execve_coll->args;
+    struct aushape_gbtree *gbtree = &execve_coll->gbtree;
     struct aushape_gbuf *gbuf = &gbtree->text;
     enum aushape_rc rc;
     size_t l = level;
@@ -525,7 +525,7 @@ aushape_execve_coll_end(struct aushape_coll *coll,
 {
     struct aushape_execve_coll *execve_coll =
                     (struct aushape_execve_coll *)coll;
-    struct aushape_gbtree *gbtree = &execve_coll->args;
+    struct aushape_gbtree *gbtree = &execve_coll->gbtree;
     struct aushape_gbuf *gbuf = &gbtree->text;
     enum aushape_rc rc = AUSHAPE_RC_OK;
     size_t l = level;

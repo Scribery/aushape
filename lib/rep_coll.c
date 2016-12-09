@@ -29,8 +29,8 @@ struct aushape_rep_coll {
     struct aushape_coll     coll;
     /** Name of the output container */
     const char             *name;
-    /** Items growing buffer tree */
-    struct aushape_gbtree   items;
+    /** Output growing buffer tree */
+    struct aushape_gbtree   gbtree;
 };
 
 static bool
@@ -39,7 +39,7 @@ aushape_rep_coll_is_valid(const struct aushape_coll *coll)
     struct aushape_rep_coll *rep_coll =
                     (struct aushape_rep_coll *)coll;
     return rep_coll->name != NULL &&
-           aushape_gbtree_is_valid(&rep_coll->items);
+           aushape_gbtree_is_valid(&rep_coll->gbtree);
 }
 
 static enum aushape_rc
@@ -56,7 +56,7 @@ aushape_rep_coll_init(struct aushape_coll *coll,
                                      rep_args->name != NULL);
 
     rep_coll->name = rep_args->name;
-    aushape_gbtree_init(&rep_coll->items, 4096, 8, 8);
+    aushape_gbtree_init(&rep_coll->gbtree, 4096, 8, 8);
 
     rc = AUSHAPE_RC_OK;
 cleanup:
@@ -68,7 +68,7 @@ aushape_rep_coll_cleanup(struct aushape_coll *coll)
 {
     struct aushape_rep_coll *rep_coll =
                     (struct aushape_rep_coll *)coll;
-    aushape_gbtree_cleanup(&rep_coll->items);
+    aushape_gbtree_cleanup(&rep_coll->gbtree);
 }
 
 static bool
@@ -76,7 +76,7 @@ aushape_rep_coll_is_empty(const struct aushape_coll *coll)
 {
     struct aushape_rep_coll *rep_coll =
                     (struct aushape_rep_coll *)coll;
-    return aushape_gbtree_is_empty(&rep_coll->items);
+    return aushape_gbtree_is_empty(&rep_coll->gbtree);
 }
 
 static void
@@ -84,7 +84,7 @@ aushape_rep_coll_empty(struct aushape_coll *coll)
 {
     struct aushape_rep_coll *rep_coll =
                     (struct aushape_rep_coll *)coll;
-    aushape_gbtree_empty(&rep_coll->items);
+    aushape_gbtree_empty(&rep_coll->gbtree);
 }
 
 static enum aushape_rc
@@ -98,7 +98,7 @@ aushape_rep_coll_add(struct aushape_coll *coll,
     size_t l = level;
     struct aushape_rep_coll *rep_coll =
                     (struct aushape_rep_coll *)coll;
-    struct aushape_gbtree *gbtree = &rep_coll->items;
+    struct aushape_gbtree *gbtree = &rep_coll->gbtree;
     struct aushape_gbuf *gbuf = &gbtree->text;
     size_t len;
 
@@ -192,7 +192,7 @@ aushape_rep_coll_end(struct aushape_coll *coll,
 {
     struct aushape_rep_coll *rep_coll =
                     (struct aushape_rep_coll *)coll;
-    struct aushape_gbtree *gbtree = &rep_coll->items;
+    struct aushape_gbtree *gbtree = &rep_coll->gbtree;
     struct aushape_gbuf *gbuf = &gbtree->text;
     enum aushape_rc rc = AUSHAPE_RC_OK;
     size_t l = level;
@@ -205,7 +205,7 @@ aushape_rep_coll_end(struct aushape_coll *coll,
         AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &coll->format, l));
         AUSHAPE_GUARD(aushape_gbuf_add_fmt(gbuf, "</%s>", rep_coll->name));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
-        if (!aushape_gbtree_is_empty(&rep_coll->items)) {
+        if (!aushape_gbtree_is_empty(gbtree)) {
             AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf, &coll->format, l));
         }
         AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ']'));

@@ -32,15 +32,15 @@
 struct aushape_path_coll {
     /** Abstract base collector */
     struct aushape_coll             coll;
-    /** Growing buffer tree for items */
-    struct aushape_gbtree           items;
+    /** Growing buffer tree for output */
+    struct aushape_gbtree           gbtree;
 };
 
 static bool
 aushape_path_coll_is_valid(const struct aushape_coll *coll)
 {
     struct aushape_path_coll *path_coll = (struct aushape_path_coll *)coll;
-    return aushape_gbtree_is_valid(&path_coll->items);
+    return aushape_gbtree_is_valid(&path_coll->gbtree);
 }
 
 static enum aushape_rc
@@ -48,7 +48,7 @@ aushape_path_coll_init(struct aushape_coll *coll, const void *args)
 {
     struct aushape_path_coll *path_coll = (struct aushape_path_coll *)coll;
     (void)args;
-    aushape_gbtree_init(&path_coll->items, 2048, 8, 8);
+    aushape_gbtree_init(&path_coll->gbtree, 2048, 8, 8);
     return AUSHAPE_RC_OK;
 }
 
@@ -56,7 +56,7 @@ static void
 aushape_path_coll_cleanup(struct aushape_coll *coll)
 {
     struct aushape_path_coll *path_coll = (struct aushape_path_coll *)coll;
-    aushape_gbtree_cleanup(&path_coll->items);
+    aushape_gbtree_cleanup(&path_coll->gbtree);
 }
 
 static bool
@@ -64,14 +64,14 @@ aushape_path_coll_is_empty(const struct aushape_coll *coll)
 {
     struct aushape_path_coll *path_coll =
                     (struct aushape_path_coll *)coll;
-    return aushape_gbtree_is_empty(&path_coll->items);
+    return aushape_gbtree_is_empty(&path_coll->gbtree);
 }
 
 static void
 aushape_path_coll_empty(struct aushape_coll *coll)
 {
     struct aushape_path_coll *path_coll = (struct aushape_path_coll *)coll;
-    aushape_gbtree_empty(&path_coll->items);
+    aushape_gbtree_empty(&path_coll->gbtree);
 }
 
 static enum aushape_rc
@@ -82,7 +82,7 @@ aushape_path_coll_add(struct aushape_coll *coll,
                       auparse_state_t *au)
 {
     struct aushape_path_coll *path_coll = (struct aushape_path_coll *)coll;
-    struct aushape_gbtree *gbtree = &path_coll->items;
+    struct aushape_gbtree *gbtree = &path_coll->gbtree;
     struct aushape_gbuf *gbuf = &gbtree->text;
     enum aushape_rc rc;
     size_t l = level;
@@ -206,7 +206,7 @@ aushape_path_coll_end(struct aushape_coll *coll,
 {
     struct aushape_path_coll *path_coll =
                     (struct aushape_path_coll *)coll;
-    struct aushape_gbtree *gbtree = &path_coll->items;
+    struct aushape_gbtree *gbtree = &path_coll->gbtree;
     struct aushape_gbuf *gbuf = &gbtree->text;
     enum aushape_rc rc = AUSHAPE_RC_OK;
     size_t idx;
