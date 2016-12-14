@@ -1,0 +1,57 @@
+{
+    "date_detection": false,
+    "properties": {
+        "serial": {
+            "type": "long"
+        },
+        "time": {
+            "type": "date"
+        },
+        "host": {
+            "type": "string",
+            "fields": {
+                "raw": {
+                    "type":     "string",
+                    "index":    "not_analyzed"
+                }
+            }
+        },
+        "error": {
+            "type": "string"
+        },
+        "trimmed": {
+            "type":     "string",
+            "index":    "not_analyzed"
+        },
+        "text": {
+            "type": "string"
+        },
+        "data": {
+            "type": "object",
+            "properties": {
+                "avc":                              {"type": "nested"},
+                "execve":                           {"type": "string"},
+                "obj_pid":                          {"type": "nested"},
+                "path":                             {"type": "nested"}
+            }
+        }
+    },
+    "dynamic_templates": [
+        {
+            "generic_fields": {
+                "path_match": "data.*.*",
+                "mapping": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "generic_records": {
+                "path_match": "data.*",
+                "mapping": {
+                    "type": "object"
+                }
+            }
+        }
+    ]
+}
