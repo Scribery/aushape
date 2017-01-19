@@ -40,6 +40,7 @@ rm -r %{buildroot}/usr/include/%{name}.h
 %{!?_licensedir:%global license %doc}
 %license COPYING
 %license COPYING.LESSER
+%doc %{_defaultdocdir}/%{name}
 %{_bindir}/%{name}
 %{_libdir}/lib%{name}.so*
 
