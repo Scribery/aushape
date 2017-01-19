@@ -34,6 +34,7 @@ rm %{buildroot}/%{_libdir}/*.la
 # Remove development files as we're not doing a devel package yet
 rm %{buildroot}/%{_libdir}/*.so
 rm -r %{buildroot}/usr/include/%{name}
+rm -r %{buildroot}/usr/include/%{name}.h
 
 %files
 %{!?_licensedir:%global license %doc}
