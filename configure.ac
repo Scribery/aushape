@@ -26,8 +26,14 @@ AM_MAINTAINER_MODE
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AC_GNU_SOURCE
+# We define AUDIT_LIB_VERSION so we can, at compile time work our the version of audit-libs available
+# as we need to conditionally compile depending on the version
+# This means our packaging build could run
+#  ./configure ... AUDIT_LIB_VERSION=$(printf "%03d%03d%03d" $(echo `rpm -q --qf '%{VERSION}' audit-libs` | tr '.' ' '))
+# or
+#  ./configure ... AUDIT_LIB_VERSION=$(printf "%03d%03d%03d" $(echo `dpkg-query --showformat='${Version}' --show libauparse0` | cut -d: -f2 | cut -d- -f1 | tr '.' ' '))
 ABS_SRCDIR=`cd ${srcdir}; pwd`
-CPPFLAGS="-I${ABS_SRCDIR} -I${ABS_SRCDIR}/include -DNDEBUG $CPPFLAGS"
+CPPFLAGS="-I${ABS_SRCDIR} -I${ABS_SRCDIR}/include -DNDEBUG -DAUDIT_LIB_VERSION=$AUDIT_LIB_VERSION $CPPFLAGS"
 
 # Check for programs.
 AC_PROG_CC
