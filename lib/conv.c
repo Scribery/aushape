@@ -195,7 +195,27 @@ aushape_conv_create(struct aushape_conv **pconv,
 
     conv->au = auparse_init(AUSOURCE_FEED, NULL);
     AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, conv->au != NULL);
+    /*
+     * Some trickery to support different versions of auparse_set_escape_mode().
+     * It was given an additional argument in audit-libs version 2.6.2.
+     * So we can compile for older versions we
+     * a. Default of null AUDIT_LIB_VERSION assumes the new version
+     * b. We test the version strings
+     */
+#if	(AUDIT_LIB_VERSION + 0)
+
+#if	AUDIT_LIB_VERSION < 002006002 
+    auparse_set_escape_mode(AUPARSE_ESC_RAW);
+#else	/* AUDIT_LIB_VERSION < 002006002 */
     auparse_set_escape_mode(conv->au, AUPARSE_ESC_RAW);
+#endif	/* AUDIT_LIB_VERSION < 002006002 */
+
+#else 	/* AUDIT_LIB_VERSION is null */
+
+    auparse_set_escape_mode(conv->au, AUPARSE_ESC_RAW);
+
+#endif	/* AUDIT_LIB_VERSION is null */
+
     auparse_add_callback(conv->au, aushape_conv_cb, conv, NULL);
 
     conv->format = *format;

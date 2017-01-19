@@ -50,7 +50,10 @@ aushape_field_format(struct aushape_gbuf *gbuf,
 
     switch (type) {
     case AUPARSE_TYPE_ESCAPED:
+    /* This field type was introduced in audit-libs 2.6.6 */
+#ifdef	AUPARSE_TYPE_ESCAPED_KEY
     case AUPARSE_TYPE_ESCAPED_KEY:
+#endif	/* def AUPARSE_TYPE_ESCAPED_KEY */
         value_r = NULL;
         break;
     default:

@@ -22,8 +22,9 @@ formats.
 %setup -q
 
 %build
-%configure --disable-rpath --disable-static
-make %{?_smp_mflags}
+autoreconf -i -f
+%configure --disable-rpath --disable-static AUDIT_LIB_VERSION=$(printf "%03d%03d%03d" $(echo `rpm -q --qf '%{VERSION}' audit-libs` | tr '.' ' '))
+make %{?_smp_mflags} 
 
 %check
 make %{?_smp_mflags} check
@@ -41,5 +42,6 @@ rm -r %{buildroot}/usr/include/%{name}
 %license COPYING.LESSER
 %{_bindir}/%{name}
 %{_libdir}/lib%{name}.so*
-
+%attr(644,root,root) /usr/include/aushape.h
+%attr(644,root,root) /usr/share/doc/aushape/README.md
 %changelog
