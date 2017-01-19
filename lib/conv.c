@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <config.h>
 #include <aushape/conv.h>
 #include <aushape/conv_buf.h>
 #include <aushape/gbuf.h>
@@ -195,7 +196,9 @@ aushape_conv_create(struct aushape_conv **pconv,
 
     conv->au = auparse_init(AUSOURCE_FEED, NULL);
     AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, conv->au != NULL);
+#ifdef HAVE_NEW_AUPARSE_SET_ESCAPE_MODE
     auparse_set_escape_mode(conv->au, AUPARSE_ESC_RAW);
+#endif
     auparse_add_callback(conv->au, aushape_conv_cb, conv, NULL);
 
     conv->format = *format;

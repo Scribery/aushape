@@ -22,6 +22,7 @@
 #include <aushape/fd_output.h>
 #include <aushape/syslog_output.h>
 #include <aushape/syslog_misc.h>
+#include <auparse.h>
 #include <syslog.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -128,6 +129,11 @@ main(int argc, char **argv)
     enum aushape_rc aushape_rc;
     char buf[4096];
     ssize_t rc;
+
+    /* Setup auparse library, if necessary */
+#ifndef HAVE_NEW_AUPARSE_SET_ESCAPE_MODE
+    auparse_set_escape_mode(AUPARSE_ESC_RAW);
+#endif
 
     /* Read configuration */
     if (!aushape_conf_load(&conf, argc, argv)) {

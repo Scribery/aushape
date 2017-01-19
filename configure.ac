@@ -51,6 +51,28 @@ fi
 # Check for libraries
 PKG_CHECK_MODULES([AUPARSE], [auparse])
 
+# Check for functions
+AC_MSG_CHECKING([for version of auparse_set_escape_mode])
+AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([[
+        #include <auparse.h>
+        void
+        f(void)
+        {
+            auparse_set_escape_mode(NULL, AUPARSE_ESC_RAW);
+        }
+    ]])],
+    [
+        AC_MSG_RESULT([two-argument])
+        AC_DEFINE(HAVE_NEW_AUPARSE_SET_ESCAPE_MODE, [1],
+                  [Define if auparse_set_escape_mode accepts two arguments])
+    ],
+    [AC_MSG_RESULT([one-argument])]
+)
+
+# Check for symbols
+AC_CHECK_DECLS([AUPARSE_TYPE_ESCAPED_KEY],,,[[#include <auparse.h>]])
+
 # Output
 AC_CONFIG_FILES([Makefile
                  include/Makefile

@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <config.h>
 #include <aushape/field.h>
 #include <aushape/guard.h>
 #include <string.h>
@@ -50,7 +51,9 @@ aushape_field_format(struct aushape_gbuf *gbuf,
 
     switch (type) {
     case AUPARSE_TYPE_ESCAPED:
+#if HAVE_DECL_AUPARSE_TYPE_ESCAPED_KEY
     case AUPARSE_TYPE_ESCAPED_KEY:
+#endif
         value_r = NULL;
         break;
     default:

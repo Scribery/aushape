@@ -42,6 +42,10 @@ bool aushape_conv_is_valid(const struct aushape_conv *conv);
 /**
  * Create (allocate and initialize) a converter.
  *
+ * If your auparse library has auparse_set_escape_mode accepting only one
+ * argument (not accepting an auparse_state_t pointer), then you need to call
+ * it with AUPARSE_ESC_RAW argument before using the created converter.
+ *
  * @param pconv             Location for the created converter pointer.
  *                          Not modified in case of error. Cannot be NULL.
  * @param format            The output format to use.
