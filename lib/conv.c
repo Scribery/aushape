@@ -179,7 +179,7 @@ aushape_conv_create(struct aushape_conv **pconv,
                     bool output_owned)
 {
     enum aushape_rc rc;
-    struct aushape_conv *conv;
+    struct aushape_conv *conv = NULL;
 
     if (pconv == NULL ||
         !aushape_format_is_valid(format) ||
