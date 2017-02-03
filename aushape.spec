@@ -45,3 +45,12 @@ rm -r %{buildroot}/usr/include/%{name}.h
 %{_libdir}/lib%{name}.so*
 
 %changelog
+* Fri Feb 03 2017 Nikolai Kondrashov <Nikolai.Kondrashov@redhat.com> - 1-1
+- Release v1. Not ready for production. Following features are included.
+- Conversion to both XML and JSON.
+- Can output bare events or complete documents.
+- Output to file or syslog.
+- Can be used both single-shot or streaming under audispd.
+- Arbitrary output indentation and syntax folding.
+- Original log messages can be included in the output.
+- Can trim events to specified size.
