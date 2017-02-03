@@ -1,5 +1,5 @@
 Name:       aushape
-Version:    1
+Version:    2
 Release:    1%{?dist}
 Summary:    Audit message format conversion library and utility
 Group:      Applications/System
@@ -51,6 +51,9 @@ rm -r %{buildroot}/usr/include/%{name}.h
 /sbin/ldconfig
 
 %changelog
+* Fri Feb 03 2017 Nikolai Kondrashov <Nikolai.Kondrashov@redhat.com> - 2-1
+- Release v2.
+
 * Fri Feb 03 2017 Nikolai Kondrashov <Nikolai.Kondrashov@redhat.com> - 1-1
 - Release v1. Not ready for production. Following features are included.
 - Conversion to both XML and JSON.
