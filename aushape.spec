@@ -44,6 +44,12 @@ rm -r %{buildroot}/usr/include/%{name}.h
 %{_bindir}/%{name}
 %{_libdir}/lib%{name}.so*
 
+%post
+/sbin/ldconfig
+
+%postun
+/sbin/ldconfig
+
 %changelog
 * Fri Feb 03 2017 Nikolai Kondrashov <Nikolai.Kondrashov@redhat.com> - 1-1
 - Release v1. Not ready for production. Following features are included.
