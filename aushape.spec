@@ -5,7 +5,7 @@ Summary:    Audit message format conversion library and utility
 Group:      Applications/System
 
 License:    GPLv2+ and LGPLv2+
-URL:        https://github.com/Scribery/aushape
+URL:        https://github.com/Scribery/%{name}
 Source:     https://github.com/Scribery/%{name}/releases/download/v%{version}/%{name}-%{version}.tar.gz
 
 BuildRequires:  audit-libs-devel
