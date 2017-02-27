@@ -91,6 +91,13 @@ logs. The development version of this library needs to be installed before
 building Aushape. It is available in "audit-libs-devel" package on Fedora and
 RHEL, and "libauparse-dev" package on Debian-based systems.
 
+You will also need to install some autotools.
+
+For RHEL
+```
+yum -y install autoconf aclocal automake libtool gcc make audit-libs-devel
+```
+
 Building
 --------
 
