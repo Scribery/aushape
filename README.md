@@ -89,7 +89,32 @@ Dependencies
 Aushape uses the Auparse library (a part of the Auditd package) to parse audit
 logs. The development version of this library needs to be installed before
 building Aushape. It is available in "audit-libs-devel" package on Fedora and
-RHEL, and "libauparse-dev" package on Debian-based systems.
+RHEL, and "libauparse-dev" or "libaudit-dev" package on Debian-based systems.
+
+If you're installing an RPM package, the package manager would take care of
+dependencies for you.
+
+If you're building from a release tarball, then you can install the
+dependencies as follows.
+
+On RPM-based systems:
+
+    sudo yum install -y gcc make audit-libs-devel
+
+On Debian-based systems:
+
+    sudo apt-get install -y gcc make '^libau(dit|parse)-dev$'
+
+If you're building from the Git source tree, then you can install the
+additional dependencies as follows.
+
+On RPM-based systems:
+
+    sudo yum install -y autoconf automake libtool
+
+On Debian-based systems:
+
+    sudo apt-get install -y autoconf automake libtool pkg-config
 
 Building
 --------
@@ -99,7 +124,8 @@ generate the build system files:
 
     autoreconf -i -f
 
-After that you need to follow the usual configure & make approach:
+After that, or if you're building from a release tarball, you need to follow
+the usual configure & make approach:
 
     ./configure --prefix=/usr --sysconfdir=/etc && make
 
