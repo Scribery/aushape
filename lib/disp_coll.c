@@ -21,6 +21,7 @@
 #include <aushape/disp_coll.h>
 #include <aushape/uniq_coll.h>
 #include <aushape/coll.h>
+#include <aushape/auparse.h>
 #include <aushape/misc.h>
 #include <string.h>
 
@@ -218,7 +219,7 @@ aushape_disp_coll_add(struct aushape_coll *coll,
     assert(pcount != NULL);
     assert(au != NULL);
 
-    name = auparse_get_type_name(au);
+    name = aushape_auparse_get_type_name(au);
     if (name == NULL) {
         return AUSHAPE_RC_AUPARSE_FAILED;
     }

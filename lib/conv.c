@@ -196,7 +196,7 @@ aushape_conv_create(struct aushape_conv **pconv,
 
     conv->au = auparse_init(AUSOURCE_FEED, NULL);
     AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, conv->au != NULL);
-#ifdef HAVE_NEW_AUPARSE_SET_ESCAPE_MODE
+#if AUPARSE_SET_ESCAPE_MODE_VER == 2
     auparse_set_escape_mode(conv->au, AUPARSE_ESC_RAW);
 #endif
     auparse_add_callback(conv->au, aushape_conv_cb, conv, NULL);

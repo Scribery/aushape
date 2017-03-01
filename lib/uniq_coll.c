@@ -21,6 +21,7 @@
 #include <aushape/uniq_coll.h>
 #include <aushape/coll.h>
 #include <aushape/record.h>
+#include <aushape/auparse.h>
 #include <aushape/guard.h>
 #include <string.h>
 
@@ -145,7 +146,7 @@ aushape_uniq_coll_add(struct aushape_coll *coll,
     assert(pcount != NULL);
     assert(au != NULL);
 
-    name = auparse_get_type_name(au);
+    name = aushape_auparse_get_type_name(au);
     AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, name != NULL);
     if (aushape_uniq_coll_seen_has(coll, name)) {
         rc = AUSHAPE_RC_REPEATED_RECORD;

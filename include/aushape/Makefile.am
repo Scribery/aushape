@@ -30,6 +30,7 @@ aushape_HEADERS = \
     syslog_output.h
 
 noinst_HEADERS = \
+    auparse.h       \
     coll.h          \
     coll_type.h     \
     conf.h          \

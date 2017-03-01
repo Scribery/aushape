@@ -49,7 +49,38 @@ if test "$enable_debug" = "yes"; then
 fi
 
 # Check for libraries
-PKG_CHECK_MODULES([AUPARSE], [auparse])
+PKG_CHECK_MODULES(
+    [AUPARSE], [auparse], ,
+    [
+        AC_CHECK_LIB(
+            [auparse], [auparse_init],
+            [
+                AC_SUBST(AUPARSE_CFLAGS, [])
+                AC_SUBST(AUPARSE_LIBS, [-lauparse])
+            ],
+            [
+                AC_MSG_ERROR([libauparse not found])
+            ]
+        )
+    ]
+)
+
+have_audit=yes
+PKG_CHECK_MODULES(
+    [AUDIT], [audit], ,
+    [
+        AC_CHECK_LIB(
+            [audit], [audit_open],
+            [
+                AC_SUBST(AUDIT_CFLAGS, [])
+                AC_SUBST(AUDIT_LIBS, [-laudit])
+            ],
+            [
+                have_audit=no
+            ]
+        )
+    ]
+)
 
 # Check for functions
 AC_MSG_CHECKING([for version of auparse_set_escape_mode])
@@ -64,10 +95,45 @@ AC_COMPILE_IFELSE(
     ]])],
     [
         AC_MSG_RESULT([two-argument])
-        AC_DEFINE(HAVE_NEW_AUPARSE_SET_ESCAPE_MODE, [1],
-                  [Define if auparse_set_escape_mode accepts two arguments])
+        AC_DEFINE(AUPARSE_SET_ESCAPE_MODE_VER, [2],
+                  [Define to the version of auparse_set_escape_mode])
     ],
-    [AC_MSG_RESULT([one-argument])]
+    [
+        AC_COMPILE_IFELSE(
+            [AC_LANG_PROGRAM([[
+                #include <auparse.h>
+                void
+                f(void)
+                {
+                    auparse_set_escape_mode(AUPARSE_ESC_RAW);
+                }
+            ]])],
+            [
+                AC_MSG_RESULT([one-argument])
+                AC_DEFINE(AUPARSE_SET_ESCAPE_MODE_VER, [1],
+                          [Define to the version of auparse_set_escape_mode])
+            ],
+            [
+                AC_MSG_RESULT([missing])
+            ]
+        )
+    ]
+)
+
+AC_CHECK_DECL(
+    [auparse_get_type_name],
+    [AC_DEFINE(HAVE_AUPARSE_GET_TYPE_NAME, [1],
+               [Define to 1 if you have auparse_get_type_name defined in auparse.h])],
+    [
+        AC_MSG_NOTICE([linking with libaudit to implement auparse_get_type_name])
+        if test "x$have_audit" = xyes; then
+            AUPARSE_CFLAGS="$AUPARSE_CFLAGS $AUDIT_CFLAGS"
+            AUPARSE_LIBS="$AUPARSE_LIBS $AUDIT_LIBS"
+        else
+            AC_MSG_ERROR([libaudit not found])
+        fi
+    ],
+    [[#include <auparse.h>]]
 )
 
 # Check for symbols

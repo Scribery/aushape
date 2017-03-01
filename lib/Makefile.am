@@ -22,6 +22,7 @@ lib_LTLIBRARIES = \
     libaushape.la
 
 libaushape_la_SOURCES = \
+    auparse.c           \
     coll.c              \
     conf.c              \
     conv.c              \

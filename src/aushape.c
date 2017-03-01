@@ -131,7 +131,7 @@ main(int argc, char **argv)
     ssize_t rc;
 
     /* Setup auparse library, if necessary */
-#ifndef HAVE_NEW_AUPARSE_SET_ESCAPE_MODE
+#if AUPARSE_SET_ESCAPE_MODE_VER == 1
     auparse_set_escape_mode(AUPARSE_ESC_RAW);
 #endif
 
