@@ -30,11 +30,12 @@ ABS_SRCDIR=`cd ${srcdir}; pwd`
 CPPFLAGS="-I${ABS_SRCDIR} -I${ABS_SRCDIR}/include -DNDEBUG $CPPFLAGS"
 
 # Check for programs.
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AC_PROG_CC
 AC_PROG_CC_STDC
 AC_PROG_INSTALL
-m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
-LT_INIT
+AC_PROG_LIBTOOL
+m4_ifdef([LT_INIT], [LT_INIT])
 
 # Check for features
 AC_ARG_ENABLE(
