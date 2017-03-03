@@ -184,7 +184,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
                             event_buf, "<event serial=\"%lu\" time=\"%s\"",
                             e->serial, timestamp_buf));
         if (e->host != NULL) {
-            AUSHAPE_GUARD(aushape_gbuf_add_str(event_buf, " host=\""));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(event_buf, " node=\""));
             AUSHAPE_GUARD(aushape_gbuf_add_str_xml(event_buf, e->host));
             AUSHAPE_GUARD(aushape_gbuf_add_str(event_buf, "\""));
         }
@@ -239,7 +239,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         if (e->host != NULL) {
             AUSHAPE_GUARD(aushape_gbuf_add_char(event_buf, ','));
             AUSHAPE_GUARD(aushape_gbuf_space_opening(event_buf, &buf->format, l));
-            AUSHAPE_GUARD(aushape_gbuf_add_str(event_buf, "\"host\":\""));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(event_buf, "\"node\":\""));
             AUSHAPE_GUARD(aushape_gbuf_add_str_json(event_buf, e->host));
             AUSHAPE_GUARD(aushape_gbuf_add_char(event_buf, '"'));
         }
