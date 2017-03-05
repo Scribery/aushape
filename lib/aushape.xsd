@@ -693,7 +693,7 @@
             </xsd:sequence>
             <xsd:attribute name="serial" type="serial" use="required"/>
             <xsd:attribute name="time" type="xsd:dateTime" use="required"/>
-            <xsd:attribute name="host" type="xsd:string"/>
+            <xsd:attribute name="node" type="xsd:string"/>
             <xsd:attribute name="error" type="xsd:string">
                 <xsd:annotation>
                     <xsd:documentation>

@@ -7,7 +7,7 @@
         "time": {
             "type": "date"
         },
-        "host": {
+        "node": {
             "type": "string",
             "fields": {
                 "raw": {

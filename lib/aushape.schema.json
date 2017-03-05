@@ -276,7 +276,7 @@
                 "type":         "string",
                 "format":       "date-time"
             },
-            "host": {
+            "node": {
                 "description":  "Event hostname",
                 "type":         "string"
             },
