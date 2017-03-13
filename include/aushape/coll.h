@@ -1,6 +1,47 @@
 /**
  * @brief Abstract record collector interface
  *
+ * A collector is used for accumulating record sequences before they can be
+ * output as part of an event.
+ *
+ * Upon creation a collector is supplied with the output format, the growing
+ * buffer tree to output to and type-specific arguments.
+ *
+ * After creating, records can be added to the collector with aushape_coll_add
+ * repeatedly and the sequence needs to be ended with aushape_coll_end. Either
+ * of these may add complete objects/elements to the output (although only one
+ * does normally).
+ *
+ * At any point a collector can be emptied with aushape_coll_empty to begin a
+ * new record sequence. However no new records can be added with
+ * aushape_coll_add after the sequence was ended with aushape_coll_end,
+ * without emptying it with aushape_coll_empty first.
+ *
+ * State transition table:
+ *
+ * +--------------------+-----------+-----------------------+
+ * | CURRENT STATE      | ACTION    | NEXT STATE            |
+ * +--------------------+-----------+-----------------------+
+ * |                    | create    | empty && !ended       |
+ * +--------------------+-----------+-----------------------+
+ * | empty && !ended    | add       | empty && !ended ||    |
+ * |                    |           | !empty && !ended      |
+ * |                    |           |                       |
+ * |                    | end       | empty && ended        |
+ * +--------------------+-----------+-----------------------+
+ * | !empty && !ended   | add       | !empty && !ended      |
+ * |                    |           |                       |
+ * |                    | end       | !empty && ended       |
+ * +--------------------+-----------+-----------------------+
+ * | ended              | add       | ERROR                 |
+ * |                    |           |                       |
+ * |                    | end       | ERROR                 |
+ * +--------------------+-----------+-----------------------+
+ * | ANY                | empty     | empty && !ended       |
+ * +--------------------+-----------+-----------------------+
+ * | ANY                | destroy   |                       |
+ * +--------------------+-----------+-----------------------+
+ *
  * Copyright (C) 2016 Red Hat
  *
  * This library is free software; you can redistribute it and/or
