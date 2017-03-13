@@ -50,6 +50,10 @@ aushape_execve_coll_is_valid(const struct aushape_coll *coll)
                     (struct aushape_execve_coll *)coll;
     return aushape_gbtree_is_valid(&execve_coll->gbtree) &&
            execve_coll->arg_idx <= execve_coll->arg_num &&
+           /*
+            * slice_idx and len_total should be zero,
+            * unless we got a sliced argument
+            */
            (execve_coll->got_len ||
             (execve_coll->slice_idx == 0 && execve_coll->len_total == 0)) &&
            execve_coll->len_read <= execve_coll->len_total;
