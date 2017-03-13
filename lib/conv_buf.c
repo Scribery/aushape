@@ -162,6 +162,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     assert(aushape_conv_buf_is_valid(buf));
     assert(padded != NULL);
     assert(au != NULL);
+    assert(aushape_coll_is_empty(buf->coll));
 
     level = buf->format.events_per_doc != 0;
     l = level;
