@@ -55,7 +55,7 @@ struct aushape_disp_coll_type_link {
  * aushape_coll_create:
  * aushape_coll_add:
  * aushape_coll_end:
- *      Any of the return codes specified collectors can return for the
+ *      Any of the return codes the supplied collectors can return for the
  *      corresponding calls.
  */
 extern const struct aushape_coll_type aushape_disp_coll_type;
