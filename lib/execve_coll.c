@@ -532,8 +532,14 @@ aushape_execve_coll_end(struct aushape_coll *coll,
                     (struct aushape_execve_coll *)coll;
     struct aushape_gbtree *gbtree = &execve_coll->gbtree;
     struct aushape_gbuf *gbuf = &gbtree->text;
-    enum aushape_rc rc = AUSHAPE_RC_OK;
+    enum aushape_rc rc;
     size_t l = level;
+
+    /* Check that the record sequence was finished */
+    if (execve_coll->arg_idx != execve_coll->arg_num) {
+        rc = AUSHAPE_RC_INVALID_EXECVE;
+        goto cleanup;
+    }
 
     /* Account for the container markup */
     l++;

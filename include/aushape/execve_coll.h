@@ -31,6 +31,7 @@
  * Collector-specific return codes:
  *
  * aushape_coll_add:
+ * aushape_coll_end:
  *      AUSHAPE_RC_INVALID_EXECVE   - invalid execve record sequence
  *                                    encountered
  */
