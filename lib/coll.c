@@ -88,14 +88,18 @@ bool
 aushape_coll_is_empty(const struct aushape_coll *coll)
 {
     assert(aushape_coll_is_valid(coll));
-    return coll->type->is_empty(coll);
+    return (coll->type->is_empty != NULL)
+                ? coll->type->is_empty(coll)
+                : true;
 }
 
 void
 aushape_coll_empty(struct aushape_coll *coll)
 {
     assert(aushape_coll_is_valid(coll));
-    coll->type->empty(coll);
+    if (coll->type->empty != NULL) {
+        coll->type->empty(coll);
+    }
     coll->ended = false;
 }
 
