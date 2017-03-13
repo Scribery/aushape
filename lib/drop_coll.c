@@ -29,37 +29,6 @@ struct aushape_drop_coll {
     struct aushape_coll     coll;
 };
 
-static bool
-aushape_drop_coll_is_empty(const struct aushape_coll *coll)
-{
-    (void)coll;
-    return true;
-}
-
-static void
-aushape_drop_coll_empty(struct aushape_coll *coll)
-{
-    (void)coll;
-}
-
-static enum aushape_rc
-aushape_drop_coll_add(struct aushape_coll *coll,
-                      size_t *pcount,
-                      size_t level,
-                      size_t prio,
-                      auparse_state_t *au)
-{
-    (void)coll;
-    (void)pcount;
-    (void)level;
-    (void)prio;
-    (void)au;
-    return AUSHAPE_RC_OK;
-}
-
 const struct aushape_coll_type aushape_drop_coll_type = {
     .size       = sizeof(struct aushape_drop_coll),
-    .is_empty   = aushape_drop_coll_is_empty,
-    .empty      = aushape_drop_coll_empty,
-    .add        = aushape_drop_coll_add,
 };
