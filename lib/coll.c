@@ -113,13 +113,17 @@ aushape_coll_add(struct aushape_coll *coll,
                  size_t prio,
                  auparse_state_t *au)
 {
+    enum aushape_rc rc;
     if (!aushape_coll_is_valid(coll) || pcount == NULL || au == NULL) {
         return AUSHAPE_RC_INVALID_ARGS;
     }
     if (aushape_coll_is_ended(coll)) {
         return AUSHAPE_RC_INVALID_STATE;
     }
-    return coll->type->add(coll, pcount, level, prio, au);
+    rc = (coll->type->add != NULL)
+                ? coll->type->add(coll, pcount, level, prio, au)
+                : AUSHAPE_RC_OK;
+    return rc;
 }
 
 enum aushape_rc

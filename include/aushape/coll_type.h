@@ -173,7 +173,6 @@ aushape_coll_type_is_valid(const struct aushape_coll_type *type)
     return type != NULL &&
            type->size >= sizeof(type) &&
            type->is_empty != NULL &&
-           type->empty != NULL &&
-           type->add != NULL;
+           type->empty != NULL;
 }
 #endif /* _AUSHAPE_COLL_TYPE_H */
