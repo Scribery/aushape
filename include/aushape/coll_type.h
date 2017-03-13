@@ -117,9 +117,9 @@ typedef enum aushape_rc (*aushape_coll_type_add_fn)(
                                 auparse_state_t *au);
 
 /**
- * Prototype for a function ending collection of the record sequence. Cannot
- * be called if the collector is empty, or after the sequence collection was
- * ended. Can output a complete record.
+ * Prototype for a function ending collection of the record sequence for a
+ * collector. Cannot be called if the collector is empty or already ended.
+ * Can output a complete record.
  *
  * @param coll      The collector to end the sequence for.
  * @param pcount    Location of/for the record counter in the container.
@@ -156,7 +156,7 @@ struct aushape_coll_type {
     aushape_coll_type_empty_fn      empty;
     /** Record-addition function */
     aushape_coll_type_add_fn        add;
-    /** Sequence-ending function */
+    /** Record sequence-ending function */
     aushape_coll_type_end_fn        end;
 };
 

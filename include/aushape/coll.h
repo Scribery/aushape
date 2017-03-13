@@ -138,8 +138,8 @@ extern enum aushape_rc aushape_coll_add(struct aushape_coll *coll,
 
 /**
  * End collection of a collector's record sequence. Can output a complete
- * record. Has no effect if no records were added since the collector was
- * created or ended.
+ * record. Has no effect if no record sequence has been accumulated by the
+ * collector. Cannot be called repeatedly, without emptying the collector.
  *
  * @param coll      The collector to end the sequence for.
  * @param pcount    Location of/for the record counter in the container.
@@ -150,6 +150,8 @@ extern enum aushape_rc aushape_coll_add(struct aushape_coll *coll,
  * @return Return code:
  *          AUSHAPE_RC_OK               - added successfully,
  *          AUSHAPE_RC_INVALID_ARGS     - invalid arguments supplied,
+ *          AUSHAPE_RC_INVALID_STATE    - called after ending record
+ *                                        sequence, without emptying,
  *          AUSHAPE_RC_NOMEM            - memory allocation failed,
  *          other                       - collector-specific errors,
  *                                        see corresponding collector type

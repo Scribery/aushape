@@ -132,8 +132,10 @@ aushape_coll_end(struct aushape_coll *coll,
     if (!aushape_coll_is_valid(coll) || pcount == NULL) {
         return AUSHAPE_RC_INVALID_ARGS;
     }
-    if (aushape_coll_is_empty(coll) ||
-        aushape_coll_is_ended(coll)) {
+    if (aushape_coll_is_ended(coll)) {
+        return AUSHAPE_RC_INVALID_STATE;
+    }
+    if (aushape_coll_is_empty(coll)) {
         return AUSHAPE_RC_OK;
     }
     rc = (coll->type->end != NULL)
