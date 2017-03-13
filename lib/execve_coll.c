@@ -94,6 +94,7 @@ aushape_execve_coll_empty(struct aushape_coll *coll)
     execve_coll->arg_num = 0;
     execve_coll->arg_idx = 0;
     execve_coll->got_len = false;
+    execve_coll->slice_idx = 0;
     execve_coll->len_total = 0;
     execve_coll->len_read = 0;
 }
