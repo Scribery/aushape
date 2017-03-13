@@ -81,7 +81,8 @@ extern bool aushape_coll_is_valid(const struct aushape_coll *coll);
 extern void aushape_coll_destroy(struct aushape_coll *coll);
 
 /**
- * Check if a collector is empty.
+ * Check if a collector is empty, i.e. if it has not accumulated information
+ * on a record sequence that can be ended.
  *
  * @param coll      The collector to check, must be valid.
  *

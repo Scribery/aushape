@@ -68,7 +68,8 @@ typedef void (*aushape_coll_type_cleanup_fn)(
                                 struct aushape_coll *coll);
 
 /**
- * Prototype for a function checking if a collector is empty.
+ * Prototype for a function checking if a collector is empty, i.e. if it has
+ * not accumulated information on a record sequence that can be ended.
  *
  * @param coll      The collector to check. Must be valid.
  *
@@ -88,7 +89,8 @@ typedef void (*aushape_coll_type_empty_fn)(
 
 /**
  * Prototype for a function adding a record to the collector record sequence.
- * Cannot be called after the sequence collection was ended. Can output a
+ * Cannot be called after the collection was ended, but the collector was not
+ * emptied. Does not have to make the collector non-empty. Can output a
  * complete record.
  *
  * @param coll      The collector to add the record to.
