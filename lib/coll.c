@@ -49,6 +49,8 @@ aushape_coll_create(struct aushape_coll **pcoll,
         rc = (type->init != NULL) ? type->init(coll, args) : AUSHAPE_RC_OK;
         if (rc == AUSHAPE_RC_OK) {
             assert(aushape_coll_is_valid(coll));
+            assert(aushape_coll_is_empty(coll));
+            assert(!aushape_coll_is_ended(coll));
             *pcoll = coll;
         } else {
             free(coll);
@@ -101,6 +103,9 @@ aushape_coll_empty(struct aushape_coll *coll)
         coll->type->empty(coll);
     }
     coll->ended = false;
+    assert(aushape_coll_is_valid(coll));
+    assert(aushape_coll_is_empty(coll));
+    assert(!aushape_coll_is_ended(coll));
 }
 
 bool
@@ -127,6 +132,8 @@ aushape_coll_add(struct aushape_coll *coll,
     rc = (coll->type->add != NULL)
                 ? coll->type->add(coll, pcount, level, prio, au)
                 : AUSHAPE_RC_OK;
+    assert(aushape_coll_is_valid(coll));
+    assert(!aushape_coll_is_ended(coll));
     return rc;
 }
 
@@ -147,5 +154,7 @@ aushape_coll_end(struct aushape_coll *coll,
                 ? coll->type->end(coll, pcount, level, prio)
                 : AUSHAPE_RC_OK;
     coll->ended = true;
+    assert(aushape_coll_is_valid(coll));
+    assert(aushape_coll_is_ended(coll));
     return rc;
 }
