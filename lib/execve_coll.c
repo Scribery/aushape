@@ -418,7 +418,7 @@ aushape_execve_coll_add_arg_slice(struct aushape_coll *coll,
         AUSHAPE_GUARD(aushape_gbtree_node_add_text(gbtree,
                                                    execve_coll->arg_idx));
         /* Reset parsing state */
-        execve_coll->got_len = 0;
+        execve_coll->got_len = false;
         execve_coll->slice_idx = 0;
         execve_coll->len_total = 0;
         execve_coll->len_read = 0;
