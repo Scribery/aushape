@@ -135,14 +135,9 @@ aushape_coll_end(struct aushape_coll *coll,
     if (aushape_coll_is_ended(coll)) {
         return AUSHAPE_RC_INVALID_STATE;
     }
-    if (aushape_coll_is_empty(coll)) {
-        return AUSHAPE_RC_OK;
-    }
-    rc = (coll->type->end != NULL)
+    rc = (!aushape_coll_is_empty(coll) && coll->type->end != NULL)
                 ? coll->type->end(coll, pcount, level, prio)
                 : AUSHAPE_RC_OK;
-    if (rc == AUSHAPE_RC_OK) {
-        coll->ended = true;
-    }
+    coll->ended = true;
     return rc;
 }
