@@ -31,6 +31,7 @@
             "properties": {
                 "avc":                              {"type": "nested"},
                 "execve":                           {"type": "string"},
+                "netfilter_cfg":                    {"type": "nested"},
                 "obj_pid":                          {"type": "nested"},
                 "path":                             {"type": "nested"}
             }

@@ -609,7 +609,7 @@
             <xsd:element name="mq_notify"                   type="single_record"        minOccurs="0"/>
             <xsd:element name="mq_open"                     type="single_record"        minOccurs="0"/>
             <xsd:element name="mq_sendrecv"                 type="single_record"        minOccurs="0"/>
-            <xsd:element name="netfilter_cfg"               type="single_record"        minOccurs="0"/>
+            <xsd:element name="netfilter_cfg"               type="repeated_record"      minOccurs="0"/>
             <xsd:element name="netfilter_pkt"               type="single_record"        minOccurs="0"/>
             <xsd:element name="obj_pid"                     type="repeated_record"      minOccurs="0"/>
             <xsd:element name="path"                        type="repeated_record"      minOccurs="0"/>

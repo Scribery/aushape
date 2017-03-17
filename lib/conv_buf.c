@@ -51,6 +51,9 @@ aushape_conv_buf_init(struct aushape_conv_buf *buf,
     static const struct aushape_rep_coll_args avc_args = {
         .name = "avc",
     };
+    static const struct aushape_rep_coll_args netfilter_cfg_args = {
+        .name = "netfilter_cfg",
+    };
     static const struct aushape_disp_coll_type_link map[] = {
         {
             .name   = "EXECVE",
@@ -71,6 +74,11 @@ aushape_conv_buf_init(struct aushape_conv_buf *buf,
             .name   = "AVC",
             .type   = &aushape_rep_coll_type,
             .args   = &avc_args,
+        },
+        {
+            .name   = "NETFILTER_CFG",
+            .type   = &aushape_rep_coll_type,
+            .args   = &netfilter_cfg_args,
         },
         {
             .name   = "EOE",

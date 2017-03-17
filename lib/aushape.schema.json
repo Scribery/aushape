@@ -408,7 +408,7 @@
                     "mq_notify":                        { "$ref": "#/definitions/single_record" },
                     "mq_open":                          { "$ref": "#/definitions/single_record" },
                     "mq_sendrecv":                      { "$ref": "#/definitions/single_record" },
-                    "netfilter_cfg":                    { "$ref": "#/definitions/single_record" },
+                    "netfilter_cfg":                    { "$ref": "#/definitions/repeated_record" },
                     "netfilter_pkt":                    { "$ref": "#/definitions/single_record" },
                     "obj_pid":                          { "$ref": "#/definitions/repeated_record" },
                     "path":                             { "$ref": "#/definitions/repeated_record" },
