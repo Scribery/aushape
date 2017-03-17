@@ -150,6 +150,7 @@
                 "obj":                          { "$ref": "#/definitions/field" },
                 "obj_gid":                      { "$ref": "#/definitions/field" },
                 "obj_uid":                      { "$ref": "#/definitions/field" },
+                "objtype":                      { "$ref": "#/definitions/field" },
                 "ocomm":                        { "$ref": "#/definitions/field" },
                 "oflag":                        { "$ref": "#/definitions/field" },
                 "ogid":                         { "$ref": "#/definitions/field" },

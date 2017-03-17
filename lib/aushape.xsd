@@ -144,6 +144,7 @@
     <xsd:element type="field" name="obj"/>
     <xsd:element type="field" name="obj_gid"/>
     <xsd:element type="field" name="obj_uid"/>
+    <xsd:element type="field" name="objtype"/>
     <xsd:element type="field" name="ocomm"/>
     <xsd:element type="field" name="oflag"/>
     <xsd:element type="field" name="ogid"/>
@@ -377,6 +378,7 @@
             <xsd:element ref="obj" minOccurs="0"/>
             <xsd:element ref="obj_gid" minOccurs="0"/>
             <xsd:element ref="obj_uid" minOccurs="0"/>
+            <xsd:element ref="objtype" minOccurs="0"/>
             <xsd:element ref="ocomm" minOccurs="0"/>
             <xsd:element ref="oflag" minOccurs="0"/>
             <xsd:element ref="ogid" minOccurs="0"/>
