@@ -362,22 +362,17 @@ aushape_execve_coll_add_arg_slice(struct aushape_coll *coll,
     int_len = strlen(int_str);
 
     /*
-     * The kernel specifies the length of transferred argument in aX_len
-     * fields. The transferred argument slice can be as is, or HEX-encoded.
-     * However, the userspace sometimes double-quotes non-HEX-encoded
-     * argument slices, making them longer than what kernel supplied.
+     * The transferred argument slice can be as is, or HEX-encoded. The as-is
+     * slice is double-quoted, and the HEX-encoded slice is not. The kernel
+     * specifies the length of transferred argument in aX_len fields. For
+     * as-is, quoted slices it counts the actual slice length (which is
+     * interpreted string length), for HEX-encoded slices it counts the
+     * doubled slice length (which is the raw string length).
      *
-     * As that logic is not exposed, we use the safest assumption to derive
-     * the length the kernel transferred. That being that only HEX-encoded
-     * argument slices can be half the length when "interpreted" (decoded).
-     * This seems to be true, since there is no sense in outputting an empty
-     * quoted argument slice - the only quoted slice that can be half the
-     * length when "interpreted".
-     *
-     * FIXME No, empty quoted argument length is 2, while unquoted would be 0.
-     *       What about "xx", which *will* be half the length unquoted?
+     * To detect which is which, we check if the first character is double
+     * quote, which seems to be the most reliable way so far.
      */
-    len = (int_len == raw_len / 2) ? raw_len : int_len;
+    len = (*raw_str == '"') ? int_len : raw_len;
     AUSHAPE_GUARD_BOOL(INVALID_EXECVE,
                        execve_coll->len_read + len <= execve_coll->len_total);
 
