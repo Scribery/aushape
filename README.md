@@ -116,6 +116,13 @@ On Debian-based systems:
 
     sudo apt-get install -y autoconf automake libtool pkg-config
 
+You will also need to install some autotools.
+
+For RHEL
+```
+yum -y install autoconf aclocal automake libtool gcc make audit-libs-devel
+```
+
 Building
 --------
 
