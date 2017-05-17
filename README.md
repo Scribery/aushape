@@ -189,7 +189,7 @@ You can then add it to Audispd configuration by putting this into
 
     active = yes
     direction = out
-    path = /usr/local/bin/aushape-audispd-plugin
+    path = /usr/bin/aushape-audispd-plugin
     type = always
     format = string
 
