@@ -39,6 +39,15 @@
     },
     "dynamic_templates": [
         {
+            "generic_nested_fields": {
+                "path_match": "data.*.*.*",
+                "mapping": {
+                    "type": "string",
+                    "index": "analyzed"
+                }
+            }
+        },
+        {
             "generic_fields": {
                 "path_match": "data.*.*",
                 "mapping": {
