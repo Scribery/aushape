@@ -287,13 +287,14 @@
             },
             "trimmed": {
                 "type":     "array",
-                "description":  "A list of JSONPath expressions relative to the event object, specifying objects/arrays with (some) contents removed as the result of event size limiting. Empty string means event itself. Empty array means trimming occurred at unspecified objects/arrays.",
+                "description":  "An array of JSONPath expressions relative to the event object, specifying objects/arrays with (some) contents removed as the result of event size limiting. Empty string means event itself. Empty array means trimming occurred at unspecified objects/arrays.",
                 "items": {
                     "type": "string"
                 }
             },
             "text": {
                 "type":     "array",
+                "description":  "An array of strings representing original audit log records",
                 "items": {
                     "type": "string"
                 }
