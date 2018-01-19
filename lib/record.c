@@ -59,6 +59,7 @@ aushape_record_format_fields(struct aushape_gbuf *gbuf,
 cleanup:
     return rc;
 }
+
 enum aushape_rc
 aushape_record_format(struct aushape_gbuf *gbuf,
                       const struct aushape_format *format,
