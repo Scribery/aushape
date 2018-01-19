@@ -28,6 +28,33 @@
 #include <auparse.h>
 
 /**
+ * Output an auparse field as extracted properties to a growing buffer
+ * according to format and syntactic nesting level.
+ *
+ * @param gbuf      The growing buffer to add the formatted field to.
+ * @param format    The output format to use.
+ * @param level     Syntactic nesting level the field is output at.
+ * @param first     True if this is the first field being output for a
+ *                  container, false otherwise.
+ * @param name      The field name.
+ * @param value_r   The raw field value, NULL for omitted.
+ * @param value_i   The "interpreted" field value, NULL for omitted.
+ *
+ * @return Return code:
+ *          AUSHAPE_RC_OK               - output successfully,
+ *          AUSHAPE_RC_INVALID_ARGS     - invalid arguments supplied,
+ *          AUSHAPE_RC_NOMEM            - memory allocation failed,
+ */
+extern enum aushape_rc aushape_field_format_props(
+                                    struct aushape_gbuf *gbuf,
+                                    const struct aushape_format *format,
+                                    size_t level,
+                                    bool first,
+                                    const char *name,
+                                    const char *value_r,
+                                    const char *value_i);
+
+/**
  * Output an auparse field to a growing buffer according to format and
  * syntactic nesting level.
  *

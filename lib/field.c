@@ -24,45 +24,22 @@
 #include <string.h>
 
 enum aushape_rc
-aushape_field_format(struct aushape_gbuf *gbuf,
-                     const struct aushape_format *format,
-                     size_t level,
-                     bool first,
-                     const char *name,
-                     auparse_state_t *au)
+aushape_field_format_props(struct aushape_gbuf *gbuf,
+                           const struct aushape_format *format,
+                           size_t level,
+                           bool first,
+                           const char *name,
+                           const char *value_r,
+                           const char *value_i)
 {
     enum aushape_rc rc;
     size_t l = level;
-    int type;
-    const char *value_r;
-    const char *value_i;
 
     if (!aushape_gbuf_is_valid(gbuf) ||
         !aushape_format_is_valid(format) ||
-        name == NULL ||
-        au == NULL) {
+        name == NULL) {
         rc = AUSHAPE_RC_INVALID_ARGS;
         goto cleanup;
-    }
-
-    type = auparse_get_field_type(au);
-    value_i = auparse_interpret_field(au);
-    AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, value_i != NULL);
-
-    switch (type) {
-    case AUPARSE_TYPE_ESCAPED:
-#if HAVE_DECL_AUPARSE_TYPE_ESCAPED_KEY
-    case AUPARSE_TYPE_ESCAPED_KEY:
-#endif
-        value_r = NULL;
-        break;
-    default:
-        value_r = auparse_get_field_str(au);
-        AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, value_r != NULL);
-        if (strcmp(value_r, value_i) == 0) {
-            value_r = NULL;
-        }
-        break;
     }
 
     switch (format->lang) {
@@ -107,6 +84,55 @@ aushape_field_format(struct aushape_gbuf *gbuf,
     }
 
     assert(l == level);
+    rc = AUSHAPE_RC_OK;
+cleanup:
+    return rc;
+}
+
+enum aushape_rc
+aushape_field_format(struct aushape_gbuf *gbuf,
+                     const struct aushape_format *format,
+                     size_t level,
+                     bool first,
+                     const char *name,
+                     auparse_state_t *au)
+{
+    enum aushape_rc rc;
+    int type;
+    const char *value_r;
+    const char *value_i;
+
+    if (!aushape_gbuf_is_valid(gbuf) ||
+        !aushape_format_is_valid(format) ||
+        name == NULL ||
+        au == NULL) {
+        rc = AUSHAPE_RC_INVALID_ARGS;
+        goto cleanup;
+    }
+
+    type = auparse_get_field_type(au);
+    value_i = auparse_interpret_field(au);
+    AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, value_i != NULL);
+
+    switch (type) {
+    case AUPARSE_TYPE_ESCAPED:
+#if HAVE_DECL_AUPARSE_TYPE_ESCAPED_KEY
+    case AUPARSE_TYPE_ESCAPED_KEY:
+#endif
+        value_r = NULL;
+        break;
+    default:
+        value_r = auparse_get_field_str(au);
+        AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, value_r != NULL);
+        if (strcmp(value_r, value_i) == 0) {
+            value_r = NULL;
+        }
+        break;
+    }
+
+    AUSHAPE_GUARD(aushape_field_format_props(gbuf, format, level, first,
+                                             name, value_r, value_i));
+
     rc = AUSHAPE_RC_OK;
 cleanup:
     return rc;
