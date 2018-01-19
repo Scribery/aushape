@@ -36,7 +36,10 @@
  * @param level     Syntactic nesting level the field is output at.
  * @param first     True if this is the first field being output for a
  *                  container, false otherwise.
- * @param name      The field name.
+ * @param list      True if outputting a list item,
+ *                  false if outputting a "map" item.
+ * @param name      The field "element" name. Not used for list items in
+ *                  languages where they don't have to be named, such as JSON.
  * @param value_r   The raw field value, NULL for omitted.
  * @param value_i   The "interpreted" field value, NULL for omitted.
  *
@@ -50,6 +53,7 @@ extern enum aushape_rc aushape_field_format_props(
                                     const struct aushape_format *format,
                                     size_t level,
                                     bool first,
+                                    bool list,
                                     const char *name,
                                     const char *value_r,
                                     const char *value_i);
@@ -63,7 +67,10 @@ extern enum aushape_rc aushape_field_format_props(
  * @param level     Syntactic nesting level the field is output at.
  * @param first     True if this is the first field being output for a
  *                  container, false otherwise.
- * @param name      The field name.
+ * @param list      True if outputting a list item,
+ *                  false if outputting a "map" item.
+ * @param name      The field "element" name. Not used for list items in
+ *                  languages where they don't have to be named, such as JSON.
  * @param au        The auparse state with the current field as the one to be
  *                  output.
  *
@@ -78,6 +85,7 @@ extern enum aushape_rc aushape_field_format(
                                     const struct aushape_format *format,
                                     size_t level,
                                     bool first,
+                                    bool list,
                                     const char *name,
                                     auparse_state_t *au);
 

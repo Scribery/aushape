@@ -44,8 +44,8 @@ aushape_record_format_fields(struct aushape_gbuf *gbuf,
             field_name = auparse_get_field_name(au);
             if (strcmp(field_name, "type") != 0 &&
                 strcmp(field_name, "node") != 0) {
-                rc = aushape_field_format(gbuf, format, level,
-                                          first_field, field_name, au);
+                rc = aushape_field_format(gbuf, format, level, first_field,
+                                          false, field_name, au);
                 if (rc != AUSHAPE_RC_OK) {
                     assert(rc != AUSHAPE_RC_INVALID_ARGS);
                     goto cleanup;

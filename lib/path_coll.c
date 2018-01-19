@@ -160,7 +160,7 @@ aushape_path_coll_add(struct aushape_coll *coll,
             /* Add the field */
             AUSHAPE_GUARD(aushape_field_format(gbuf,
                                                &coll->format, l,
-                                               first_field,
+                                               first_field, false,
                                                field_name, au));
             first_field = false;
         }

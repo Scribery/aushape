@@ -28,6 +28,7 @@ aushape_field_format_props(struct aushape_gbuf *gbuf,
                            const struct aushape_format *format,
                            size_t level,
                            bool first,
+                           bool list,
                            const char *name,
                            const char *value_r,
                            const char *value_i)
@@ -60,9 +61,13 @@ aushape_field_format_props(struct aushape_gbuf *gbuf,
             AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
         }
         AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, format, l));
-        AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, name));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\":["));
+        if (list) {
+            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '['));
+        } else {
+            AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, name));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\":["));
+        }
         l++;
         AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, format, l));
         AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
@@ -94,6 +99,7 @@ aushape_field_format(struct aushape_gbuf *gbuf,
                      const struct aushape_format *format,
                      size_t level,
                      bool first,
+                     bool list,
                      const char *name,
                      auparse_state_t *au)
 {
@@ -131,7 +137,7 @@ aushape_field_format(struct aushape_gbuf *gbuf,
     }
 
     AUSHAPE_GUARD(aushape_field_format_props(gbuf, format, level, first,
-                                             name, value_r, value_i));
+                                             list, name, value_r, value_i));
 
     rc = AUSHAPE_RC_OK;
 cleanup:
