@@ -172,9 +172,9 @@ aushape_execve_coll_add_arg_str(struct aushape_coll *coll,
 
     if (coll->format.lang == AUSHAPE_LANG_XML) {
         AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf, &coll->format, level));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<a i=\""));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<a>"));
         AUSHAPE_GUARD(aushape_gbuf_add_str_xml(gbuf, str));
-        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"/>"));
+        AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "</a>"));
     } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
         /* If it's not the first argument in the record */
         if (execve_coll->arg_idx > 0) {
@@ -382,8 +382,7 @@ aushape_execve_coll_add_arg_slice(struct aushape_coll *coll,
         if (coll->format.lang == AUSHAPE_LANG_XML) {
             AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf,
                                                      &coll->format, level));
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf,
-                                               "<a i=\""));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "<a>"));
         } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
             /* If it's not the first argument in the record */
             if (execve_coll->arg_idx > 0) {
@@ -405,7 +404,7 @@ aushape_execve_coll_add_arg_slice(struct aushape_coll *coll,
     if (execve_coll->len_read == execve_coll->len_total) {
         /* End argument markup */
         if (coll->format.lang == AUSHAPE_LANG_XML) {
-            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\"/>"));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "</a>"));
         } else if (coll->format.lang == AUSHAPE_LANG_JSON) {
             AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
         }

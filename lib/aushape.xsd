@@ -8,7 +8,6 @@
     </xsd:complexType>
 
     <!-- All fields -->
-    <xsd:element type="field" name="a"/>
     <xsd:element type="field" name="a0"/>
     <xsd:element type="field" name="a1"/>
     <xsd:element type="field" name="a2"/>
@@ -524,7 +523,7 @@
     <!-- Execve record type -->
     <xsd:complexType name="execve_record">
         <xsd:sequence>
-            <xsd:element ref="a" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="a" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
     </xsd:complexType>
 
