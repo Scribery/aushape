@@ -40,6 +40,10 @@ struct aushape_conv_buf {
     struct aushape_gbtree   text;
     /** Growing buffer sub-tree for event's data */
     struct aushape_gbtree   data;
+    /** Growing buffer sub-tree for event's normalized data */
+    struct aushape_gbtree   norm;
+    /** Growing buffer sub-tree for normalized data attr lists */
+    struct aushape_gbtree   norm_list;
     /** Record collector */
     struct aushape_coll    *coll;
 };

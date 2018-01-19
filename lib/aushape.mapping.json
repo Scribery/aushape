@@ -35,6 +35,13 @@
                 "obj_pid":                          {"type": "nested"},
                 "path":                             {"type": "nested"}
             }
+        },
+        "norm": {
+            "type": "object",
+            "properties": {
+                "subject_attrs":                    {"type": "nested"},
+                "object_attrs":                     {"type": "nested"}
+            }
         }
     },
     "dynamic_templates": [
@@ -60,6 +67,24 @@
                 "path_match": "data.*",
                 "mapping": {
                     "type": "object"
+                }
+            }
+        },
+        {
+            "norm_attrs_fields": {
+                "path_match": "norm.*_attrs.*",
+                "mapping": {
+                    "type": "string",
+                    "index": "analyzed"
+                }
+            }
+        },
+        {
+            "norm_generic_fields": {
+                "path_match": "norm.*",
+                "mapping": {
+                    "type": "string",
+                    "index": "analyzed"
                 }
             }
         }

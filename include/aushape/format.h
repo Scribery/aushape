@@ -66,6 +66,11 @@ struct aushape_format {
      * false otherwise.
      */
     bool                with_text;
+    /**
+     * True if normalized data should be included in the output,
+     * false otherwise.
+     */
+    bool                with_norm;
 };
 
 /**

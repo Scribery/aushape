@@ -476,6 +476,34 @@
         </xsd:all>
     </xsd:group>
 
+    <!-- Normalized data attribute list field -->
+    <xsd:complexType name="norm_attrs_field">
+        <xsd:sequence>
+            <xsd:element name="attr" type="field" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Normalized data fields -->
+    <xsd:group name="norm_fields">
+        <xsd:sequence>
+            <xsd:element name="event_kind"          type="field"            minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="session"             type="field"            minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="subject_kind"        type="field"            minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="subject_primary"     type="field"            minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="subject_secondary"   type="field"            minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="subject_attrs"       type="norm_attrs_field" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="action"              type="field"            minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="object_kind"         type="field"            minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="object_primary"      type="field"            minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="object_secondary"    type="field"            minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="object_primary2"     type="field"            minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="object_attrs"        type="norm_attrs_field" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="result"              type="field"            minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="how"                 type="field"            minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="key"                 type="field"            minOccurs="0" maxOccurs="1"/>
+        </xsd:sequence>
+    </xsd:group>
+
     <!-- Single record type -->
     <xsd:complexType name="single_record">
         <xsd:group ref="generic_fields" minOccurs="0" maxOccurs="1"/>
@@ -690,6 +718,11 @@
                 <xsd:element name="data" minOccurs="0" maxOccurs="1">
                     <xsd:complexType>
                         <xsd:group ref="records" minOccurs="0" maxOccurs="1"/>
+                    </xsd:complexType>
+                </xsd:element>
+                <xsd:element name="norm" minOccurs="0" maxOccurs="1">
+                    <xsd:complexType>
+                        <xsd:group ref="norm_fields" minOccurs="0" maxOccurs="1"/>
                     </xsd:complexType>
                 </xsd:element>
             </xsd:sequence>

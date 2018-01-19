@@ -11,6 +11,11 @@
             "minItems": 1,
             "maxItems": 2
         },
+        "field_list": {
+            "description":  "A list of fields",
+            "type":         "array",
+            "items":        { "$ref": "#/definitions/field" }
+        },
         "generic_fields": {
             "description":  "Generic fields",
             "type":         "object",
@@ -467,6 +472,26 @@
                     "virt_control":                     { "$ref": "#/definitions/single_record" },
                     "virt_machine_id":                  { "$ref": "#/definitions/single_record" },
                     "virt_resource":                    { "$ref": "#/definitions/single_record" }
+                }
+            },
+            "norm": {
+                "type":     "object",
+                "properties": {
+                    "event_kind":           { "$ref": "#/definitions/field" },
+                    "session":              { "$ref": "#/definitions/field" },
+                    "subject_kind":         { "$ref": "#/definitions/field" },
+                    "subject_primary":      { "$ref": "#/definitions/field" },
+                    "subject_secondary":    { "$ref": "#/definitions/field" },
+                    "subject_attrs":        { "$ref": "#/definitions/field_list" },
+                    "action":               { "$ref": "#/definitions/field" },
+                    "object_kind":          { "$ref": "#/definitions/field" },
+                    "object_primary":       { "$ref": "#/definitions/field" },
+                    "object_secondary":     { "$ref": "#/definitions/field" },
+                    "object_primary2":      { "$ref": "#/definitions/field" },
+                    "object_attrs":         { "$ref": "#/definitions/field_list" },
+                    "result":               { "$ref": "#/definitions/field" },
+                    "how":                  { "$ref": "#/definitions/field" },
+                    "key":                  { "$ref": "#/definitions/field" }
                 }
             }
         },

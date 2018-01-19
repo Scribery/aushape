@@ -25,7 +25,9 @@
 #include <aushape/execve_coll.h>
 #include <aushape/path_coll.h>
 #include <aushape/rep_coll.h>
+#include <aushape/field.h>
 #include <aushape/guard.h>
+#include <aushape/misc.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -38,6 +40,7 @@ aushape_conv_buf_is_valid(const struct aushape_conv_buf *buf)
            aushape_gbtree_is_valid(&buf->event) &&
            aushape_gbtree_is_valid(&buf->text) &&
            aushape_gbtree_is_valid(&buf->data) &&
+           aushape_gbtree_is_valid(&buf->norm) &&
            aushape_coll_is_valid(buf->coll);
 }
 
@@ -103,6 +106,7 @@ aushape_conv_buf_init(struct aushape_conv_buf *buf,
     aushape_gbtree_init(&buf->event, 1024, 32, 32);
     aushape_gbtree_init(&buf->text, 4096, 8, 8);
     aushape_gbtree_init(&buf->data, 4096, 256, 256);
+    aushape_gbtree_init(&buf->norm, 4096, 32, 32);
     rc = aushape_coll_create(&buf->coll,
                              &aushape_disp_coll_type,
                              &buf->format,
@@ -123,6 +127,7 @@ aushape_conv_buf_cleanup(struct aushape_conv_buf *buf)
     aushape_coll_destroy(buf->coll);
     aushape_gbtree_cleanup(&buf->data);
     aushape_gbtree_cleanup(&buf->text);
+    aushape_gbtree_cleanup(&buf->norm);
     aushape_gbtree_cleanup(&buf->event);
     aushape_gbuf_cleanup(&buf->gbuf);
     memset(buf, 0, sizeof(*buf));
@@ -134,6 +139,217 @@ aushape_conv_buf_empty(struct aushape_conv_buf *buf)
     assert(aushape_conv_buf_is_valid(buf));
     aushape_gbuf_empty(&buf->gbuf);
     assert(aushape_conv_buf_is_valid(buf));
+}
+
+/** Normalized field type */
+enum aushape_conv_buf_norm_type {
+    /** Metadata field */
+    AUSHAPE_CONV_BUF_NORM_TYPE_META,
+    /** Positioning field */
+    AUSHAPE_CONV_BUF_NORM_TYPE_POS,
+    /** Position listing field */
+    AUSHAPE_CONV_BUF_NORM_TYPE_POS_LIST,
+};
+
+/** Description of a normalized field */
+struct aushape_conv_buf_norm_field {
+    /** Field name */
+    const char                         *name;
+    /** Field type */
+    enum aushape_conv_buf_norm_type     type;
+    /** Field item name for position listing fields */
+    const char                         *item_name;
+    /** Value extraсtion function for metadata fields */
+    const char *(*fn_meta)(auparse_state_t *au);
+    /** Cursor position function for positioning fields */
+    int (*fn_pos)(auparse_state_t *au);
+    /** Iteration beginning function for position listing fields */
+    int (*fn_pos_list_first)(auparse_state_t *au);
+    /** Iteration continuation function for position listing fields */
+    int (*fn_pos_list_next)(auparse_state_t *au);
+};
+
+/**
+ * Add event normalized data.
+ *
+ * @param buf   The buffer to add normalized data to.
+ * @param level Syntactic nesting level to add normalized data with.
+ * @param au    The auparse state with the current event as the event which
+ *              normalized data should be added.
+ *
+ * @return Return code:
+ *          AUSHAPE_RC_OK               - added successfully,
+ *          AUSHAPE_RC_NOMEM            - memory allocation failed,
+ *          AUSHAPE_RC_AUPARSE_FAILED   - an auparse call failed.
+ */
+static enum aushape_rc
+aushape_conv_buf_add_event_norm(struct aushape_conv_buf *buf,
+                                size_t level,
+                                auparse_state_t *au)
+{
+    static const struct aushape_conv_buf_norm_field field_list[] = {
+#define FIELD_META(_name_tkn, _fn) \
+        {.name = #_name_tkn,                        \
+         .type = AUSHAPE_CONV_BUF_NORM_TYPE_META,   \
+         .fn_meta = _fn}
+#define FIELD_POS(_name_tkn, _fn) \
+        {.name = #_name_tkn,                        \
+         .type = AUSHAPE_CONV_BUF_NORM_TYPE_POS,   \
+         .fn_pos = _fn}
+#define FIELD_POS_LIST(_name_tkn, _item_name_tkn, _fn_first, _fn_next) \
+        {.name = #_name_tkn,                                            \
+         .item_name = #_item_name_tkn,                                  \
+         .type = AUSHAPE_CONV_BUF_NORM_TYPE_POS_LIST,                   \
+         .fn_pos_list_first = _fn_first,                                \
+         .fn_pos_list_next = _fn_next}
+
+        FIELD_META(event_kind,          auparse_normalize_get_event_kind),
+
+        FIELD_POS(session,              auparse_normalize_session),
+
+        FIELD_META(subject_kind,        auparse_normalize_subject_kind),
+        FIELD_POS(subject_primary,      auparse_normalize_subject_primary),
+        FIELD_POS(subject_secondary,    auparse_normalize_subject_secondary),
+        FIELD_POS_LIST(subject_attrs, attr,
+                                    auparse_normalize_subject_first_attribute,
+                                    auparse_normalize_subject_next_attribute),
+
+        FIELD_META(action,              auparse_normalize_get_action),
+
+        FIELD_META(object_kind,         auparse_normalize_object_kind),
+        FIELD_POS(object_primary,       auparse_normalize_object_primary),
+        FIELD_POS(object_secondary,     auparse_normalize_object_secondary),
+        FIELD_POS(object_primary2,      auparse_normalize_object_primary2),
+        FIELD_POS_LIST(object_attrs, attr,
+                                    auparse_normalize_object_first_attribute,
+                                    auparse_normalize_object_next_attribute),
+
+        FIELD_POS(result,               auparse_normalize_get_results),
+
+        FIELD_META(how,                 auparse_normalize_how),
+
+        FIELD_POS(key,                  auparse_normalize_key),
+
+#undef FIELD_POS_LIST
+#undef FIELD_POS
+#undef FIELD_META
+    };
+
+    struct aushape_gbtree *tree = &buf->norm;
+    struct aushape_gbuf *gbuf = &tree->text;
+    size_t prio;
+    enum aushape_rc rc;
+    size_t i;
+    size_t j;
+    int auparse_rc;
+    size_t l = level;
+    const char *str;
+
+    assert(aushape_conv_buf_is_valid(buf));
+    assert(au != NULL);
+
+    AUSHAPE_GUARD_BOOL(AUPARSE_FAILED,
+                       auparse_normalize(au, NORM_OPT_ALL) == 0);
+
+    prio = 1;
+    for (i = 0; i < AUSHAPE_ARRAY_SIZE(field_list); i++) {
+        const struct aushape_conv_buf_norm_field *field = &field_list[i];
+
+        switch (field->type) {
+        case AUSHAPE_CONV_BUF_NORM_TYPE_META:
+            str = field->fn_meta(au);
+            if (str != NULL) {
+                AUSHAPE_GUARD(aushape_field_format_props(gbuf, &buf->format,
+                                                         l, i == 0, false,
+                                                         field->name,
+                                                         NULL, str));
+                AUSHAPE_GUARD(aushape_gbtree_node_add_text(tree, prio++));
+            }
+            break;
+        case AUSHAPE_CONV_BUF_NORM_TYPE_POS:
+            auparse_rc = field->fn_pos(au);
+            AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, auparse_rc >= 0);
+            if (auparse_rc == 1) {
+                AUSHAPE_GUARD(aushape_field_format(gbuf, &buf->format,
+                                                   l, i == 0, false,
+                                                   field->name, au));
+                AUSHAPE_GUARD(aushape_gbtree_node_add_text(tree, prio++));
+            }
+            break;
+        case AUSHAPE_CONV_BUF_NORM_TYPE_POS_LIST:
+            auparse_rc = field->fn_pos_list_first(au);
+            AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, auparse_rc >= 0);
+            if (auparse_rc != 1) {
+                break;
+            }
+
+            /* Add list prologue */
+            switch (buf->format.lang) {
+            case AUSHAPE_LANG_XML:
+                AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf,
+                                                         &buf->format, l));
+                AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '<'));
+                AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, field->name));
+                AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '>'));
+                AUSHAPE_GUARD(aushape_gbtree_node_add_text(tree, prio));
+                break;
+            case AUSHAPE_LANG_JSON:
+                if (i > 0) {
+                    AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ','));
+                }
+                AUSHAPE_GUARD(aushape_gbuf_space_opening(gbuf,
+                                                         &buf->format, l));
+                AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '"'));
+                AUSHAPE_GUARD(aushape_gbuf_add_str_json(gbuf, field->name));
+                AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "\":["));
+                AUSHAPE_GUARD(aushape_gbtree_node_add_text(tree, prio));
+            default:
+                break;
+            }
+            l++;
+
+            /* Add list items */
+            j = 0;
+            do {
+                AUSHAPE_GUARD(aushape_field_format(gbuf, &buf->format, l,
+                                                   j == 0, true,
+                                                   field->item_name, au));
+                AUSHAPE_GUARD(aushape_gbtree_node_add_text(tree, prio + j));
+                j++;
+                auparse_rc = field->fn_pos_list_next(au);
+                AUSHAPE_GUARD_BOOL(AUPARSE_FAILED, auparse_rc >= 0);
+            } while (auparse_rc == 1);
+
+            /* Add list epilogue */
+            l--;
+            switch (buf->format.lang) {
+            case AUSHAPE_LANG_XML:
+                AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf,
+                                                         &buf->format, l));
+                AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, "</"));
+                AUSHAPE_GUARD(aushape_gbuf_add_str(gbuf, field->name));
+                AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, '>'));
+                AUSHAPE_GUARD(aushape_gbtree_node_add_text(tree, prio));
+                break;
+            case AUSHAPE_LANG_JSON:
+                AUSHAPE_GUARD(aushape_gbuf_space_closing(gbuf,
+                                                         &buf->format, l));
+                AUSHAPE_GUARD(aushape_gbuf_add_char(gbuf, ']'));
+                AUSHAPE_GUARD(aushape_gbtree_node_add_text(tree, prio));
+            default:
+                break;
+            }
+            prio += j;
+            break;
+        default:
+            break;
+        }
+    }
+
+    assert(l == level);
+    rc = AUSHAPE_RC_OK;
+cleanup:
+    return rc;
 }
 
 enum aushape_rc
@@ -158,6 +374,8 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
     struct aushape_gbuf *text_buf = &text_tree->text;
     struct aushape_gbtree *data_tree = &buf->data;
     struct aushape_gbuf *data_buf = &data_tree->text;
+    struct aushape_gbtree *norm_tree = &buf->norm;
+    struct aushape_gbuf *norm_buf = &norm_tree->text;
     const char *line;
     enum aushape_rc error_rc;
     size_t trimmed_node_index;
@@ -223,6 +441,16 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         AUSHAPE_GUARD(aushape_gbtree_node_add_text(data_tree, 0));
         data_node_index = aushape_gbtree_get_node_num(event_tree);
         AUSHAPE_GUARD(aushape_gbtree_node_add_tree(event_tree, 2, data_tree));
+
+        /* Begin and attach normalization node, if requested */
+        if (buf->format.with_norm) {
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(norm_buf,
+                                                     &buf->format, l));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(norm_buf, "<norm>"));
+            AUSHAPE_GUARD(aushape_gbtree_node_add_text(norm_tree, 0));
+            AUSHAPE_GUARD(aushape_gbtree_node_add_tree(event_tree, 3,
+                                                       norm_tree));
+        }
     } else {
         /* Add event header */
         if (!first) {
@@ -268,6 +496,7 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         AUSHAPE_GUARD(aushape_gbtree_node_add_text(text_tree, 0));
         text_node_index = aushape_gbtree_get_node_num(event_tree);
         AUSHAPE_GUARD(aushape_gbtree_node_add_tree(event_tree, 1, text_tree));
+
         /* Begin and attach data node */
         AUSHAPE_GUARD(aushape_gbuf_add_char(data_buf, ','));
         AUSHAPE_GUARD(aushape_gbuf_space_opening(data_buf, &buf->format, l));
@@ -275,6 +504,17 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         AUSHAPE_GUARD(aushape_gbtree_node_add_text(data_tree, 0));
         data_node_index = aushape_gbtree_get_node_num(event_tree);
         AUSHAPE_GUARD(aushape_gbtree_node_add_tree(event_tree, 2, data_tree));
+
+        /* Begin and attach normalization node, if requested */
+        if (buf->format.with_norm) {
+            AUSHAPE_GUARD(aushape_gbuf_add_char(norm_buf, ','));
+            AUSHAPE_GUARD(aushape_gbuf_space_opening(norm_buf,
+                                                     &buf->format, l));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(norm_buf, "\"norm\":{"));
+            AUSHAPE_GUARD(aushape_gbtree_node_add_text(norm_tree, 0));
+            AUSHAPE_GUARD(aushape_gbtree_node_add_tree(event_tree, 3,
+                                                       norm_tree));
+        }
     }
 
     l++;
@@ -333,6 +573,11 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
         goto cleanup;
     }
 
+    /* Add normalized data, if requested */
+    if (buf->format.with_norm) {
+        AUSHAPE_GUARD(aushape_conv_buf_add_event_norm(buf, l, au));
+    }
+
     l--;
 
     /* Terminate source text */
@@ -361,6 +606,22 @@ aushape_conv_buf_add_event(struct aushape_conv_buf *buf,
             AUSHAPE_GUARD(aushape_gbuf_add_char(data_buf, '}'));
         }
         AUSHAPE_GUARD(aushape_gbtree_node_add_text(data_tree, 0));
+    }
+
+    /* Terminate normalization, if requested */
+    if (buf->format.with_norm) {
+        if (buf->format.lang == AUSHAPE_LANG_XML) {
+            AUSHAPE_GUARD(aushape_gbuf_space_closing(norm_buf,
+                                                     &buf->format, l));
+            AUSHAPE_GUARD(aushape_gbuf_add_str(norm_buf, "</norm>"));
+        } else if (buf->format.lang == AUSHAPE_LANG_JSON) {
+            if (line_num > 0) {
+                AUSHAPE_GUARD(aushape_gbuf_space_closing(norm_buf,
+                                                         &buf->format, l));
+            }
+            AUSHAPE_GUARD(aushape_gbuf_add_str(norm_buf, "}"));
+        }
+        AUSHAPE_GUARD(aushape_gbtree_node_add_text(norm_tree, 0));
     }
 
     /* If an error has occurred */
@@ -442,6 +703,7 @@ cleanup:
     aushape_gbtree_empty(event_tree);
     aushape_gbtree_empty(text_tree);
     aushape_gbtree_empty(data_tree);
+    aushape_gbtree_empty(norm_tree);
     assert(aushape_conv_buf_is_valid(buf));
     return rc;
 }

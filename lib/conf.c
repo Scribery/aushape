@@ -66,6 +66,8 @@ const char *aushape_conf_cmd_help =
    "                            Default: 4\n"
    "    --with-text             Include original text log messages in the output.\n"
    "                            Default: off\n"
+   "    --with-norm             Include normalized data in the output.\n"
+   "                            Default: off\n"
    "\n"
    "Output options:\n"
    "    -o, --output=STRING         Use STRING output type (\"file\"/\"syslog\").\n"
@@ -90,6 +92,7 @@ enum aushape_conf_opt {
     AUSHAPE_CONF_OPT_FOLD,
     AUSHAPE_CONF_OPT_INDENT,
     AUSHAPE_CONF_OPT_WITH_TEXT,
+    AUSHAPE_CONF_OPT_WITH_NORM,
     AUSHAPE_CONF_OPT_SYSLOG_FACILITY,
     AUSHAPE_CONF_OPT_SYSLOG_PRIORITY,
 };
@@ -150,6 +153,11 @@ static const struct option aushape_conf_longopts[] = {
         .has_arg = no_argument,
     },
     {
+        .name = "with-norm",
+        .val = AUSHAPE_CONF_OPT_WITH_NORM,
+        .has_arg = no_argument,
+    },
+    {
         .name = "syslog-facility",
         .val = AUSHAPE_CONF_OPT_SYSLOG_FACILITY,
         .has_arg = required_argument,
@@ -178,6 +186,7 @@ aushape_conf_load(struct aushape_conf *pconf, int argc, char **argv)
             .events_per_doc = SSIZE_MAX,
             .max_event_size = SIZE_MAX,
             .with_text = false,
+            .with_norm = false,
         },
         .output_type = AUSHAPE_CONF_OUTPUT_TYPE_FD,
         .output_conf = {
@@ -318,6 +327,10 @@ aushape_conf_load(struct aushape_conf *pconf, int argc, char **argv)
 
         case AUSHAPE_CONF_OPT_WITH_TEXT:
             conf.format.with_text = true;
+            break;
+
+        case AUSHAPE_CONF_OPT_WITH_NORM:
+            conf.format.with_norm = true;
             break;
 
         case AUSHAPE_CONF_OPT_SYSLOG_FACILITY:
